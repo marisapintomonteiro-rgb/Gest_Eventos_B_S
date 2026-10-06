@@ -14,5 +14,8 @@ A aplicação tem como objetivo apoiar o planeamento e a gestão de eventos temp
 - Node.js
 - MySQL
 
+## Regras de programação
+Para a criação deste site vamos utilizar o vibe coding, é uma forma de criar software usando linguagem natural para instruir uma inteligência artificial a gerar o código por nós. Vamos utilizar o CODEX que é um agente apoiado por vamos LLM's. 
+
 ## Equipa
 Marisa Pinto Monteiro
