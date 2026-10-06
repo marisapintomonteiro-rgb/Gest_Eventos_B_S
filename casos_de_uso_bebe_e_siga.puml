@@ -1,7 +1,7 @@
 @startuml
 
 title Diagrama de casos de uso — Bebe e Siga
-caption Planeamento, operação e análise de eventos temporários
+caption Leitura: da esquerda para a direita, de cima para baixo
 
 left to right direction
 
@@ -13,16 +13,12 @@ skinparam defaultFontSize 12
 skinparam ArrowFontSize 10
 skinparam packageStyle rectangle
 skinparam nodesep 30
-skinparam ranksep 40
+skinparam ranksep 45
 skinparam padding 10
-
-' Os pacotes exteriores servem apenas para organizar a página.
-' Cada retângulo interior delimita uma área da aplicação.
 
 skinparam package {
   BorderColor Transparent
   BackgroundColor Transparent
-  FontColor Black
 }
 
 skinparam rectangle {
@@ -35,351 +31,316 @@ skinparam usecase {
   BackgroundColor White
 }
 
-' =========================================================
-' 1. ATORES E HERANÇA
-' =========================================================
+' ==================================================
+' 1 — UC01 A UC03
+' ==================================================
 
 package " " as P1 {
 
-  rectangle "1. Atores e herança de permissões" {
+  actor "Colaborador" as C1
+  actor "Administrador" as A1
+  actor "Visitante" as V1
 
-    actor "Colaborador" as ColabBase
-    actor "Gestor" as GestorBase
-    actor "Administrador" as AdminBase
+  rectangle "1. Acesso e utilizadores — UC01 a UC03" {
 
-    ColabBase <|-- GestorBase
-    GestorBase <|-- AdminBase
+    usecase "Iniciar sessão\n(UC01)" as UC01
+    usecase "Validar credenciais" as Credenciais
 
-    note right of ColabBase
-      Consulta ementa e faturação.
-      Regista vendas e consumo interno.
-      Não consulta custos nem lucro.
-    end note
+    usecase "Gerir utilizadores\n(UC02)" as UC02
+    usecase "Atribuir ou alterar perfil" as Perfil
 
-    note right of GestorBase
-      Herda as funções do Colaborador.
-      Planeia e gere os eventos.
-      Não gere utilizadores.
-    end note
+    usecase "Criar conta\n(UC03)" as UC03
+    usecase "Validar dados do registo" as ValidarRegisto
 
-    note right of AdminBase
-      Herda as funções do Gestor.
-      Gere também os utilizadores.
-    end note
+    UC01 -[hidden]down-> UC02
+    UC02 -[hidden]down-> UC03
   }
+
+  C1 -- UC01
+  A1 -- UC02
+  V1 -- UC03
+
+  UC01 ..> Credenciais : <<include>>
+  Perfil ..> UC02 : <<extend>>\n[definir ou alterar perfil]
+  UC03 ..> ValidarRegisto : <<include>>
 }
 
-' =========================================================
-' 2. ACESSO E UTILIZADORES
-' =========================================================
+' ==================================================
+' 2 — UC04 A UC06
+' ==================================================
 
 package " " as P2 {
 
-  actor "Visitante" as VisitanteAcesso
-  actor "Colaborador" as UtilizadorAcesso
-  actor "Administrador" as AdminAcesso
+  actor "Gestor" as G2
+  actor "Colaborador" as C2
 
-  rectangle "2. Acesso e utilizadores" {
-
-    usecase "Criar conta\n(UC03)" as UC03
-    usecase "Validar dados\ndo registo" as ValidarRegisto
-
-    usecase "Iniciar sessão\n(UC01)" as UC01
-    usecase "Validar credenciais" as ValidarCredenciais
-
-    usecase "Terminar sessão" as Logout
-
-    usecase "Gerir utilizadores\n(UC02)" as UC02
-    usecase "Atribuir ou alterar\nperfil de acesso" as AtribuirPerfil
-  }
-
-  VisitanteAcesso -- UC03
-  UtilizadorAcesso -- UC01
-  UtilizadorAcesso -- Logout
-  AdminAcesso -- UC02
-
-  UC03 ..> ValidarRegisto : <<include>>
-  UC01 ..> ValidarCredenciais : <<include>>
-
-  AtribuirPerfil ..> UC02 : <<extend>>\n[definir ou alterar perfil]
-}
-
-' =========================================================
-' 3. EVENTOS E CALENDÁRIO
-' =========================================================
-
-package " " as P3 {
-
-  actor "Gestor" as GestorEvento
-  actor "Colaborador" as ColabCalendario
-
-  rectangle "3. Eventos e calendário" {
+  rectangle "2. Eventos e calendário — UC04 a UC06" {
 
     usecase "Criar evento\n(UC04)" as UC04
-    usecase "Configurar dias\ndo evento\n(UC05)" as UC05
-
-    usecase "Definir orçamento\nmáximo" as Orcamento
+    usecase "Configurar dias do evento\n(UC05)" as UC05
     usecase "Consultar calendário\n(UC06)" as UC06
+
+    UC04 -[hidden]down-> UC05
+    UC05 -[hidden]down-> UC06
   }
 
-  GestorEvento -- UC04
-  GestorEvento -- UC05
-  ColabCalendario -- UC06
+  G2 -- UC04
+  G2 -- UC05
+  C2 -- UC06
 
   UC04 ..> UC05 : <<include>>
-  Orcamento ..> UC04 : <<extend>>\n[orçamento indicado]
 
-  note bottom of UC05
+  note bottom of UC06
     Os dias podem não ser consecutivos.
-    O horário de cada dia é opcional.
+    Horários e orçamento são opcionais.
   end note
 }
 
-' =========================================================
-' 4. PRODUTOS, EMENTA E RECEITAS
-' =========================================================
+' ==================================================
+' 3 — UC07 A UC10
+' ==================================================
 
-package " " as P4 {
+package " " as P3 {
 
-  actor "Gestor" as GestorEmenta
+  actor "Gestor" as G3
 
-  rectangle "4. Produtos, ementa e receitas" {
+  rectangle "3. Produtos e ementa — UC07 a UC10" {
 
     usecase "Gerir produtos\n(UC07)" as UC07
     usecase "Gerir ementa\n(UC08)" as UC08
-
     usecase "Definir composição\n(UC09)" as UC09
     usecase "Reutilizar ementa\n(UC10)" as UC10
+
+    UC07 -[hidden]down-> UC08
+    UC08 -[hidden]down-> UC09
+    UC09 -[hidden]down-> UC10
   }
 
-  GestorEmenta -- UC07
-  GestorEmenta -- UC08
+  G3 -- UC07
+  G3 -- UC08
 
   UC09 ..> UC08 : <<extend>>\n[artigo composto]
   UC10 ..> UC08 : <<extend>>\n[copiar edição anterior]
 
-  note bottom of UC08
-    Ementa, preços e doses são próprios da edição.
-    Alterações não modificam eventos anteriores.
-  end note
-
-  note bottom of UC07
-    Unidades base: ml, g ou unidade.
-    Produtos perecíveis e limites de stock.
+  note bottom of UC10
+    Preços e receitas são próprios de cada edição.
+    Não alterar retroativamente outros eventos.
   end note
 }
 
-' =========================================================
-' 5. FORNECEDORES, COMPRAS E PREVISÃO
-' =========================================================
+' ==================================================
+' 4 — UC11 A UC13
+' ==================================================
 
-package " " as P5 {
+package " " as P4 {
 
-  actor "Gestor" as GestorCompras
+  actor "Gestor" as G4
 
-  rectangle "5. Fornecedores, compras e previsão" {
+  rectangle "4. Fornecedores e compras — UC11 a UC13" {
 
     usecase "Gerir fornecedores\n(UC11)" as UC11
     usecase "Consultar alternativas\ne comparar preços" as Alternativas
 
     usecase "Registar compras\n(UC12)" as UC12
-    usecase "Registar custo\nda compra" as CustoCompra
-    usecase "Registar entrada\nde stock" as EntradaStock
+    usecase "Registar custo e\nentrada de stock" as Entrada
 
-    usecase "Consultar previsão\nde compras\n(UC13)" as UC13
-    usecase "Ajustar quantidades e\nmargem de segurança" as AjustarPrevisao
+    usecase "Consultar previsão de compras\n(UC13)" as UC13
+    usecase "Ajustar quantidades e\nmargem de segurança" as Margem
+
+    UC11 -[hidden]down-> UC12
+    UC12 -[hidden]down-> UC13
   }
 
-  GestorCompras -- UC11
-  GestorCompras -- UC12
-  GestorCompras -- UC13
+  G4 -- UC11
+  G4 -- UC12
+  G4 -- UC13
 
   Alternativas ..> UC11 : <<extend>>\n[comparar fornecedores]
-
-  UC12 ..> CustoCompra : <<include>>
-  UC12 ..> EntradaStock : <<include>>
-
-  AjustarPrevisao ..> UC13 : <<extend>>\n[ajuste por produto]
-
-  note bottom of UC12
-    Neste caso de uso, a compra já foi recebida.
-    Guardar fornecedor, quantidade e preço aplicado.
-  end note
+  UC12 ..> Entrada : <<include>>
+  Margem ..> UC13 : <<extend>>\n[ajustar por produto]
 
   note bottom of UC13
-    Utilizar apenas o histórico do mesmo evento.
+    Compras registadas como recebidas.
+    Previsão baseada no histórico do mesmo evento.
     Sem histórico, permitir planeamento manual.
   end note
 }
 
-' =========================================================
-' 6. VENDAS E OPERAÇÃO DIÁRIA
-' =========================================================
+' ==================================================
+' 5 — UC14 A UC19
+' ==================================================
+
+package " " as P5 {
+
+  actor "Colaborador" as C5
+  actor "Gestor" as G5
+
+  rectangle "5. Operação diária — UC14 a UC19" {
+
+    usecase "Registar vendas\n(UC14)" as UC14
+    usecase "Atualizar faturação" as Faturacao
+    usecase "Descontar stock" as Desconto
+
+    usecase "Registar consumo interno\n(UC16)" as UC16
+
+    usecase "Corrigir stock\n(UC17)" as UC17
+    usecase "Registar responsável\ne motivo da correção" as Auditoria
+
+    usecase "Encerrar ou reabrir dia\n(UC19)" as UC19
+
+    UC14 -[hidden]down-> UC16
+    UC16 -[hidden]down-> UC17
+    UC17 -[hidden]down-> UC19
+  }
+
+  C5 -- UC14
+  C5 -- UC16
+
+  G5 -- UC17
+  G5 -- UC19
+
+  UC14 ..> Faturacao : <<include>>
+  UC14 ..> Desconto : <<include>>
+  UC16 ..> Desconto : <<include>>
+  UC17 ..> Auditoria : <<include>>
+
+  note bottom of UC19
+    Reabrir o dia antes de corrigir vendas.
+    Guardar as alterações e voltar a fechar.
+  end note
+}
+
+' ==================================================
+' 6 — UC20 A UC24
+' ==================================================
 
 package " " as P6 {
 
-  actor "Colaborador" as ColabVendas
-  actor "Gestor" as GestorDia
+  actor "Gestor" as G6
 
-  rectangle "6. Vendas e operação diária" {
-
-    usecase "Consultar ementa\n(UC29)" as UC29
-
-    usecase "Registar vendas\n(UC14)" as UC14
-    usecase "Atualizar faturação" as AtualizarFaturacao
-    usecase "Descontar produtos\ne ingredientes" as DescontarStock
-
-    usecase "Registar consumo interno\n(UC16)" as UC16
-    usecase "Consultar faturação diária\n(UC30)" as UC30
-
-    usecase "Encerrar ou reabrir dia\n(UC19)" as UC19
-  }
-
-  ColabVendas -- UC29
-  ColabVendas -- UC14
-  ColabVendas -- UC16
-  ColabVendas -- UC30
-
-  GestorDia -- UC19
-
-  UC14 ..> AtualizarFaturacao : <<include>>
-  UC14 ..> DescontarStock : <<include>>
-  UC16 ..> DescontarStock : <<include>>
-
-  note bottom of UC14
-    Aceitar venda unitária ou quantidade agregada.
-    Impedir duplicações e guardar o responsável.
-    Um fino de 200 ml consome 220 ml de stock.
-  end note
-
-  note bottom of UC19
-    Correções num dia fechado exigem reabertura.
-    Guardar histórico e voltar a fechar o dia.
-  end note
-}
-
-' =========================================================
-' 7. STOCK, QUEBRAS E DEVOLUÇÕES
-' =========================================================
-
-package " " as P7 {
-
-  actor "Gestor" as GestorStock
-
-  rectangle "7. Stock, quebras e devoluções" {
-
-    usecase "Corrigir stock\n(UC17)" as UC17
-    usecase "Registar quebra\nou desperdício" as Quebras
-
-    usecase "Registar movimento,\nresponsável e motivo" as MovimentoStock
-
-    usecase "Registar devoluções\n(UC22)" as UC22
-    usecase "Validar elegibilidade\ne embalagens fechadas" as ValidarDevolucao
-    usecase "Reduzir stock e\ncusto líquido das compras" as AtualizarDevolucao
-  }
-
-  GestorStock -- UC17
-  GestorStock -- Quebras
-  GestorStock -- UC22
-
-  UC17 ..> MovimentoStock : <<include>>
-  Quebras ..> MovimentoStock : <<include>>
-
-  UC22 ..> ValidarDevolucao : <<include>>
-  UC22 ..> AtualizarDevolucao : <<include>>
-
-  note bottom of ValidarDevolucao
-    O fornecedor deve aceitar devoluções.
-    Confirmar fisicamente as embalagens fechadas.
-    Sobras em ml não provam garrafas fechadas.
-  end note
-}
-
-' =========================================================
-' 8. DESPESAS E ANÁLISE FINANCEIRA
-' =========================================================
-
-package " " as P8 {
-
-  actor "Gestor" as GestorFinanceiro
-
-  rectangle "8. Despesas e análise financeira" {
+  rectangle "6. Gestão financeira — UC20 a UC24" {
 
     usecase "Gerir despesas\n(UC20)" as UC20
 
-    usecase "Consultar resultados\nfinanceiros\n(UC21)" as UC21
-    usecase "Comparar orçamento\ncom despesa realizada" as CompararOrcamento
+    usecase "Consultar resultados financeiros\n(UC21)" as UC21
+    usecase "Comparar orçamento\ncom despesa realizada" as Orcamento
+
+    usecase "Registar devoluções\n(UC22)" as UC22
+    usecase "Validar embalagens fechadas\ne aceitação do fornecedor" as ValidarDevolucao
+    usecase "Reduzir stock e\ncusto líquido das compras" as AtualizarDevolucao
 
     usecase "Consultar dashboard\n(UC23)" as UC23
+    usecase "Registar observações\n(UC24)" as UC24
+
+    UC20 -[hidden]down-> UC21
+    UC21 -[hidden]down-> UC22
+    UC22 -[hidden]down-> UC23
+    UC23 -[hidden]down-> UC24
   }
 
-  GestorFinanceiro -- UC20
-  GestorFinanceiro -- UC21
-  GestorFinanceiro -- UC23
+  G6 -- UC20
+  G6 -- UC21
+  G6 -- UC22
+  G6 -- UC23
+  G6 -- UC24
 
-  CompararOrcamento ..> UC21 : <<extend>>\n[orçamento definido]
+  Orcamento ..> UC21 : <<extend>>\n[orçamento definido]
+  UC22 ..> ValidarDevolucao : <<include>>
+  UC22 ..> AtualizarDevolucao : <<include>>
 
-  note bottom of UC20
-    Despesas fixas ou variáveis.
-    Associadas ao evento ou a um dia.
-  end note
-
-  note bottom of UC21
-    Separar faturação, compras, devoluções,
-    mercadoria consumida, stock final e resultado.
-  end note
-
-  note bottom of UC23
-    Destaques: faturação acumulada,
-    resultado estimado e stock baixo.
+  note bottom of UC22
+    Confirmar fisicamente as embalagens fechadas.
+    Uma devolução não é receita de vendas.
   end note
 }
 
-' =========================================================
-' 9. ENCERRAMENTO, RELATÓRIOS E HISTÓRICO
-' =========================================================
+' ==================================================
+' 7 — UC25 A UC28
+' ==================================================
 
-package " " as P9 {
+package " " as P7 {
 
-  actor "Gestor" as GestorFecho
+  actor "Gestor" as G7
 
-  rectangle "9. Encerramento, relatórios e histórico" {
+  rectangle "7. Encerramento e histórico — UC25 a UC28" {
 
-    usecase "Registar observações\n(UC24)" as UC24
     usecase "Encerrar evento\n(UC25)" as UC25
-
-    usecase "Registar contagem\nfísica final" as ContagemFinal
+    usecase "Registar contagem física final" as Contagem
 
     usecase "Gerar relatório final\n(UC27)" as UC27
-    usecase "Exportar relatório\nem PDF" as ExportarPDF
+    usecase "Exportar relatório em PDF" as PDF
 
     usecase "Consultar histórico\n(UC28)" as UC28
+
+    UC25 -[hidden]down-> UC27
+    UC27 -[hidden]down-> UC28
   }
 
-  GestorFecho -- UC24
-  GestorFecho -- UC25
-  GestorFecho -- UC27
-  GestorFecho -- UC28
+  G7 -- UC25
+  G7 -- UC27
+  G7 -- UC28
 
-  ContagemFinal ..> UC25 : <<extend>>\n[realizar contagem final]
-  UC27 ..> ExportarPDF : <<include>>
+  Contagem ..> UC25 : <<extend>>\n[realizar contagem]
+  UC27 ..> PDF : <<include>>
 
   note bottom of UC25
     Pré-condição: todos os dias fechados.
-    Correções e devoluções até um mês
-    contado do último dia do evento.
-  end note
-
-  note bottom of UC27
-    Incluir vendas, despesas, stock,
-    devoluções, notas e resultados.
-    Permitir regeneração após correções válidas.
+    Correções até um mês após o último dia.
   end note
 }
 
-' =========================================================
-' ORGANIZAÇÃO VISUAL — AS LIGAÇÕES OCULTAS NÃO SÃO RELAÇÕES UML
-' =========================================================
+' ==================================================
+' 8 — UC29 A UC30
+' ==================================================
+
+package " " as P8 {
+
+  actor "Colaborador" as C8
+
+  rectangle "8. Consultas operacionais — UC29 a UC30" {
+
+    usecase "Consultar ementa\n(UC29)" as UC29
+    usecase "Consultar faturação diária\n(UC30)" as UC30
+
+    UC29 -[hidden]down-> UC30
+  }
+
+  C8 -- UC29
+  C8 -- UC30
+
+  note bottom of UC30
+    O Colaborador consulta faturação,
+    mas não consulta custos nem lucro.
+  end note
+}
+
+' ==================================================
+' 9 — HERANÇA DOS PERFIS
+' ==================================================
+
+package " " as P9 {
+
+  rectangle "9. Herança de permissões" {
+
+    actor "Colaborador" as Colaborador
+    actor "Gestor" as Gestor
+    actor "Administrador" as Administrador
+
+    Colaborador <|-- Gestor
+    Gestor <|-- Administrador
+
+    note bottom of Administrador
+      O Gestor herda as funções do Colaborador.
+      O Administrador herda as funções do Gestor.
+      Só o Administrador gere utilizadores.
+    end note
+  }
+}
+
+' ==================================================
+' GRELHA: 1–2–3 / 4–5–6 / 7–8–9
+' Ligações ocultas apenas para orientar o desenho.
+' ==================================================
 
 P1 -[hidden]right-> P2
 P2 -[hidden]right-> P3
@@ -400,23 +361,15 @@ P3 -[hidden]down-> P6
 P6 -[hidden]down-> P9
 
 legend bottom
-  |= Notação |= Significado |
-  | Linha contínua | Participação do ator no caso de uso |
-  | <<include>> | Comportamento obrigatório no caso de uso base |
-  | <<extend>> | Comportamento adicional, numa condição indicada |
-  | Triângulo vazio | Herança; aponta para o papel mais geral |
+  <<include>> — operação obrigatória no caso de uso base.
+  <<extend>> — operação adicional na condição indicada.
+  Triângulo vazio — aponta para o papel cujas funções são herdadas.
 
-  Atores com o mesmo nome representam o mesmo papel,
-  repetido para facilitar a leitura dos diferentes blocos.
-
-  As permissões são herdadas:
-  Administrador → Gestor → Colaborador.
-
+  Os atores repetidos representam o mesmo perfil.
   A operação da plataforma exige autenticação.
-  O registo de conta não atribui permissões de gestão.
 
-  Este diagrama representa requisitos previstos,
-  não funcionalidades já concluídas no Sprint 1.
+  Mantêm-se os códigos UC anteriores.
+  Os intervalos não representam funcionalidades acrescentadas.
 endlegend
 
 @enduml
