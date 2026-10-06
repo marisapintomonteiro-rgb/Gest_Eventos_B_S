@@ -1,10 +1,111 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <title>Bebe e Siga</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bebe e Siga | Gestão de Utilizadores</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Bebe e Siga</h1>
+    <header class="topbar">
+        <a class="brand" href="#" aria-label="Bebe e Siga - página inicial">
+            <span class="brand-mark">B</span>
+            <span>Bebe e Siga</span>
+        </a>
+
+        <nav class="main-nav" aria-label="Navegação principal">
+            <a href="#">Início</a>
+            <a class="active" href="#utilizadores">Utilizadores</a>
+            <a href="#">Eventos</a>
+        </nav>
+
+        <div class="user-chip">Administrador</div>
+    </header>
+
+    <main class="page-container" id="utilizadores">
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">Administração</p>
+                <h1>Gestão de utilizadores</h1>
+                <p class="intro">Regista os utilizadores que vão ter acesso à aplicação e define o respetivo perfil.</p>
+            </div>
+            <span class="status-pill">Protótipo Sprint 1</span>
+        </section>
+
+        <section class="content-grid">
+            <article class="card form-card">
+                <div class="card-heading">
+                    <div>
+                        <p class="card-kicker">Novo registo</p>
+                        <h2>Adicionar utilizador</h2>
+                    </div>
+                </div>
+
+                <form id="userForm" novalidate>
+                    <div class="field">
+                        <label for="name">Nome completo</label>
+                        <input type="text" id="name" name="name" placeholder="Ex.: Ana Silva" autocomplete="name" required>
+                        <small class="error" id="nameError"></small>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="nome@email.pt" autocomplete="email" required>
+                        <small class="error" id="emailError"></small>
+                    </div>
+
+                    <div class="field">
+                        <label for="role">Perfil</label>
+                        <select id="role" name="role" required>
+                            <option value="">Selecionar perfil</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Gestor">Gestor</option>
+                            <option value="Colaborador">Colaborador</option>
+                        </select>
+                        <small class="error" id="roleError"></small>
+                    </div>
+
+                    <button class="primary-button" type="submit">Registar utilizador</button>
+                    <p class="form-note">Nesta versão de demonstração os dados ficam guardados apenas neste navegador.</p>
+                </form>
+            </article>
+
+            <article class="card list-card">
+                <div class="card-heading list-heading">
+                    <div>
+                        <p class="card-kicker">Utilizadores</p>
+                        <h2>Registos atuais</h2>
+                    </div>
+                    <span class="counter" id="userCount">0</span>
+                </div>
+
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon">+</div>
+                    <h3>Ainda não existem utilizadores</h3>
+                    <p>Utiliza o formulário ao lado para criar o primeiro registo.</p>
+                </div>
+
+                <div class="table-wrapper" id="tableWrapper" hidden>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Perfil</th>
+                                <th><span class="sr-only">Ações</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer class="page-footer">
+        Bebe e Siga · Aplicações Informáticas · 2026
+    </footer>
+
+    <script src="js/app.js"></script>
 </body>
 </html>
