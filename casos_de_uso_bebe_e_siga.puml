@@ -1,151 +1,219 @@
 @startuml
 
-title Sistema de Gestão de Eventos — Bebe e Siga
+title Bebe e Siga — Acesso e gestão de utilizadores
 
 left to right direction
 
-skinparam backgroundColor White
 skinparam shadowing false
+skinparam backgroundColor White
+skinparam monochrome true
 skinparam defaultFontName Arial
-skinparam defaultFontSize 13
+skinparam defaultFontSize 14
 skinparam packageStyle rectangle
-skinparam nodesep 35
-skinparam ranksep 55
+skinparam nodesep 45
+skinparam ranksep 65
 
-skinparam actor {
-  BorderColor Black
-  FontColor Black
-}
-
-skinparam usecase {
-  BackgroundColor White
-  BorderColor Black
-  FontColor Black
-}
-
-skinparam package {
-  BackgroundColor #F7F7F7
-  BorderColor Black
-  FontColor Black
-}
-
-skinparam rectangle {
-  BackgroundColor White
-  BorderColor Black
-}
-
-skinparam ArrowColor #444444
-
-' Atores
 actor "Visitante" as Visitante
 actor "Colaborador" as Colaborador
 actor "Gestor" as Gestor
-actor "Administrador" as Administrador
+actor "Administrador" as Admin
 
-' Herança de funcionalidades
 Colaborador <|-- Gestor
-Gestor <|-- Administrador
+Gestor <|-- Admin
+
+rectangle "Bebe e Siga" {
+  usecase "Criar conta\n(UC03)" as Registo
+  usecase "Iniciar sessão\n(UC01)" as Login
+  usecase "Gerir utilizadores\n(UC02)" as Utilizadores
+}
+
+Visitante -- Registo
+Colaborador -- Login
+Admin -- Utilizadores
+
+note bottom of Utilizadores
+  Funcionalidade exclusiva
+  do Administrador.
+end note
+
+@enduml
+
+
+@startuml
+
+title Bebe e Siga — Planeamento do evento
+
+left to right direction
+
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam monochrome true
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 65
+
+actor "Gestor" as Gestor
+actor "Administrador" as Admin
+
+Gestor <|-- Admin
 
 rectangle "Bebe e Siga" {
 
-  package "Acesso e gestão do sistema" {
-    usecase "Iniciar sessão\n(UC01)" as UC01
-    usecase "Gerir utilizadores\n(UC02)" as UC02
-    usecase "Criar conta\n(UC03)" as UC03
+  package "Evento" {
+    usecase "Criar evento\n(UC04)" as Criar
+    usecase "Configurar dias do evento\n(UC05)" as Dias
   }
 
-  package "Funcionalidades comuns" {
-    usecase "Consultar calendário\n(UC06)" as UC06
-    usecase "Consultar ementa\n(UC29)" as UC29
-    usecase "Registar vendas\n(UC14)" as UC14
-    usecase "Registar consumo interno\n(UC16)" as UC16
-    usecase "Consultar faturação diária\n(UC30)" as UC30
+  package "Produtos e ementa" {
+    usecase "Gerir produtos\n(UC07)" as Produtos
+    usecase "Gerir ementa\n(UC08)" as Ementa
+    usecase "Definir composição\n(UC09)" as Composicao
+    usecase "Reutilizar ementa\n(UC10)" as Reutilizar
   }
 
-  package "Planeamento e gestão do evento" {
-    usecase "Criar evento\n(UC04)" as UC04
-    usecase "Configurar dias do evento\n(UC05)" as UC05
-    usecase "Gerir produtos\n(UC07)" as UC07
-    usecase "Gerir ementa\n(UC08)" as UC08
-    usecase "Definir composição\n(UC09)" as UC09
-    usecase "Reutilizar ementa\n(UC10)" as UC10
-    usecase "Gerir fornecedores\n(UC11)" as UC11
-    usecase "Registar compras\n(UC12)" as UC12
-    usecase "Consultar previsão de compras\n(UC13)" as UC13
-    usecase "Corrigir stock\n(UC17)" as UC17
-    usecase "Encerrar ou reabrir dia\n(UC19)" as UC19
-  }
-
-  package "Análise e encerramento" {
-    usecase "Gerir despesas\n(UC20)" as UC20
-    usecase "Consultar resultados financeiros\n(UC21)" as UC21
-    usecase "Registar devoluções\n(UC22)" as UC22
-    usecase "Consultar dashboard\n(UC23)" as UC23
-    usecase "Registar observações\n(UC24)" as UC24
-    usecase "Encerrar evento\n(UC25)" as UC25
-    usecase "Gerar relatório final\n(UC27)" as UC27
-    usecase "Consultar histórico\n(UC28)" as UC28
+  package "Fornecimento" {
+    usecase "Gerir fornecedores\n(UC11)" as Fornecedores
+    usecase "Consultar previsão de compras\n(UC13)" as Previsao
   }
 }
 
-' Registo de uma pessoa ainda sem conta
-Visitante -- UC03
+Gestor -- Criar
+Gestor -- Dias
+Gestor -- Produtos
+Gestor -- Ementa
+Gestor -- Fornecedores
+Gestor -- Previsao
 
-' Funcionalidades comuns aos três perfis
-Colaborador -- UC01
-Colaborador -- UC06
-Colaborador -- UC29
-Colaborador -- UC14
-Colaborador -- UC16
-Colaborador -- UC30
+Criar ..> Dias : <<include>>
 
-' Gestão de utilizadores exclusiva do Administrador
-Administrador -- UC02
+Composicao ..> Ementa : <<extend>>\n[artigo composto]
+Reutilizar ..> Ementa : <<extend>>\n[copiar edição anterior]
 
-' Funcionalidades do Gestor, herdadas pelo Administrador
-Gestor -- UC04
-Gestor -- UC05
-Gestor -- UC07
-Gestor -- UC08
-Gestor -- UC11
-Gestor -- UC12
-Gestor -- UC13
-Gestor -- UC17
-Gestor -- UC19
+legend bottom
+  Pré-condição: sessão iniciada.
+  O Administrador herda as funcionalidades do Gestor.
+endlegend
 
-Gestor -- UC20
-Gestor -- UC21
-Gestor -- UC22
-Gestor -- UC23
-Gestor -- UC24
-Gestor -- UC25
-Gestor -- UC27
-Gestor -- UC28
+@enduml
 
-' Criar um evento exige definir os seus dias
-UC04 ..> UC05 : <<include>>
 
-' Composição aplicável aos artigos com receita
-UC09 ..> UC08 : <<extend>>\n[artigo composto]
+@startuml
 
-' Copiar uma ementa anterior é opcional
-UC10 ..> UC08 : <<extend>>\n[optar por copiar]
+title Bebe e Siga — Operação diária do evento
 
-note bottom of UC25
-  Pré-condição:
-  todos os dias do evento
-  devem estar fechados.
+left to right direction
+
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam monochrome true
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 65
+
+actor "Colaborador" as Colaborador
+actor "Gestor" as Gestor
+actor "Administrador" as Admin
+
+Colaborador <|-- Gestor
+Gestor <|-- Admin
+
+rectangle "Bebe e Siga" {
+
+  package "Consulta e registo diário" {
+    usecase "Consultar calendário\n(UC06)" as Calendario
+    usecase "Consultar ementa\n(UC29)" as Ementa
+    usecase "Registar vendas\n(UC14)" as Vendas
+    usecase "Registar consumo interno\n(UC16)" as Consumo
+    usecase "Consultar faturação diária\n(UC30)" as Faturacao
+  }
+
+  package "Controlo do evento" {
+    usecase "Registar compras\n(UC12)" as Compras
+    usecase "Corrigir stock\n(UC17)" as Stock
+    usecase "Encerrar ou reabrir dia\n(UC19)" as Dia
+  }
+}
+
+Colaborador -- Calendario
+Colaborador -- Ementa
+Colaborador -- Vendas
+Colaborador -- Consumo
+Colaborador -- Faturacao
+
+Gestor -- Compras
+Gestor -- Stock
+Gestor -- Dia
+
+legend bottom
+  Pré-condição: sessão iniciada.
+
+  O Gestor herda as funcionalidades do Colaborador.
+  O Administrador herda as funcionalidades do Gestor.
+
+  O Colaborador não consulta custos nem lucro.
+endlegend
+
+@enduml
+
+
+@startuml
+
+title Bebe e Siga — Análise financeira e encerramento
+
+left to right direction
+
+skinparam shadowing false
+skinparam backgroundColor White
+skinparam monochrome true
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 65
+
+actor "Gestor" as Gestor
+actor "Administrador" as Admin
+
+Gestor <|-- Admin
+
+rectangle "Bebe e Siga" {
+
+  package "Gestão financeira" {
+    usecase "Gerir despesas\n(UC20)" as Despesas
+    usecase "Registar devoluções\n(UC22)" as Devolucoes
+    usecase "Consultar resultados financeiros\n(UC21)" as Resultados
+    usecase "Consultar dashboard\n(UC23)" as Dashboard
+  }
+
+  package "Encerramento e histórico" {
+    usecase "Registar observações\n(UC24)" as Observacoes
+    usecase "Encerrar evento\n(UC25)" as Encerrar
+    usecase "Gerar relatório final\n(UC27)" as Relatorio
+    usecase "Consultar histórico\n(UC28)" as Historico
+  }
+}
+
+Gestor -- Despesas
+Gestor -- Devolucoes
+Gestor -- Resultados
+Gestor -- Dashboard
+Gestor -- Observacoes
+Gestor -- Encerrar
+Gestor -- Relatorio
+Gestor -- Historico
+
+note right of Encerrar
+  Só é possível encerrar o evento
+  quando todos os dias estiverem fechados.
 end note
 
 legend bottom
-  As funcionalidades de operação exigem
-  uma sessão iniciada e permissões adequadas.
-
-  O Colaborador não consulta custos nem lucro.
-  O Gestor não gere utilizadores.
-
-  A generalização permite herdar funcionalidades,
-  evitando repetir todas as ligações.
+  Pré-condição: sessão iniciada.
+  O Administrador herda as funcionalidades do Gestor.
 endlegend
 
 @enduml
