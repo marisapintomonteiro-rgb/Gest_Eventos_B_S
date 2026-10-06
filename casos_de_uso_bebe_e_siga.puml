@@ -36,10 +36,8 @@ note bottom of Utilizadores
   do Administrador.
 end note
 
-@enduml
 
 
-@startuml
 
 title Bebe e Siga — Planeamento do evento
 
@@ -96,10 +94,7 @@ legend bottom
   O Administrador herda as funcionalidades do Gestor.
 endlegend
 
-@enduml
 
-
-@startuml
 
 title Bebe e Siga — Operação diária do evento
 
