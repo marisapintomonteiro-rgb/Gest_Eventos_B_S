@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área da marca | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html" aria-current="page">Início</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <section class="welcome" aria-labelledby="welcomeTitle">
+            <figure class="badge badge-hero">
+                <div class="badge-logo" id="badgeLogo"></div>
+                <figcaption class="badge-brand" id="badgeBrandName"></figcaption>
+                <span class="badge-band" id="badgeRole"></span>
+                <span class="badge-email" id="badgeEmail"></span>
+            </figure>
+
+            <div class="welcome-text">
+                <h1 id="welcomeTitle"></h1>
+                <p class="lead" id="welcomeRole"></p>
+                <p class="session-info" id="sessionInfo"></p>
+            </div>
+        </section>
+
+        <section class="panel access-panel" aria-labelledby="accessTitle">
+            <div class="access-heading">
+                <h2 id="accessTitle">O que podes fazer</h2>
+                <p>O que está marcado com «Em breve» chega nas próximas fases do projeto.</p>
+            </div>
+
+            <div class="areas" id="areas"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        Protótipo da Sprint 1. Os dados ficam guardados apenas neste navegador; a versão final vai usar servidor e base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/marca.js"></script>
+</body>
+</html>

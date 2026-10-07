@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="wordmark" href="login.html">Gestão de Eventos</a>
+        <a class="button button-ghost button-small" href="registo.html">Registar marca</a>
+    </header>
+
+    <main class="login-layout">
+        <section class="login-intro" aria-labelledby="loginTitle">
+            <h1 id="loginTitle">Entra na área da tua marca</h1>
+            <p class="lead">Planeamento, vendas, stock e resultados dos teus eventos temporários. Cada pessoa da equipa entra com o seu email e vê apenas o que o seu perfil permite.</p>
+        </section>
+
+        <dl class="role-list" aria-label="Perfis de acesso">
+            <div>
+                <dt><span class="role-chip role-administrador">Administrador</span></dt>
+                <dd>Acesso total, incluindo os utilizadores da marca.</dd>
+            </div>
+            <div>
+                <dt><span class="role-chip role-gestor">Gestor</span></dt>
+                <dd>Eventos, ementas, compras, stock e resultados.</dd>
+            </div>
+            <div>
+                <dt><span class="role-chip role-colaborador">Colaborador</span></dt>
+                <dd>Vendas e consumo interno durante o evento.</dd>
+            </div>
+        </dl>
+
+        <section class="panel login-panel" aria-labelledby="formTitle">
+            <h2 id="formTitle">Iniciar sessão</h2>
+            <p id="formMessage" class="form-message" role="status" hidden></p>
+
+            <form id="loginForm" novalidate>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" autocomplete="username" placeholder="nome@marca.pt" aria-describedby="emailError" required>
+                    <small class="error" id="emailError"></small>
+                </div>
+
+                <div class="field">
+                    <label for="password">Palavra-passe</label>
+                    <div class="password-field">
+                        <input type="password" id="password" autocomplete="current-password" aria-describedby="passwordError" required>
+                        <button type="button" class="toggle-password" data-toggle-password="password" aria-pressed="false">Mostrar</button>
+                    </div>
+                    <small class="error" id="passwordError"></small>
+                </div>
+
+                <button class="button button-block" type="submit">Entrar</button>
+            </form>
+
+            <p class="panel-footnote">Ainda não registaste a tua marca? <a href="registo.html">Registar marca</a></p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        Protótipo da Sprint 1. Os dados ficam guardados apenas neste navegador; a versão final vai usar servidor e base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registar marca | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="wordmark" href="login.html">Gestão de Eventos</a>
+        <p class="header-link">Já tens conta? <a href="login.html">Entrar</a></p>
+    </header>
+
+    <main class="page">
+        <div class="page-heading">
+            <h1>Registar marca</h1>
+            <p class="lead">Cria a área da tua marca e escolhe as funções da equipa. Cada função fica associada a um email e a uma palavra-passe.</p>
+        </div>
+
+        <form id="brandForm" novalidate>
+            <section class="panel brand-panel" aria-labelledby="brandTitle">
+                <div>
+                    <h2 id="brandTitle">A marca</h2>
+
+                    <div class="field">
+                        <label for="brandName">Nome da marca</label>
+                        <input type="text" id="brandName" maxlength="60" placeholder="Ex.: Bebe e Siga" aria-describedby="brandNameError" required>
+                        <small class="error" id="brandNameError"></small>
+                    </div>
+
+                    <div class="field">
+                        <label for="brandLogo">Logótipo <span class="optional">(opcional)</span></label>
+                        <input type="file" id="brandLogo" accept="image/png, image/jpeg, image/svg+xml, image/webp" aria-describedby="brandLogoHint brandLogoError">
+                        <small class="hint" id="brandLogoHint">PNG, JPG ou SVG até 1 MB. Aparece no cabeçalho e no cartão de acesso.</small>
+                        <small class="error" id="brandLogoError"></small>
+                    </div>
+                </div>
+
+                <figure class="badge badge-preview" aria-label="Pré-visualização do cartão de acesso">
+                    <div class="badge-logo" id="previewLogo"></div>
+                    <figcaption class="badge-brand" id="previewName">Nome da marca</figcaption>
+                    <span class="badge-band role-administrador">Administrador</span>
+                </figure>
+            </section>
+
+            <section class="roles-section" aria-labelledby="rolesTitle">
+                <h2 id="rolesTitle">Funções e acessos</h2>
+                <p class="section-text">Escolhe as funções que a marca vai usar. O Administrador é obrigatório porque é quem gere os utilizadores.</p>
+
+                <div class="credential-grid">
+                    <div class="credential role-administrador" role="group" aria-labelledby="adminTitle">
+                        <h3 class="credential-band" id="adminTitle">Administrador</h3>
+                        <div class="credential-body">
+                            <p class="credential-text">Acesso total, incluindo os utilizadores da marca.</p>
+                            <p class="credential-status">Obrigatório</p>
+
+                            <div class="field">
+                                <label for="adminEmail">Email</label>
+                                <input type="email" id="adminEmail" autocomplete="off" aria-describedby="adminEmailError" required>
+                                <small class="error" id="adminEmailError"></small>
+                            </div>
+
+                            <div class="field">
+                                <label for="adminPassword">Palavra-passe</label>
+                                <div class="password-field">
+                                    <input type="password" id="adminPassword" autocomplete="new-password" aria-describedby="adminPasswordError" required>
+                                    <button type="button" class="toggle-password" data-toggle-password="adminPassword" aria-pressed="false">Mostrar</button>
+                                </div>
+                                <small class="error" id="adminPasswordError"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="credential role-gestor" role="group" aria-labelledby="gestorTitle">
+                        <h3 class="credential-band" id="gestorTitle">Gestor</h3>
+                        <div class="credential-body">
+                            <p class="credential-text">Eventos, ementas, compras, stock e resultados.</p>
+                            <label class="check credential-status"><input type="checkbox" id="useGestor" checked> Usar esta função</label>
+
+                            <div class="field">
+                                <label for="gestorEmail">Email</label>
+                                <input type="email" id="gestorEmail" autocomplete="off" aria-describedby="gestorEmailError">
+                                <small class="error" id="gestorEmailError"></small>
+                            </div>
+
+                            <div class="field">
+                                <label for="gestorPassword">Palavra-passe</label>
+                                <div class="password-field">
+                                    <input type="password" id="gestorPassword" autocomplete="new-password" aria-describedby="gestorPasswordError">
+                                    <button type="button" class="toggle-password" data-toggle-password="gestorPassword" aria-pressed="false">Mostrar</button>
+                                </div>
+                                <small class="error" id="gestorPasswordError"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="credential role-colaborador" role="group" aria-labelledby="colaboradorTitle">
+                        <h3 class="credential-band" id="colaboradorTitle">Colaborador</h3>
+                        <div class="credential-body">
+                            <p class="credential-text">Vendas e consumo interno durante o evento.</p>
+                            <label class="check credential-status"><input type="checkbox" id="useColaborador" checked> Usar esta função</label>
+
+                            <div class="field">
+                                <label for="colaboradorEmail">Email</label>
+                                <input type="email" id="colaboradorEmail" autocomplete="off" aria-describedby="colaboradorEmailError">
+                                <small class="error" id="colaboradorEmailError"></small>
+                            </div>
+
+                            <div class="field">
+                                <label for="colaboradorPassword">Palavra-passe</label>
+                                <div class="password-field">
+                                    <input type="password" id="colaboradorPassword" autocomplete="new-password" aria-describedby="colaboradorPasswordError">
+                                    <button type="button" class="toggle-password" data-toggle-password="colaboradorPassword" aria-pressed="false">Mostrar</button>
+                                </div>
+                                <small class="error" id="colaboradorPasswordError"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <p id="formMessage" class="form-message" role="status" hidden></p>
+                <button class="button" type="submit">Registar marca</button>
+            </div>
+        </form>
+    </main>
+
+    <footer class="site-footer">
+        Protótipo da Sprint 1. Os dados ficam guardados apenas neste navegador; a versão final vai usar servidor e base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/registo.js"></script>
+</body>
+</html>
