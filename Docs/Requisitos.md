@@ -330,3 +330,31 @@ O relatório pode incluir:
 Manter os eventos anteriores disponíveis para consulta.
 
 O histórico pode ser utilizado como apoio ao planeamento de novas edições.
+
+## RF29 — Consultar ementa
+
+Permitir ao Colaborador consultar a ementa do evento, com os artigos e os respetivos preços.
+
+Corresponde ao caso de uso UC29.
+
+## RF30 — Consultar faturação diária
+
+Permitir ao Colaborador consultar a faturação do dia.
+
+O Colaborador não consulta custos nem lucro.
+
+Corresponde ao caso de uso UC30.
+
+## RF31 — Registar marca
+
+Permitir que uma marca se registe na aplicação, indicando o nome e, opcionalmente, o logótipo.
+
+No registo, a marca escolhe as funções que vai usar:
+
+- Administrador (obrigatório)
+- Gestor (opcional)
+- Colaborador (opcional)
+
+Cada função fica associada a um email e a uma palavra-passe.
+
+Corresponde ao caso de uso UC03 (Criar conta).

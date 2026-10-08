@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_CriarEvento" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collaboration_CriarEvento">
+    <bpmn:participant id="Participant_BebeESiga" name="Bebe e Siga — Criar evento (US01)" processRef="Process_CriarEvento" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_CriarEvento" name="Criar evento" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_CriarEvento">
+      <bpmn:lane id="Lane_Gestor" name="Gestor ou Administrador">
+        <bpmn:flowNodeRef>StartEvent_Novo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Abrir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Dados</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Dias</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Opcionais</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Aplicacao" name="Aplicação">
+        <bpmn:flowNodeRef>Task_Perfil</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Perfil</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Recusado</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Validar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Validos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Erros</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Guardar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Criado</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_Novo" name="Novo evento para planear">
+      <bpmn:outgoing>Flow_1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_Abrir" name="Abrir Planear e escolher Novo evento">
+      <bpmn:incoming>Flow_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Perfil" name="Verificar o perfil">
+      <bpmn:incoming>Flow_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Perfil" name="Administrador ou Gestor?">
+      <bpmn:incoming>Flow_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_Sim_Perfil</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Nao_Perfil</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent_Recusado" name="Acesso recusado">
+      <bpmn:incoming>Flow_Nao_Perfil</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:task id="Task_Dados" name="Indicar nome, local e tipo de espaço">
+      <bpmn:incoming>Flow_Sim_Perfil</bpmn:incoming>
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Dias" name="Escolher os dias e os horários">
+      <bpmn:incoming>Flow_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Opcionais" name="Indicar público, orçamento e despesas iniciais">
+      <bpmn:incoming>Flow_5</bpmn:incoming>
+      <bpmn:outgoing>Flow_6</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Validar" name="Validar nome, local e dias">
+      <bpmn:incoming>Flow_6</bpmn:incoming>
+      <bpmn:outgoing>Flow_7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Validos" name="Dados válidos?">
+      <bpmn:incoming>Flow_7</bpmn:incoming>
+      <bpmn:outgoing>Flow_Sim_Validos</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Nao_Validos</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Task_Erros" name="Mostrar os erros">
+      <bpmn:incoming>Flow_Nao_Validos</bpmn:incoming>
+      <bpmn:outgoing>Flow_8</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_Guardar" name="Guardar o evento e os dias">
+      <bpmn:incoming>Flow_Sim_Validos</bpmn:incoming>
+      <bpmn:outgoing>Flow_9</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="EndEvent_Criado" name="Evento criado">
+      <bpmn:incoming>Flow_9</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_Novo" targetRef="Task_Abrir" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_Abrir" targetRef="Task_Perfil" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_Perfil" targetRef="Gateway_Perfil" />
+    <bpmn:sequenceFlow id="Flow_Sim_Perfil" name="Sim" sourceRef="Gateway_Perfil" targetRef="Task_Dados" />
+    <bpmn:sequenceFlow id="Flow_Nao_Perfil" name="Não" sourceRef="Gateway_Perfil" targetRef="EndEvent_Recusado" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_Dados" targetRef="Task_Dias" />
+    <bpmn:sequenceFlow id="Flow_5" sourceRef="Task_Dias" targetRef="Task_Opcionais" />
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_Opcionais" targetRef="Task_Validar" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_Validar" targetRef="Gateway_Validos" />
+    <bpmn:sequenceFlow id="Flow_Sim_Validos" name="Sim" sourceRef="Gateway_Validos" targetRef="Task_Guardar" />
+    <bpmn:sequenceFlow id="Flow_Nao_Validos" name="Não" sourceRef="Gateway_Validos" targetRef="Task_Erros" />
+    <bpmn:sequenceFlow id="Flow_8" name="Corrigir" sourceRef="Task_Erros" targetRef="Task_Dados" />
+    <bpmn:sequenceFlow id="Flow_9" sourceRef="Task_Guardar" targetRef="EndEvent_Criado" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CriarEvento">
+    <bpmndi:BPMNPlane id="BPMNPlane_CriarEvento" bpmnElement="Collaboration_CriarEvento">
+      <bpmndi:BPMNShape id="Participant_BebeESiga_di" bpmnElement="Participant_BebeESiga" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1280" height="500" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Gestor_di" bpmnElement="Lane_Gestor" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1250" height="220" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Aplicacao_di" bpmnElement="Lane_Aplicacao" isHorizontal="true">
+        <dc:Bounds x="190" y="300" width="1250" height="280" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_Novo_di" bpmnElement="StartEvent_Novo">
+        <dc:Bounds x="246" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="222" y="213" width="83" height="28" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Abrir_di" bpmnElement="Task_Abrir">
+        <dc:Bounds x="320" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Perfil_di" bpmnElement="Task_Perfil">
+        <dc:Bounds x="320" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Perfil_di" bpmnElement="Gateway_Perfil" isMarkerVisible="true">
+        <dc:Bounds x="485" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="543" y="368" width="90" height="28" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Recusado_di" bpmnElement="EndEvent_Recusado">
+        <dc:Bounds x="492" y="492" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="458" y="533" width="103" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Dados_di" bpmnElement="Task_Dados">
+        <dc:Bounds x="600" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Dias_di" bpmnElement="Task_Dias">
+        <dc:Bounds x="750" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Opcionais_di" bpmnElement="Task_Opcionais">
+        <dc:Bounds x="900" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Validar_di" bpmnElement="Task_Validar">
+        <dc:Bounds x="900" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Validos_di" bpmnElement="Gateway_Validos" isMarkerVisible="true">
+        <dc:Bounds x="1065" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1042" y="355" width="96" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Erros_di" bpmnElement="Task_Erros">
+        <dc:Bounds x="1040" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Guardar_di" bpmnElement="Task_Guardar">
+        <dc:Bounds x="1180" y="360" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_Criado_di" bpmnElement="EndEvent_Criado">
+        <dc:Bounds x="1354" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1327" y="423" width="90" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="282" y="190" />
+        <di:waypoint x="320" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="370" y="230" />
+        <di:waypoint x="370" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="420" y="400" />
+        <di:waypoint x="485" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Sim_Perfil_di" bpmnElement="Flow_Sim_Perfil">
+        <di:waypoint x="510" y="375" />
+        <di:waypoint x="510" y="190" />
+        <di:waypoint x="600" y="190" />
+        <bpmndi:BPMNLabel><dc:Bounds x="518" y="324" width="24" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Nao_Perfil_di" bpmnElement="Flow_Nao_Perfil">
+        <di:waypoint x="510" y="425" />
+        <di:waypoint x="510" y="492" />
+        <bpmndi:BPMNLabel><dc:Bounds x="518" y="449" width="24" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4">
+        <di:waypoint x="700" y="190" />
+        <di:waypoint x="750" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="850" y="190" />
+        <di:waypoint x="900" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6">
+        <di:waypoint x="950" y="230" />
+        <di:waypoint x="950" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7">
+        <di:waypoint x="1000" y="400" />
+        <di:waypoint x="1065" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Sim_Validos_di" bpmnElement="Flow_Sim_Validos">
+        <di:waypoint x="1115" y="400" />
+        <di:waypoint x="1180" y="400" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1136" y="381" width="24" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Nao_Validos_di" bpmnElement="Flow_Nao_Validos">
+        <di:waypoint x="1090" y="425" />
+        <di:waypoint x="1090" y="470" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1098" y="441" width="24" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
+        <di:waypoint x="1040" y="510" />
+        <di:waypoint x="650" y="510" />
+        <di:waypoint x="650" y="230" />
+        <bpmndi:BPMNLabel><dc:Bounds x="870" y="491" width="57" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
+        <di:waypoint x="1280" y="400" />
+        <di:waypoint x="1354" y="400" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
