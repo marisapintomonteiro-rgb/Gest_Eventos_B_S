@@ -92,6 +92,7 @@ Não substituir estas tecnologias sem confirmação.
 ```text
 Gest_Eventos_B_S/
 │
+├── .gitignore
 ├── CLAUDE.md
 ├── README.md
 │
@@ -99,7 +100,10 @@ Gest_Eventos_B_S/
 │   ├── README.md
 │   ├── Requisitos.md
 │   ├── US01-criar-evento.md
-│   ├── casos_de_uso_bebe_e_siga.puml
+│   ├── UML/
+│   │   ├── casos-de-uso.puml
+│   │   ├── casos-de-uso.svg
+│   │   └── casos-de-uso.png
 │   └── BPMN/
 │       ├── criar-evento.bpmn
 │       ├── criar-evento.svg
@@ -647,7 +651,7 @@ Já existe um repositório GitHub chamado:
 
 Sprint 1 (apresentada a 8 de outubro de 2026):
 - requisitos em `Docs/Requisitos.md` (RF01 a RF31 e RNF01 a RNF11);
-- diagrama de casos de uso e diagrama BPMN do processo Criar evento em `Docs/`;
+- diagrama de casos de uso em `Docs/UML/` e diagrama BPMN do processo Criar evento em `Docs/BPMN/`;
 - módulo de acesso no frontend: registo de marca com funções, email e palavra-passe (UC03), login (UC01), página da marca por perfil e gestão de utilizadores (UC02).
 
 Nesta fase o frontend guarda os dados no navegador (`localStorage` e `sessionStorage`) e protege as palavras-passe com hash SHA-256 e sal. As permissões ainda só são verificadas no navegador.

@@ -420,5 +420,5 @@ Os dados da aplicação devem ser guardados de forma persistente numa base de da
 # Documentos relacionados
 
 - `US01-criar-evento.md`: user story 01, Criar evento (RF04 e RF05).
-- `casos_de_uso_bebe_e_siga.puml`: diagrama de casos de uso (também em `.png` e `.svg`).
+- `UML/casos-de-uso.puml`: diagrama de casos de uso (também em `.png` e `.svg`).
 - `BPMN/criar-evento.bpmn`: processo Criar evento em BPMN (também em `.png` e `.svg`).
