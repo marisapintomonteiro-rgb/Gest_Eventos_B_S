@@ -1,0 +1,18 @@
+# Credenciais e configuração local (nunca vão para o GitHub)
+.env
+.env.*
+!.env.example
+
+# Dependências do Node.js
+node_modules/
+
+# Registos
+*.log
+npm-debug.log*
+
+# Ficheiros de sistema e de editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
