@@ -29,6 +29,3 @@ Nesta fase os dados ficam guardados apenas no navegador. Mais tarde vão passar 
 
 Para a criação deste site vamos utilizar o vibe coding, uma forma de criar software usando linguagem natural para instruir uma inteligência artificial a gerar o código por nós. Vamos utilizar o Codex, um agente apoiado por vários LLM, e também o Claude. O contexto do projeto e as regras de código estão no ficheiro `CLAUDE.md`.
 
-## Equipa
-
-Marisa Pinto Monteiro
