@@ -128,6 +128,51 @@ Gest_Eventos_B_S/
 
 Antes de reorganizar ficheiros, analisar primeiro a estrutura atual.
 
+### 5.1 Padrão de arquitetura: MVC
+
+O código segue o padrão **MVC (Model–View–Controller)**. Cada parte tem uma única responsabilidade:
+
+| Camada | Onde fica | Responsabilidade |
+| --- | --- | --- |
+| **Model** | `Backend/models/` | Ler e gravar dados no MySQL. É o único sítio com SQL, sempre com queries parametrizadas. |
+| **View** | `Frontend/` | Páginas HTML, CSS e o JavaScript que mostra os dados no ecrã. |
+| **Controller** | `Backend/controllers/` | Recebe o pedido, valida os dados, chama o Model e devolve a resposta em JSON. |
+
+Peças de apoio:
+
+- `Backend/routes/`: liga cada endereço da API (ex.: `POST /api/events`) ao controller certo e ao middleware de permissões.
+- `Backend/middleware/`: confirma a sessão e o perfil (RBAC) antes de o pedido chegar ao controller. É aqui que as permissões são validadas no backend.
+- `Backend/config/`: ligação ao MySQL, com as credenciais lidas do `.env`.
+- `Frontend/js/api.js`: o único ficheiro do frontend que fala com o servidor (`fetch`). As outras páginas chamam as funções do `api.js` e não usam `localStorage` para guardar dados.
+
+Estrutura prevista do backend:
+
+```text
+Backend/
+├── server.js
+├── package.json
+├── .env.example
+├── config/
+│   └── database.js
+├── routes/
+│   └── eventRoutes.js
+├── controllers/
+│   └── eventController.js
+├── models/
+│   └── eventModel.js
+└── middleware/
+    └── authMiddleware.js
+```
+
+Cada módulo tem um ficheiro em cada pasta, com o mesmo nome base (ex.: `eventRoutes.js`, `eventController.js`, `eventModel.js`).
+
+Regras:
+
+- Um controller nunca escreve SQL. Um model nunca lê `req` nem `res`.
+- Uma rota protegida indica sempre o perfil mínimo (ex.: `requireRole('Gestor')`).
+- As páginas do frontend não decidem permissões. Podem esconder botões, mas quem decide é o servidor.
+- As respostas de erro da API têm sempre o formato `{ "error": "mensagem para o utilizador" }`.
+
 ---
 
 ## 6. Perfis de utilizador e RBAC
