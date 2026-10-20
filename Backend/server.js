@@ -10,6 +10,7 @@ const session = require('express-session');
 const pool = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 
 // 2. Criar a aplicação (o nosso servidor)
 const app = express();
@@ -42,6 +43,9 @@ app.use('/api/auth', authRoutes);
 
 // Endereços da API de utilizadores: /api/users/...
 app.use('/api/users', userRoutes);
+
+// Endereços da API de eventos: /api/events/...
+app.use('/api/events', eventRoutes);
 
 // 5. Rota de teste: confirma que o servidor e a base de dados estão a funcionar
 app.get('/api/health', async (req, res) => {
