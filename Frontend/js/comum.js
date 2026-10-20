@@ -1,13 +1,7 @@
 // comum.js: funções usadas por todas as páginas.
-// Guarda os dados no navegador, protege as palavras-passe com hash,
-// controla a sessão e aplica as permissões de cada perfil (RBAC).
-
-// Nomes usados para guardar os dados no navegador
-const STORAGE_KEYS = {
-    brands: 'gestEventosBrands',
-    accounts: 'gestEventosAccounts',
-    session: 'gestEventosSession'
-};
+// Confirma a sessão junto do servidor, mostra o cabeçalho da marca,
+// aplica na página as permissões de cada perfil (RBAC) e ajuda nos formulários.
+// Os dados e as palavras-passe já não ficam no navegador: estão no servidor (ver api.js).
 
 // A sessão termina ao fim de 30 minutos sem atividade (RNF08)
 const SESSION_TIMEOUT_MINUTES = 30;
@@ -28,124 +22,6 @@ const ROLES = {
     }
 };
 
-// ---------- Dados guardados no navegador ----------
-
-function loadList(storageKey) {
-    try {
-        const storedValue = localStorage.getItem(storageKey);
-        return storedValue ? JSON.parse(storedValue) : [];
-    } catch (error) {
-        console.error('Não foi possível ler os dados guardados.', error);
-        return [];
-    }
-}
-
-function saveList(storageKey, list) {
-    localStorage.setItem(storageKey, JSON.stringify(list));
-}
-
-function findBrandById(brandId) {
-    return loadList(STORAGE_KEYS.brands).find((brand) => brand.id === brandId);
-}
-
-function findAccountByEmail(email) {
-    return loadList(STORAGE_KEYS.accounts).find((account) => account.email === email);
-}
-
-function createId() {
-    return crypto.randomUUID();
-}
-
-// ---------- Palavras-passe ----------
-
-// O "sal" é um valor aleatório: duas palavras-passe iguais ficam com hashes diferentes
-function createSalt() {
-    const randomBytes = crypto.getRandomValues(new Uint8Array(16));
-    return bytesToHex(randomBytes);
-}
-
-// Calcula o hash SHA-256 do sal + palavra-passe. A palavra-passe nunca é guardada.
-async function hashPassword(password, salt) {
-    const data = new TextEncoder().encode(salt + password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    return bytesToHex(new Uint8Array(hashBuffer));
-}
-
-function bytesToHex(bytes) {
-    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-}
-
-// ---------- Sessão ----------
-
-function startSession(account) {
-    const now = Date.now();
-
-    saveSession({
-        accountId: account.id,
-        brandId: account.brandId,
-        email: account.email,
-        role: account.role,
-        startedAt: now,
-        lastActivity: now
-    });
-}
-
-function saveSession(session) {
-    sessionStorage.setItem(STORAGE_KEYS.session, JSON.stringify(session));
-}
-
-function readSession() {
-    const storedSession = sessionStorage.getItem(STORAGE_KEYS.session);
-    return storedSession ? JSON.parse(storedSession) : null;
-}
-
-function endSession() {
-    sessionStorage.removeItem(STORAGE_KEYS.session);
-}
-
-function isSessionExpired(session) {
-    const minutesWithoutActivity = (Date.now() - session.lastActivity) / 60000;
-    return minutesWithoutActivity > SESSION_TIMEOUT_MINUTES;
-}
-
-// Termina a sessão e volta ao login com o aviso de inatividade
-function expireSession() {
-    endSession();
-    window.location.href = 'login.html?sessao=expirada';
-}
-
-function checkSession() {
-    const session = readSession();
-
-    if (session && isSessionExpired(session)) {
-        expireSession();
-    }
-}
-
-function registerActivity() {
-    const session = readSession();
-
-    // Sem sessão: a pessoa acabou de carregar em "Sair"
-    if (!session) {
-        return;
-    }
-
-    if (isSessionExpired(session)) {
-        expireSession();
-        return;
-    }
-
-    session.lastActivity = Date.now();
-    saveSession(session);
-}
-
-// Conta cada clique ou tecla como atividade e confirma a sessão a cada minuto
-function watchInactivity() {
-    document.addEventListener('click', registerActivity);
-    document.addEventListener('keydown', registerActivity);
-    setInterval(checkSession, 60000);
-}
-
 // ---------- Perfis e permissões ----------
 
 function hasRole(userRole, requiredRole) {
@@ -156,25 +32,17 @@ function getRoleClass(role) {
     return `role-${role.toLowerCase()}`;
 }
 
-// Início de cada página privada: confirma a sessão, o perfil e a marca.
-// Devolve { session, brand } ou null quando a pessoa tem de sair da página.
-function startPrivatePage(requiredRole) {
-    const session = readSession();
+// Início de cada página privada: pergunta ao servidor quem tem a sessão aberta.
+// Devolve { session, brand }, ou null quando a pessoa tem de sair da página.
+// As permissões verdadeiras são confirmadas pelo servidor em cada pedido.
+async function startPrivatePage(requiredRole) {
+    let session;
 
-    if (!session) {
-        window.location.href = 'login.html';
-        return null;
-    }
-
-    if (isSessionExpired(session)) {
-        expireSession();
-        return null;
-    }
-
-    const brand = findBrandById(session.brandId);
-
-    if (!brand) {
-        endSession();
+    try {
+        const result = await apiGetCurrentUser();
+        session = result.user;
+    } catch (error) {
+        // Sem sessão (ou sessão terminada por inatividade): volta ao login
         window.location.href = 'login.html';
         return null;
     }
@@ -184,8 +52,9 @@ function startPrivatePage(requiredRole) {
         return null;
     }
 
-    registerActivity();
-    watchInactivity();
+    // O logótipo ainda não é guardado no servidor: por agora mostram-se as iniciais
+    const brand = { name: session.brandName, logo: '' };
+
     renderAppHeader(brand, session);
     return { session, brand };
 }
@@ -207,9 +76,12 @@ function renderAppHeader(brand, session) {
         element.hidden = !hasRole(session.role, element.dataset.requiredRole);
     });
 
-    document.getElementById('logoutButton').addEventListener('click', () => {
-        endSession();
-        window.location.href = 'login.html';
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+        try {
+            await apiLogout();
+        } finally {
+            window.location.href = 'login.html';
+        }
     });
 }
 

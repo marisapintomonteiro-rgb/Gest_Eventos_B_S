@@ -40,9 +40,16 @@ const APP_AREAS = [
     }
 ];
 
-const page = startPrivatePage();
+startBrandPage();
 
-if (page) {
+// Pergunta ao servidor quem entrou e só depois desenha a página
+async function startBrandPage() {
+    const page = await startPrivatePage();
+
+    if (!page) {
+        return;
+    }
+
     renderBadge(page.brand, page.session);
     renderWelcome(page.session);
     renderAreas(page.session.role);
@@ -65,15 +72,10 @@ function renderBadge(brand, session) {
 }
 
 function renderWelcome(session) {
-    const startTime = new Date(session.startedAt).toLocaleTimeString('pt-PT', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-
     document.getElementById('welcomeTitle').textContent = `Olá! Entraste como ${session.role}.`;
     document.getElementById('welcomeRole').textContent = ROLES[session.role].description;
     document.getElementById('sessionInfo').textContent =
-        `Sessão iniciada às ${startTime}. Termina ao fim de ${SESSION_TIMEOUT_MINUTES} minutos sem atividade.`;
+        `A sessão termina ao fim de ${SESSION_TIMEOUT_MINUTES} minutos sem atividade.`;
 }
 
 // Cria uma coluna por área, só com as funcionalidades permitidas ao perfil

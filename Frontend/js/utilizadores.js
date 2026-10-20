@@ -1,7 +1,7 @@
 // utilizadores.js: gestão dos utilizadores da marca (UC02, só para o Administrador).
-// Acrescenta contas com email, palavra-passe e perfil, e remove acessos.
+// Acrescenta contas com email, palavra-passe e perfil, e remove acessos, através do servidor.
 
-const page = startPrivatePage('Administrador');
+let page = null;
 
 const userForm = document.getElementById('userForm');
 const emailInput = document.getElementById('email');
@@ -11,14 +11,23 @@ const pageMessage = document.getElementById('pageMessage');
 const tableBody = document.getElementById('userTableBody');
 const userCount = document.getElementById('userCount');
 
-if (page) {
+startUsersPage();
+
+// Confirma com o servidor que quem entrou é Administrador e só depois mostra a página
+async function startUsersPage() {
+    page = await startPrivatePage('Administrador');
+
+    if (!page) {
+        return;
+    }
+
     document.getElementById('teamIntro').textContent =
         `Cria e remove os acessos da equipa da ${page.brand.name}. Cada pessoa entra com o seu email e a sua palavra-passe.`;
 
     setupPasswordToggles();
     clearErrorsWhileTyping(userForm);
-    renderUsers();
     userForm.addEventListener('submit', addUser);
+    await renderUsers();
 }
 
 async function addUser(event) {
@@ -34,32 +43,24 @@ async function addUser(event) {
         return;
     }
 
-    const salt = createSalt();
-    const newAccount = {
-        id: createId(),
-        brandId: page.brand.id,
-        role,
-        email,
-        passwordSalt: salt,
-        passwordHash: await hashPassword(password, salt),
-        createdAt: new Date().toISOString()
-    };
-
-    saveList(STORAGE_KEYS.accounts, [...loadList(STORAGE_KEYS.accounts), newAccount]);
-    userForm.reset();
-    renderUsers();
-    showMessage(pageMessage, `${email} já pode entrar como ${role}.`, 'is-success');
-    emailInput.focus();
+    // O servidor confirma os dados, protege a palavra-passe com bcrypt e grava a conta
+    try {
+        const result = await apiCreateUser(email, password, role);
+        userForm.reset();
+        await renderUsers();
+        showMessage(pageMessage, result.message, 'is-success');
+        emailInput.focus();
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
 }
 
 function validateUserForm(email, password, role) {
     let isValid = true;
 
+    // Se o email já existir noutra conta, quem avisa é o servidor
     if (!isValidEmail(email)) {
         showFieldError(emailInput, 'Indica um email válido.');
-        isValid = false;
-    } else if (findAccountByEmail(email)) {
-        showFieldError(emailInput, 'Este email já está associado a uma conta.');
         isValid = false;
     }
 
@@ -76,18 +77,23 @@ function validateUserForm(email, password, role) {
     return isValid;
 }
 
-// Só as contas desta marca
-function getBrandAccounts() {
-    return loadList(STORAGE_KEYS.accounts).filter((account) => account.brandId === page.brand.id);
-}
+// Pede ao servidor a lista das contas desta marca e desenha a tabela
+async function renderUsers() {
+    let brandAccounts;
 
-function renderUsers() {
-    const brandAccounts = getBrandAccounts();
+    try {
+        const result = await apiListUsers();
+        brandAccounts = result.users;
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+        return;
+    }
+
     tableBody.replaceChildren();
     userCount.textContent = brandAccounts.length;
 
     brandAccounts.forEach((account) => {
-        const isCurrentUser = account.id === page.session.accountId;
+        const isCurrentUser = account.user_id === page.session.userId;
         const row = document.createElement('tr');
 
         const emailCell = document.createElement('td');
@@ -108,7 +114,7 @@ function renderUsers() {
         roleCell.appendChild(roleChip);
 
         const dateCell = document.createElement('td');
-        dateCell.textContent = new Date(account.createdAt).toLocaleDateString('pt-PT');
+        dateCell.textContent = new Date(account.created_at).toLocaleDateString('pt-PT');
 
         // Ninguém remove o próprio acesso: assim a marca fica sempre com um Administrador
         const actionCell = document.createElement('td');
@@ -128,15 +134,18 @@ function renderUsers() {
     });
 }
 
-function removeUser(account) {
+async function removeUser(account) {
     const confirmed = window.confirm(`Remover o acesso de ${account.email}?`);
 
     if (!confirmed) {
         return;
     }
 
-    const remainingAccounts = loadList(STORAGE_KEYS.accounts).filter((item) => item.id !== account.id);
-    saveList(STORAGE_KEYS.accounts, remainingAccounts);
-    renderUsers();
-    showMessage(pageMessage, `O acesso de ${account.email} foi removido.`, 'is-success');
+    try {
+        await apiRemoveUser(account.user_id);
+        await renderUsers();
+        showMessage(pageMessage, `O acesso de ${account.email} foi removido.`, 'is-success');
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
 }

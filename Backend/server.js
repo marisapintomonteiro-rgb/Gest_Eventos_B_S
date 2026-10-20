@@ -5,6 +5,7 @@ require('dotenv').config();
 
 // 1. Ir buscar o Express, as sessões, a ligação à base de dados e as routes
 const express = require('express');
+const path = require('path');
 const session = require('express-session');
 const pool = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
@@ -18,6 +19,9 @@ const PORT = process.env.PORT || 3000;
 
 // 4. Permitir que o servidor leia os dados em JSON enviados pelas páginas
 app.use(express.json());
+
+// Mostrar as páginas da pasta Frontend (ex.: http://localhost:3000/login.html)
+app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 
 // Sessões: a "pulseira" (cookie) que lembra quem fez login.
 // Termina ao fim de 30 minutos sem atividade (RNF08).

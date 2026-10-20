@@ -1,5 +1,6 @@
 // registo.js: página "Registar marca" (UC03 Criar conta).
 // A marca escolhe as funções que vai usar e associa a cada uma um email e uma palavra-passe.
+// Os dados são enviados ao servidor, que os confirma e grava no MySQL.
 
 const MAX_LOGO_SIZE = 1024 * 1024; // 1 MB
 
@@ -62,39 +63,22 @@ brandForm.addEventListener('submit', async (event) => {
         return;
     }
 
-    const brand = {
-        id: createId(),
-        name: brandName,
-        logo: logoDataUrl,
-        createdAt: new Date().toISOString()
-    };
-
-    // Cria uma conta por função escolhida, guardando só o hash da palavra-passe
-    const newAccounts = [];
-
-    for (const block of activeBlocks) {
-        const salt = createSalt();
-
-        newAccounts.push({
-            id: createId(),
-            brandId: brand.id,
-            role: block.role,
-            email: normalizeEmail(block.emailInput.value),
-            passwordSalt: salt,
-            passwordHash: await hashPassword(block.passwordInput.value, salt),
-            createdAt: new Date().toISOString()
-        });
-    }
+    // Uma conta por função escolhida. A palavra-passe vai para o servidor, que guarda só o hash (bcrypt).
+    // O logótipo ainda não é enviado: falta decidir como o guardar no servidor.
+    const users = activeBlocks.map((block) => ({
+        role: block.role,
+        email: normalizeEmail(block.emailInput.value),
+        password: block.passwordInput.value
+    }));
 
     try {
-        saveList(STORAGE_KEYS.brands, [...loadList(STORAGE_KEYS.brands), brand]);
-        saveList(STORAGE_KEYS.accounts, [...loadList(STORAGE_KEYS.accounts), ...newAccounts]);
+        await apiRegisterBrand(brandName, users);
     } catch (error) {
-        showMessage(formMessage, 'Não foi possível guardar a marca. Experimenta um logótipo mais pequeno.', 'is-error');
+        showMessage(formMessage, error.message, 'is-error');
         return;
     }
 
-    const adminEmail = newAccounts[0].email;
+    const adminEmail = users[0].email;
     window.location.href = `login.html?registo=ok&email=${encodeURIComponent(adminEmail)}`;
 });
 
@@ -106,16 +90,13 @@ function updateRoleBlock(block) {
     block.checkbox.closest('.credential').classList.toggle('is-off', !isActive);
 }
 
+// Verificações rápidas na página. As verificações que contam (nome ou emails já usados) são feitas pelo servidor.
 function validateBrandForm(brandName, activeBlocks) {
-    const brands = loadList(STORAGE_KEYS.brands);
     const formEmails = [];
     let isValid = true;
 
     if (brandName.length < 2) {
         showFieldError(brandNameInput, 'Indica o nome da marca.');
-        isValid = false;
-    } else if (brands.some((brand) => brand.name.toLowerCase() === brandName.toLowerCase())) {
-        showFieldError(brandNameInput, 'Já existe uma marca registada com este nome.');
         isValid = false;
     }
 
@@ -127,9 +108,6 @@ function validateBrandForm(brandName, activeBlocks) {
             isValid = false;
         } else if (formEmails.includes(email)) {
             showFieldError(block.emailInput, 'Usa um email diferente para cada função.');
-            isValid = false;
-        } else if (findAccountByEmail(email)) {
-            showFieldError(block.emailInput, 'Este email já está associado a outra conta.');
             isValid = false;
         }
 

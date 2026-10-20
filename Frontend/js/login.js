@@ -1,5 +1,5 @@
 // login.js: página "Entrar" (UC01 Iniciar sessão).
-// Confirma o email e a palavra-passe e abre a página da marca.
+// Envia o email e a palavra-passe ao servidor, que os confirma e abre a sessão.
 
 const loginForm = document.getElementById('loginForm');
 const emailInput = document.getElementById('email');
@@ -28,20 +28,15 @@ loginForm.addEventListener('submit', async (event) => {
         return;
     }
 
-    // Calcula o hash da palavra-passe escrita e compara com o hash guardado
-    const account = findAccountByEmail(email);
-    const passwordHash = account ? await hashPassword(password, account.passwordSalt) : '';
-
-    // A mesma mensagem nos dois casos, para não revelar que emails existem
-    if (!account || passwordHash !== account.passwordHash) {
-        showMessage(formMessage, 'Email ou palavra-passe incorretos.', 'is-error');
+    // O servidor confirma a palavra-passe e, se estiver certa, abre a sessão
+    try {
+        await apiLogin(email, password);
+        window.location.href = 'marca.html';
+    } catch (error) {
+        showMessage(formMessage, error.message, 'is-error');
         passwordInput.value = '';
         passwordInput.focus();
-        return;
     }
-
-    startSession(account);
-    window.location.href = 'marca.html';
 });
 
 // Mensagens que chegam no endereço da página (depois do registo ou do fim da sessão)
