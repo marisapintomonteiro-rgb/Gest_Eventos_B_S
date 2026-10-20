@@ -3,9 +3,10 @@
 // 0. Ler as configurações do ficheiro .env (tem de ser a primeira coisa a fazer)
 require('dotenv').config();
 
-// 1. Ir buscar o Express e a ligação à base de dados
+// 1. Ir buscar o Express, a ligação à base de dados e as routes
 const express = require('express');
 const pool = require('./config/database');
+const authRoutes = require('./routes/authRoutes');
 
 // 2. Criar a aplicação (o nosso servidor)
 const app = express();
@@ -15,6 +16,9 @@ const PORT = process.env.PORT || 3000;
 
 // 4. Permitir que o servidor leia os dados em JSON enviados pelas páginas
 app.use(express.json());
+
+// Endereços da API de acesso: /api/auth/...
+app.use('/api/auth', authRoutes);
 
 // 5. Rota de teste: confirma que o servidor e a base de dados estão a funcionar
 app.get('/api/health', async (req, res) => {
