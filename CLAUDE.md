@@ -699,14 +699,13 @@ Sprint 1 (apresentada a 8 de outubro de 2026):
 - diagrama de casos de uso em `Docs/UML/` e diagrama BPMN do processo Criar evento em `Docs/BPMN/`;
 - módulo de acesso no frontend: registo de marca com funções, email e palavra-passe (UC03), login (UC01), página da marca por perfil e gestão de utilizadores (UC02).
 
-Nesta fase o frontend guarda os dados no navegador (`localStorage` e `sessionStorage`) e protege as palavras-passe com hash SHA-256 e sal. As permissões ainda só são verificadas no navegador.
+Sprint 2 (em curso):
+- backend Node.js/Express em `Backend/`, com o padrão MVC (secção 5.1), ligado ao MySQL com as credenciais no `.env`;
+- módulo de acesso passado para o servidor: registo da marca, login com sessão (`express-session`, 30 minutos sem atividade), logout e gestão de utilizadores;
+- palavras-passe protegidas com bcrypt no servidor e permissões RBAC validadas no backend (`middleware/authMiddleware.js`);
+- o frontend fala com o servidor só através de `Frontend/js/api.js` e é aberto em `http://localhost:3000`.
 
-A versão final deverá utilizar:
-- backend Node.js/Express;
-- MySQL (script inicial em `Database/bebe_e_siga.sql`);
-- autenticação real;
-- passwords protegidas com bcrypt no servidor;
-- permissões RBAC validadas no backend.
+Por fazer: o logótipo da marca ainda não é guardado no servidor (decisão pendente). O módulo Planear começa pela US01 Criar evento.
 
 ---
 
