@@ -3,8 +3,9 @@
 // 0. Ler as configurações do ficheiro .env (tem de ser a primeira coisa a fazer)
 require('dotenv').config();
 
-// 1. Ir buscar o Express, a ligação à base de dados e as routes
+// 1. Ir buscar o Express, as sessões, a ligação à base de dados e as routes
 const express = require('express');
+const session = require('express-session');
 const pool = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 
@@ -16,6 +17,20 @@ const PORT = process.env.PORT || 3000;
 
 // 4. Permitir que o servidor leia os dados em JSON enviados pelas páginas
 app.use(express.json());
+
+// Sessões: a "pulseira" (cookie) que lembra quem fez login.
+// Termina ao fim de 30 minutos sem atividade (RNF08).
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 30 * 60 * 1000
+    }
+}));
 
 // Endereços da API de acesso: /api/auth/...
 app.use('/api/auth', authRoutes);

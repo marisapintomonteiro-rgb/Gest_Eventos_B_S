@@ -12,6 +12,15 @@ async function findBrandByName(brandName) {
     return rows[0] || null;
 }
 
+// Procura uma marca pelo número (brand_id). Devolve a marca, ou null se não existir.
+async function findBrandById(brandId) {
+    const [rows] = await pool.execute(
+        'SELECT brand_id, brand_name, logo_path FROM brands WHERE brand_id = ?',
+        [brandId]
+    );
+    return rows[0] || null;
+}
+
 // Grava a marca e as suas contas de uma só vez (transação):
 // ou fica tudo gravado, ou não fica nada.
 async function createBrandWithUsers(brandName, users) {
@@ -43,4 +52,4 @@ async function createBrandWithUsers(brandName, users) {
     }
 }
 
-module.exports = { findBrandByName, createBrandWithUsers };
+module.exports = { findBrandByName, findBrandById, createBrandWithUsers };
