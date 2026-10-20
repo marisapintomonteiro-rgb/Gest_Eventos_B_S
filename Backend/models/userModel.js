@@ -11,4 +11,13 @@ async function findUserByEmail(email) {
     return rows[0] || null;
 }
 
-module.exports = { findUserByEmail };
+// Lista as contas de uma marca (sem o hash da palavra-passe)
+async function findUsersByBrand(brandId) {
+    const [rows] = await pool.execute(
+        'SELECT user_id, email, role, created_at FROM users WHERE brand_id = ? ORDER BY created_at',
+        [brandId]
+    );
+    return rows;
+}
+
+module.exports = { findUserByEmail, findUsersByBrand };
