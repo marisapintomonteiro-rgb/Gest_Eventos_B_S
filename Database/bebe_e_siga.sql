@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS brands (
     brand_name VARCHAR(60) NOT NULL UNIQUE,
     logo_path VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+   ) ENGINE=InnoDB;
 
 -- Contas de acesso: cada conta pertence a uma marca e tem um perfil (RBAC).
 -- A palavra-passe fica guardada com bcrypt; o sal vai dentro do próprio hash.
@@ -28,4 +28,4 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT fk_users_brand
         FOREIGN KEY (brand_id) REFERENCES brands (brand_id)
         ON DELETE CASCADE
-);
+   ) ENGINE=InnoDB;
