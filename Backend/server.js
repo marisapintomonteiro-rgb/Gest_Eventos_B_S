@@ -1,20 +1,32 @@
 // server.js: ponto de partida do servidor da aplicação Bebe e Siga.
 
-// 1. Ir buscar o Express, que instalámos com o npm
+// 0. Ler as configurações do ficheiro .env (tem de ser a primeira coisa a fazer)
+require('dotenv').config();
+
+// 1. Ir buscar o Express e a ligação à base de dados
 const express = require('express');
+const pool = require('./config/database');
 
 // 2. Criar a aplicação (o nosso servidor)
 const app = express();
 
-// 3. Porta onde o servidor fica à espera de pedidos
-const PORT = 3000;
+// 3. Porta onde o servidor fica à espera de pedidos (vem do .env)
+const PORT = process.env.PORT || 3000;
 
 // 4. Permitir que o servidor leia os dados em JSON enviados pelas páginas
 app.use(express.json());
 
-// 5. Rota de teste: serve só para confirmar que o servidor está a funcionar
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'O servidor Bebe e Siga está a funcionar.' });
+// 5. Rota de teste: confirma que o servidor e a base de dados estão a funcionar
+app.get('/api/health', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        await connection.ping();
+        connection.release();
+        res.json({ status: 'ok', database: 'ligada', message: 'O servidor Bebe e Siga está a funcionar.' });
+    } catch (error) {
+        console.error('Não foi possível ligar à base de dados:', error.message);
+        res.status(500).json({ error: 'O servidor está a funcionar, mas não consegue ligar à base de dados.' });
+    }
 });
 
 // 6. Ligar o servidor
