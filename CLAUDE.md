@@ -669,6 +669,7 @@ Os botões usados durante o evento devem ser fáceis de utilizar, mas sem ocupar
 - RF29 — Consultar ementa
 - RF30 — Consultar faturação diária
 - RF31 — Registar marca
+- RF32 — Calendário de desempenho e aviso de lucro
 
 ---
 
@@ -695,7 +696,7 @@ Já existe um repositório GitHub chamado:
 `Gest_Eventos_B_S`
 
 Sprint 1 (apresentada a 8 de outubro de 2026):
-- requisitos em `Docs/Requisitos.md` (RF01 a RF31 e RNF01 a RNF11);
+- requisitos em `Docs/Requisitos.md` (RF01 a RF31 e RNF01 a RNF11; o RF32 foi acrescentado na Sprint 2);
 - diagrama de casos de uso em `Docs/UML/` e diagrama BPMN do processo Criar evento em `Docs/BPMN/`;
 - módulo de acesso no frontend: registo de marca com funções, email e palavra-passe (UC03), login (UC01), página da marca por perfil e gestão de utilizadores (UC02).
 

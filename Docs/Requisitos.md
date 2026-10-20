@@ -61,6 +61,7 @@ As prioridades seguem o método MoSCoW:
 | RF29 | Consultar ementa | Should |
 | RF30 | Consultar faturação diária | Should |
 | RF31 | Registar marca | Must |
+| RF32 | Calendário de desempenho e aviso de lucro | Should |
 
 # Requisitos Funcionais
 
@@ -101,6 +102,8 @@ Permitir definir os dias de realização do evento.
 Os dias podem ser consecutivos ou não consecutivos.
 
 Os horários são opcionais e podem variar de dia para dia.
+
+Cada dia pode ter, opcionalmente, um objetivo de faturação. É usado no calendário de desempenho (RF32).
 
 As vendas ficam associadas ao dia escolhido manualmente pelo utilizador.
 
@@ -351,6 +354,20 @@ No registo, a marca escolhe as funções que vai usar:
 Cada função fica associada a um email e a uma palavra-passe.
 
 Corresponde ao caso de uso UC03 (Criar conta).
+
+## RF32 — Calendário de desempenho e aviso de lucro
+
+Mostrar os dias de cada evento num calendário, com uma cor por dia, conforme a faturação do dia em relação ao objetivo de faturação definido no planeamento (RF05):
+
+- Acima do expectável: mais de 110% do objetivo
+- Cumpriu as expectativas: entre 90% e 110% do objetivo
+- Abaixo do expectável: menos de 90% do objetivo
+
+Os dias sem objetivo definido, ou ainda sem vendas, aparecem sem cor.
+
+Mostrar um aviso no primeiro dia em que a faturação acumulada do evento iguala ou ultrapassa tudo o que foi pago: as despesas e todas as compras, incluindo o stock que ainda não foi vendido.
+
+Depende do registo de vendas (RF14), do registo de compras (RF12) e da gestão de despesas (RF20).
 
 # Requisitos Não Funcionais
 

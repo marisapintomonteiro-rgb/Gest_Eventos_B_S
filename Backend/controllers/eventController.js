@@ -80,6 +80,10 @@ function validateEvent(eventData, days, expenses) {
             return `No dia ${day.date}, as horas têm de estar no formato HH:MM.`;
         }
 
+        if (day.revenueTarget !== null && (Number.isNaN(day.revenueTarget) || day.revenueTarget < 0)) {
+            return `No dia ${day.date}, o objetivo de faturação tem de ser um valor sem negativos.`;
+        }
+
         seenDates.push(day.date);
     }
 
@@ -115,7 +119,8 @@ async function createEvent(req, res) {
     const days = (Array.isArray(body.days) ? body.days : []).map((day) => ({
         date: String(day.date || ''),
         startTime: day.startTime ? String(day.startTime) : null,
-        endTime: day.endTime ? String(day.endTime) : null
+        endTime: day.endTime ? String(day.endTime) : null,
+        revenueTarget: toOptionalNumber(day.revenueTarget)
     }));
 
     const expenses = (Array.isArray(body.expenses) ? body.expenses : []).map((expense) => ({

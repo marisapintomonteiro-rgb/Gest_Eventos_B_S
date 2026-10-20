@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS event_days (
     event_date DATE NOT NULL,
     start_time TIME NULL,
     end_time TIME NULL,
+    revenue_target DECIMAL(10,2) NULL,  -- objetivo de faturação do dia (RF05, usado no RF32)
     CONSTRAINT uq_event_days_date UNIQUE (event_id, event_date),
     CONSTRAINT fk_event_days_event
         FOREIGN KEY (event_id) REFERENCES events (event_id)

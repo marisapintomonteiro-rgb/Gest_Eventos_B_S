@@ -20,8 +20,8 @@ async function createEvent(brandId, userId, eventData, days, expenses) {
 
         for (const day of days) {
             await connection.execute(
-                'INSERT INTO event_days (event_id, event_date, start_time, end_time) VALUES (?, ?, ?, ?)',
-                [eventId, day.date, day.startTime, day.endTime]
+                'INSERT INTO event_days (event_id, event_date, start_time, end_time, revenue_target) VALUES (?, ?, ?, ?, ?)',
+                [eventId, day.date, day.startTime, day.endTime, day.revenueTarget]
             );
         }
 
