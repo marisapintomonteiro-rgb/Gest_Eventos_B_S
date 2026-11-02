@@ -45,6 +45,10 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | GET | `/api/events/:eventId/stock` | quem tem sessão (stock e movimentos, sem valores em euros) |
 | POST | `/api/events/:eventId/stock/movements` | consumo interno: todos; oferta, quebra e desperdício: Gestor (RF16) |
 | POST | `/api/events/:eventId/stock/corrections` | Gestor e Administrador (RF17; guarda anterior, nova e motivo) |
+| GET | `/api/events/:eventId/expenses` | Gestor e Administrador (RF20) |
+| POST | `/api/events/:eventId/expenses` | Gestor e Administrador (do evento ou de um dia) |
+| DELETE | `/api/events/:eventId/expenses/:expenseId` | Gestor e Administrador |
+| GET | `/api/events/:eventId/dashboard` | quem tem sessão (RF23; os valores financeiros do RF21 só para Gestor e Administrador) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |

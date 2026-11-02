@@ -108,7 +108,21 @@ async function deletePurchase(purchaseId) {
     await pool.execute('DELETE FROM purchases WHERE purchase_id = ?', [purchaseId]);
 }
 
+// Custo das compras do evento por produto: quanto se gastou e quanto entrou (para o custo médio)
+async function findPurchaseCostByProduct(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT pl.product_id, SUM(pl.packages * pl.package_price) AS cost, SUM(pl.quantity) AS quantity
+         FROM purchase_lines pl
+         JOIN purchases pu ON pu.purchase_id = pl.purchase_id
+         WHERE pu.event_id = ?
+         GROUP BY pl.product_id`,
+        [eventId]
+    );
+    return rows;
+}
+
 module.exports = {
+    findPurchaseCostByProduct,
     findPurchasesByEvent,
     findPurchaseInEvent,
     createPurchase,

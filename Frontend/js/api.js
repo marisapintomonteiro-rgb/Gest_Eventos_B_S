@@ -132,6 +132,24 @@ function apiCreateStockCorrection(eventId, correctionData) {
     return apiRequest('POST', `/api/events/${eventId}/stock/corrections`, correctionData);
 }
 
+// ---------- Painel e despesas ----------
+
+function apiGetDashboard(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/dashboard`);
+}
+
+function apiListExpenses(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/expenses`);
+}
+
+function apiCreateExpense(eventId, expenseData) {
+    return apiRequest('POST', `/api/events/${eventId}/expenses`, expenseData);
+}
+
+function apiDeleteExpense(eventId, expenseId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/expenses/${expenseId}`);
+}
+
 // ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
 
 function apiGetMenu(eventId) {

@@ -63,7 +63,7 @@ async function findEventsByBrand(brandId) {
 // Procura um evento desta marca pelo número (para confirmar que o evento é mesmo da marca)
 async function findEventById(brandId, eventId) {
     const [rows] = await pool.execute(
-        `SELECT e.event_id, e.event_name, MAX(d.event_date) AS last_day
+        `SELECT e.event_id, e.event_name, e.budget, MIN(d.event_date) AS first_day, MAX(d.event_date) AS last_day
          FROM events e
          LEFT JOIN event_days d ON d.event_id = e.event_id
          WHERE e.brand_id = ? AND e.event_id = ?

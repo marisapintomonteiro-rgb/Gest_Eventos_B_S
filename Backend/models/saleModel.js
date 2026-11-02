@@ -101,7 +101,38 @@ async function cancelSale(saleId, userId) {
     }
 }
 
+// Faturação de cada dia do evento (todos os dias aparecem, mesmo sem vendas), com o objetivo do dia
+async function findRevenueByDay(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT d.event_day_id, d.event_date, d.revenue_target,
+                COALESCE(SUM(CASE WHEN s.cancelled_at IS NULL THEN s.quantity * s.unit_price END), 0) AS revenue
+         FROM event_days d
+         LEFT JOIN sales s ON s.event_day_id = d.event_day_id
+         WHERE d.event_id = ?
+         GROUP BY d.event_day_id
+         ORDER BY d.event_date`,
+        [eventId]
+    );
+    return rows;
+}
+
+// Artigos mais vendidos do evento (sem as vendas anuladas)
+async function findTopItems(eventId, limit) {
+    const [rows] = await pool.execute(
+        `SELECT item_name, SUM(quantity) AS quantity, SUM(quantity * unit_price) AS revenue
+         FROM sales
+         WHERE event_id = ? AND cancelled_at IS NULL
+         GROUP BY item_name
+         ORDER BY quantity DESC
+         LIMIT ${Number(limit)}`,
+        [eventId]
+    );
+    return rows;
+}
+
 module.exports = {
+    findRevenueByDay,
+    findTopItems,
     findSalesByDay,
     findSaleInEvent,
     eventHasSales,

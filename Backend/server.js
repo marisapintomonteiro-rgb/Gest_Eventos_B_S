@@ -18,6 +18,8 @@ const purchaseRoutes = require('./routes/purchaseRoutes');
 const saleRoutes = require('./routes/saleRoutes');
 const stockRoutes = require('./routes/stockRoutes');
 const noteRoutes = require('./routes/noteRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // 2. Criar a aplicação (o nosso servidor)
 const app = express();
@@ -68,6 +70,10 @@ app.use('/api/events/:eventId/stock', stockRoutes);
 
 // Endereços da API das notas de cada evento: /api/events/:eventId/notes/...
 app.use('/api/events/:eventId/notes', noteRoutes);
+
+// Despesas e dashboard de cada evento
+app.use('/api/events/:eventId/expenses', expenseRoutes);
+app.use('/api/events/:eventId/dashboard', dashboardRoutes);
 
 // Endereços da API de fornecedores e produtos: /api/suppliers/... e /api/products/...
 app.use('/api/suppliers', supplierRoutes);
