@@ -1,0 +1,14 @@
+{
+  "name": "gest-eventos-b-s",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Atalhos para alojar a aplicação online: o servidor está na pasta Backend.",
+  "scripts": {
+    "postinstall": "npm --prefix Backend install",
+    "start": "npm --prefix Backend start",
+    "setup-db": "npm --prefix Backend run setup-db"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
