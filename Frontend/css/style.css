@@ -1500,6 +1500,8 @@ th {
 
     .app-nav {
         order: 3;
+        flex-wrap: wrap;
+        gap: 0 20px;
         width: 100%;
     }
 
@@ -1756,5 +1758,174 @@ th {
 
     .menu-actions {
         margin-left: 0;
+    }
+}
+
+/* ---------- Página Compras ---------- */
+
+.planner-body-purchase {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+}
+
+.purchase-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(0, 1fr) 40px;
+    gap: 4px 10px;
+    align-items: end;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line);
+}
+
+.purchase-line label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.purchase-line select,
+.purchase-line input {
+    min-width: 0;
+    min-height: 42px;
+    margin-top: 2px;
+    padding: 8px 10px;
+    color: var(--ink);
+    font-size: 0.95rem;
+}
+
+.purchase-line-info {
+    grid-column: 1 / -1;
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.purchase-total {
+    margin: 0 auto 0 0;
+    font-size: 1.05rem;
+}
+
+.money-summary {
+    margin: -4px 0 14px;
+    font-weight: 500;
+}
+
+/* Cada compra é um talão */
+.receipt-list {
+    display: grid;
+    gap: 14px;
+}
+
+.receipt {
+    padding: 14px 16px;
+    border: 1.5px solid var(--line);
+    border-top: 4px solid var(--ink);
+    border-radius: 4px 4px 12px 12px;
+    background: var(--paper);
+}
+
+.receipt-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--field-line);
+}
+
+.receipt-date {
+    color: var(--muted);
+}
+
+.receipt-lines {
+    margin: 0;
+    padding: 6px 0;
+    list-style: none;
+}
+
+.receipt-lines li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+}
+
+.receipt-amount {
+    white-space: nowrap;
+}
+
+.receipt-notes {
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.receipt-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--field-line);
+}
+
+.receipt-total {
+    margin-left: auto;
+}
+
+/* Stock do evento */
+.stock-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stock-list li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+}
+
+.stock-name {
+    font-weight: 500;
+}
+
+.stock-quantity {
+    white-space: nowrap;
+}
+
+.stock-alert {
+    flex-basis: 100%;
+    color: var(--red);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.stock-list li.is-low {
+    padding-left: 10px;
+    border-left: 3px solid var(--red);
+}
+
+@media (max-width: 900px) {
+    .planner-body-purchase {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .purchase-line {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
+    }
+
+    .purchase-line .purchase-product {
+        grid-column: 1 / -1;
+    }
+
+    .purchase-total {
+        width: 100%;
     }
 }

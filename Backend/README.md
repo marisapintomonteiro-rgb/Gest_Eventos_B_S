@@ -30,6 +30,9 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | PUT | `/api/events/:eventId/menu/:itemId` | Gestor e Administrador |
 | DELETE | `/api/events/:eventId/menu/:itemId` | Gestor e Administrador |
 | POST | `/api/events/:eventId/menu/copy` | Gestor e Administrador (RF10, copiar de outro evento) |
+| GET | `/api/events/:eventId/purchases` | Gestor e Administrador (compras do evento e stock) |
+| POST | `/api/events/:eventId/purchases` | Gestor e Administrador (RF12; atualiza o stock e o histórico de preços) |
+| DELETE | `/api/events/:eventId/purchases/:purchaseId` | Gestor e Administrador (compra registada por engano) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |

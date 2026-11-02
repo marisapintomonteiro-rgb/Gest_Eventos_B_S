@@ -169,3 +169,73 @@ function setupPasswordToggles() {
         });
     });
 }
+
+// ---------- Formatação de valores (usada em várias páginas) ----------
+
+const MONEY = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' });
+const QUANTITY = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 2 });
+const UNIT_LABELS = { unidade: 'un.', mililitro: 'ml', grama: 'g' };
+
+// Mostra uma quantidade guardada na unidade base; a partir de 1000 ml ou 1000 g mostra também
+// em L ou kg (ex.: "30 L (30 000 ml)")
+function formatQuantity(value, unit) {
+    const amount = Number(value);
+    const base = `${QUANTITY.format(amount)} ${UNIT_LABELS[unit]}`;
+
+    if (unit !== 'unidade' && amount >= 1000) {
+        const bigLabel = unit === 'mililitro' ? 'L' : 'kg';
+        return `${QUANTITY.format(amount / 1000)} ${bigLabel} (${base})`;
+    }
+
+    return base;
+}
+
+function createElementWithText(tagName, className, text) {
+    const element = document.createElement(tagName);
+
+    if (className) {
+        element.className = className;
+    }
+
+    element.textContent = text;
+    return element;
+}
+
+// ---------- Escolher o evento (páginas Ementa e Compras) ----------
+
+// Texto de cada evento na lista: nome e primeiro dia
+function formatEventOption(event) {
+    if (!event.first_day) {
+        return event.event_name;
+    }
+
+    return `${event.event_name} (${new Date(`${event.first_day}T12:00:00`).toLocaleDateString('pt-PT')})`;
+}
+
+// Preenche a lista de eventos (#eventSelect) e devolve o evento escolhido.
+// O evento pode vir no endereço (ex.: ementa.html?event=3); senão, fica o primeiro da lista.
+// onChange é chamada com o número do evento sempre que se escolhe outro.
+function setupEventPicker(events, pageFile, onChange) {
+    const select = document.getElementById('eventSelect');
+
+    events.forEach((event) => {
+        const option = document.createElement('option');
+        option.value = event.event_id;
+        option.textContent = formatEventOption(event);
+        select.appendChild(option);
+    });
+
+    const fromAddress = new URLSearchParams(window.location.search).get('event');
+    const exists = events.some((event) => String(event.event_id) === fromAddress);
+    const eventId = exists ? Number(fromAddress) : events[0].event_id;
+    select.value = eventId;
+
+    document.getElementById('eventPicker').hidden = false;
+    select.addEventListener('change', () => {
+        const chosenId = Number(select.value);
+        history.replaceState(null, '', `${pageFile}?event=${chosenId}`);
+        onChange(chosenId);
+    });
+
+    return eventId;
+}

@@ -1,10 +1,6 @@
 // produtos.js: página "Produtos e fornecedores" (RF07 e RF11, só Gestor e Administrador).
 // Cria fornecedores e produtos, liga cada produto aos seus fornecedores e guarda o histórico de preços.
 
-const MONEY = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' });
-const QUANTITY = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 2 });
-const UNIT_LABELS = { unidade: 'un.', mililitro: 'ml', grama: 'g' };
-
 // Unidades que se podem escolher no formulário. Na base de dados fica sempre a unidade base
 // (unidade, mililitro ou grama), como diz a regra: 1 L = 1000 ml e 1 kg = 1000 g.
 const INPUT_UNITS = {
@@ -412,19 +408,6 @@ async function renderProducts() {
     products.forEach((product) => list.appendChild(createProductCard(product)));
 }
 
-// Mostra a quantidade guardada; a partir de 1000 ml ou 1000 g mostra também em L ou kg
-// (ex.: "30 L (30 000 ml)")
-function formatQuantity(value, unit) {
-    const amount = Number(value);
-    const base = `${QUANTITY.format(amount)} ${UNIT_LABELS[unit]}`;
-
-    if (unit !== 'unidade' && amount >= 1000) {
-        const bigLabel = unit === 'mililitro' ? 'L' : 'kg';
-        return `${QUANTITY.format(amount / 1000)} ${bigLabel} (${base})`;
-    }
-
-    return base;
-}
 
 function createProductCard(product) {
     const card = document.createElement('article');
@@ -552,13 +535,3 @@ async function toggleHistory(product, history, button) {
     }
 }
 
-function createElementWithText(tagName, className, text) {
-    const element = document.createElement(tagName);
-
-    if (className) {
-        element.className = className;
-    }
-
-    element.textContent = text;
-    return element;
-}

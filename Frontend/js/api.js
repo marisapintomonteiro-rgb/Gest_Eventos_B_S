@@ -99,6 +99,20 @@ function apiCopyMenu(eventId, fromEventId) {
     return apiRequest('POST', `/api/events/${eventId}/menu/copy`, { fromEventId });
 }
 
+// ---------- Compras de um evento (só Gestor e Administrador) ----------
+
+function apiListPurchases(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/purchases`);
+}
+
+function apiCreatePurchase(eventId, purchaseData) {
+    return apiRequest('POST', `/api/events/${eventId}/purchases`, purchaseData);
+}
+
+function apiDeletePurchase(eventId, purchaseId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/purchases/${purchaseId}`);
+}
+
 // ---------- Fornecedores e produtos (só Gestor e Administrador) ----------
 
 function apiListSuppliers() {

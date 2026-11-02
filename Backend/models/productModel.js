@@ -55,6 +55,7 @@ async function findProductById(brandId, productId) {
 }
 
 // Devolve os produtos da lista que pertencem a esta marca, com a indicação de consumo residual
+// e o tamanho da embalagem
 async function findProductsOfBrand(brandId, productIds) {
     if (productIds.length === 0) {
         return [];
@@ -62,7 +63,7 @@ async function findProductsOfBrand(brandId, productIds) {
 
     const placeholders = productIds.map(() => '?').join(', ');
     const [rows] = await pool.execute(
-        `SELECT product_id, is_residual FROM products WHERE brand_id = ? AND product_id IN (${placeholders})`,
+        `SELECT product_id, is_residual, package_quantity FROM products WHERE brand_id = ? AND product_id IN (${placeholders})`,
         [brandId, ...productIds]
     );
     return rows;

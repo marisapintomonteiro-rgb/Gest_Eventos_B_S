@@ -1,9 +1,6 @@
 // ementa.js: página "Ementa" de cada evento (RF08, RF09, RF10 e RF29).
 // Todos os perfis consultam; o Gestor e o Administrador criam, alteram, retiram e copiam artigos.
 
-const MONEY = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' });
-const QUANTITY = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 2 });
-const UNIT_LABELS = { unidade: 'un.', mililitro: 'ml', grama: 'g' };
 const CATEGORY_ORDER = ['Bebidas', 'Cocktails', 'Shots', 'Comida', 'Outros'];
 
 // Textos de ajuda que mudam com o tipo de artigo
@@ -21,7 +18,6 @@ const TYPE_TEXTS = {
 };
 
 const pageMessage = document.getElementById('pageMessage');
-const eventSelect = document.getElementById('eventSelect');
 const itemPlanner = document.getElementById('itemPlanner');
 const copyPlanner = document.getElementById('copyPlanner');
 const itemForm = document.getElementById('itemForm');
@@ -64,37 +60,14 @@ async function startMenuPage() {
         return;
     }
 
-    fillEventSelect();
-    setupForms();
-    await renderMenu();
-}
-
-// ---------- Escolher o evento ----------
-
-function fillEventSelect() {
-    events.forEach((event) => {
-        const option = document.createElement('option');
-        option.value = event.event_id;
-        option.textContent = event.first_day
-            ? `${event.event_name} (${new Date(`${event.first_day}T12:00:00`).toLocaleDateString('pt-PT')})`
-            : event.event_name;
-        eventSelect.appendChild(option);
-    });
-
-    // O evento pode vir no endereço (ex.: ementa.html?event=3, a partir da página Eventos)
-    const fromAddress = new URLSearchParams(window.location.search).get('event');
-    const exists = events.some((event) => String(event.event_id) === fromAddress);
-    currentEventId = exists ? Number(fromAddress) : events[0].event_id;
-    eventSelect.value = currentEventId;
-
-    document.getElementById('eventPicker').hidden = false;
-    eventSelect.addEventListener('change', async () => {
-        currentEventId = Number(eventSelect.value);
-        history.replaceState(null, '', `ementa.html?event=${currentEventId}`);
+    currentEventId = setupEventPicker(events, 'ementa.html', async (eventId) => {
+        currentEventId = eventId;
         closePlanners();
         hideMessage(pageMessage);
         await renderMenu();
     });
+    setupForms();
+    await renderMenu();
 }
 
 // ---------- Formulários ----------
@@ -331,7 +304,7 @@ function openCopy() {
         .forEach((event) => {
             const option = document.createElement('option');
             option.value = event.event_id;
-            option.textContent = eventSelect.querySelector(`option[value="${event.event_id}"]`).textContent;
+            option.textContent = formatEventOption(event);
             sourceSelect.appendChild(option);
         });
 
@@ -466,15 +439,4 @@ async function removeItem(item, button) {
     } catch (error) {
         showMessage(pageMessage, error.message, 'is-error');
     }
-}
-
-function createElementWithText(tagName, className, text) {
-    const element = document.createElement(tagName);
-
-    if (className) {
-        element.className = className;
-    }
-
-    element.textContent = text;
-    return element;
 }

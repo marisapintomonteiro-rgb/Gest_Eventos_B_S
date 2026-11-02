@@ -178,3 +178,40 @@ CREATE TABLE IF NOT EXISTS menu_item_products (
     CONSTRAINT fk_menu_item_products_product
         FOREIGN KEY (product_id) REFERENCES products (product_id)
 ) ENGINE=InnoDB;
+
+-- Compras de cada evento (RF12): antes ou durante o evento. Cada compra é de um fornecedor.
+CREATE TABLE IF NOT EXISTS purchases (
+    purchase_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    purchase_date DATE NOT NULL,
+    notes VARCHAR(255) NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_purchases_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_purchases_supplier
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (supplier_id),
+    CONSTRAINT fk_purchases_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;
+
+-- Produtos de cada compra. Compra-se em embalagens (ex.: 3 barris a 85 € cada).
+-- package_quantity guarda o tamanho da embalagem no dia da compra (o histórico não muda se o produto mudar);
+-- quantity é o que entra no stock, na unidade base (3 x 30000 ml = 90000 ml).
+CREATE TABLE IF NOT EXISTS purchase_lines (
+    purchase_line_id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_id INT NOT NULL,
+    product_id INT NOT NULL,
+    packages DECIMAL(10,2) NOT NULL,
+    package_quantity DECIMAL(10,2) NOT NULL,
+    package_price DECIMAL(10,2) NOT NULL,
+    quantity DECIMAL(12,2) NOT NULL,
+    CONSTRAINT uq_purchase_lines_product UNIQUE (purchase_id, product_id),
+    CONSTRAINT fk_purchase_lines_purchase
+        FOREIGN KEY (purchase_id) REFERENCES purchases (purchase_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_purchase_lines_product
+        FOREIGN KEY (product_id) REFERENCES products (product_id)
+) ENGINE=InnoDB;

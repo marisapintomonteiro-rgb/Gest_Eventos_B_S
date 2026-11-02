@@ -2,7 +2,6 @@
 // O Gestor e o Administrador criam eventos com dias, horários, objetivos e despesas iniciais.
 // Todos os perfis veem a lista dos eventos da marca, mostrados como bilhetes.
 
-const MONEY = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' });
 
 // Texto curto de uma data, ex.: '2027-07-15' fica 'qui. 15 jul.'
 function formatShortDate(dateValue) {
@@ -296,11 +295,4 @@ function createTicket(item) {
 
     ticket.append(stub, body);
     return ticket;
-}
-
-function createElementWithText(tagName, className, text) {
-    const element = document.createElement(tagName);
-    element.className = className;
-    element.textContent = text;
-    return element;
 }

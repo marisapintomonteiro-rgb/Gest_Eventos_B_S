@@ -21,7 +21,8 @@ const APP_AREAS = [
             { name: 'Registar vendas', requiredRole: 'Colaborador' },
             { name: 'Registar consumo interno', requiredRole: 'Colaborador' },
             { name: 'Consultar faturação do dia', requiredRole: 'Colaborador' },
-            { name: 'Registar compras e corrigir stock', requiredRole: 'Gestor' },
+            { name: 'Registar compras e consultar stock', requiredRole: 'Gestor', link: 'compras.html' },
+            { name: 'Corrigir stock', requiredRole: 'Gestor' },
             { name: 'Fechar e reabrir dias', requiredRole: 'Gestor' }
         ]
     },

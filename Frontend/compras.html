@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compras | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="ementa.html">Ementa</a>
+            <a href="compras.html" data-required-role="Gestor" aria-current="page">Compras</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading">
+            <div>
+                <h1>Compras</h1>
+                <p class="lead">O que se comprou para cada evento, antes ou durante. Cada compra entra no stock do evento.</p>
+            </div>
+            <div class="heading-actions">
+                <button class="button" type="button" id="newPurchaseButton">Nova compra</button>
+            </div>
+        </div>
+
+        <div class="event-picker" id="eventPicker" hidden>
+            <label for="eventSelect">Evento</label>
+            <select id="eventSelect"></select>
+        </div>
+
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <p class="empty-state" id="noEventsNote" hidden>
+            Ainda não há eventos. As compras pertencem a um evento: <a href="eventos.html">cria primeiro o evento</a>.
+        </p>
+
+        <!-- Nova compra (RF12) -->
+        <section class="planner" id="purchasePlanner" aria-labelledby="purchasePlannerTitle" hidden>
+            <form id="purchaseForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="purchasePlannerTitle">Nova compra</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body planner-body-purchase">
+                    <div class="planner-col">
+                        <h3>A fatura</h3>
+                        <div class="field">
+                            <label for="purchaseSupplier">Fornecedor</label>
+                            <select id="purchaseSupplier"></select>
+                        </div>
+                        <div class="field">
+                            <label for="purchaseDate">Data da compra</label>
+                            <input type="date" id="purchaseDate" aria-describedby="purchaseDateError">
+                            <small class="error" id="purchaseDateError"></small>
+                        </div>
+                        <div class="field">
+                            <label for="purchaseNotes">Notas <span class="optional">(opcional)</span></label>
+                            <input type="text" id="purchaseNotes" maxlength="255" placeholder="Ex.: fatura n.º 123">
+                        </div>
+                    </div>
+
+                    <div class="planner-col">
+                        <h3>Produtos comprados</h3>
+                        <p class="col-hint">Como na fatura: quantas embalagens e quanto custou cada uma. O sistema faz a conta do que entra no stock (ex.: 3 barris de 30 L = 90 000 ml).</p>
+                        <p class="empty-state empty-small" id="noProductsNote" hidden>
+                            Faltam produtos ou fornecedores. <a href="produtos.html">Cria-os primeiro na página Produtos</a>.
+                        </p>
+                        <div id="purchaseLineList"></div>
+                        <button type="button" class="button button-ghost button-small add-row" id="addPurchaseLineButton">Acrescentar produto</button>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="purchase-total">Total da compra: <strong id="purchaseTotal">0,00 €</strong></p>
+                    <p class="form-message is-error" id="purchaseFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Registar compra</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="catalog-layout" id="purchaseLayout" hidden>
+            <section class="panel" aria-labelledby="purchasesTitle">
+                <div class="panel-heading">
+                    <h2 id="purchasesTitle">Compras do evento</h2>
+                    <span class="counter" id="purchaseCount">0</span>
+                </div>
+                <p class="money-summary" id="purchasesSum" hidden></p>
+                <div id="purchaseList" class="receipt-list"></div>
+                <p class="empty-state" id="purchasesEmpty" hidden>Ainda não há compras neste evento.</p>
+            </section>
+
+            <section class="panel" aria-labelledby="stockTitle">
+                <div class="panel-heading">
+                    <h2 id="stockTitle">Stock do evento</h2>
+                </div>
+                <p class="col-hint">Por agora conta o que entrou com as compras. As vendas e os acertos vão descontar daqui.</p>
+                <ul id="stockList" class="stock-list"></ul>
+                <p class="empty-state empty-small" id="stockEmpty" hidden>Sem stock: ainda não há compras.</p>
+            </section>
+        </div>
+    </main>
+
+    <template id="purchaseLineTemplate">
+        <div class="purchase-line">
+            <label class="purchase-product">Produto<select class="pl-product"></select></label>
+            <label>Embalagens<input type="number" class="pl-packages" min="0" step="any" inputmode="decimal" value="1"></label>
+            <label>€ por embalagem<input type="number" class="pl-price" min="0" step="0.01" inputmode="decimal"></label>
+            <button type="button" class="remove-row" aria-label="Tirar este produto">×</button>
+            <p class="purchase-line-info"></p>
+        </div>
+    </template>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/compras.js"></script>
+</body>
+</html>
