@@ -43,12 +43,13 @@ async function createEvent(brandId, userId, eventData, days, expenses) {
     }
 }
 
-// Lista os eventos de uma marca, com o primeiro e o último dia de cada um
+// Lista os eventos de uma marca, com o primeiro e o último dia e a lista dos dias de cada um
 async function findEventsByBrand(brandId) {
     const [rows] = await pool.execute(
         `SELECT e.event_id, e.event_name, e.location,
                 MIN(d.event_date) AS first_day, MAX(d.event_date) AS last_day,
-                COUNT(d.event_day_id) AS day_count
+                COUNT(d.event_day_id) AS day_count,
+                GROUP_CONCAT(d.event_date ORDER BY d.event_date SEPARATOR ',') AS dates
          FROM events e
          LEFT JOIN event_days d ON d.event_id = e.event_id
          WHERE e.brand_id = ?

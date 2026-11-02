@@ -23,6 +23,8 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | GET | `/api/users` | Administrador |
 | POST | `/api/users` | Administrador |
 | DELETE | `/api/users/:id` | Administrador |
+| GET | `/api/events` | quem tem sessão (eventos da sua marca) |
+| POST | `/api/events` | Gestor e Administrador (US01) |
 | GET | `/api/health` | qualquer pessoa (teste do servidor e da base de dados) |
 
 ## Limitações conhecidas

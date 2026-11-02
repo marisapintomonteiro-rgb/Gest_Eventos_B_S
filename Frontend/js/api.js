@@ -66,3 +66,13 @@ function apiCreateUser(email, password, role) {
 function apiRemoveUser(userId) {
     return apiRequest('DELETE', `/api/users/${userId}`);
 }
+
+// ---------- Eventos ----------
+
+function apiListEvents() {
+    return apiRequest('GET', '/api/events');
+}
+
+function apiCreateEvent(eventData) {
+    return apiRequest('POST', '/api/events', eventData);
+}

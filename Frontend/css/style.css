@@ -179,6 +179,9 @@ label {
 input[type="text"],
 input[type="email"],
 input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
 select {
     width: 100%;
     min-height: 48px;
@@ -834,6 +837,375 @@ th {
     overflow-wrap: anywhere;
 }
 
+/* ---------- Página Eventos ---------- */
+
+.events-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.events-heading h1,
+.events-heading .lead {
+    margin-bottom: 0;
+}
+
+/* Planeamento: cabeçalho preto, duas colunas e rodapé âmbar */
+.planner {
+    margin-bottom: 40px;
+    border: 2px solid var(--ink);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.planner-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px clamp(20px, 3vw, 32px);
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.planner-head h2 {
+    margin: 0;
+}
+
+.planner-close {
+    border: 0;
+    background: none;
+    color: var(--paper);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.planner-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+}
+
+.planner-col {
+    padding: clamp(20px, 3vw, 32px);
+}
+
+.planner-col + .planner-col {
+    border-left: 2px solid var(--line);
+}
+
+.planner-col h3 {
+    margin-bottom: 8px;
+}
+
+.col-hint {
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.planner-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 18px clamp(20px, 3vw, 32px);
+    border-top: 2px solid var(--ink);
+    background: var(--amber-soft);
+}
+
+.planner-foot .form-message {
+    flex: 1;
+    margin: 0;
+}
+
+.field-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* Tipo de espaço: três botões lado a lado */
+.segmented-field {
+    margin: 0 0 18px;
+    padding: 0;
+    border: 0;
+}
+
+.segmented-field legend {
+    margin-bottom: 6px;
+    padding: 0;
+    font-weight: 500;
+}
+
+.segmented {
+    display: flex;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.segmented label {
+    flex: 1;
+    margin: 0;
+    border-left: 2px solid var(--ink);
+    cursor: pointer;
+}
+
+.segmented label:first-child {
+    border-left: 0;
+}
+
+.segmented input {
+    position: absolute;
+    opacity: 0;
+}
+
+.segmented span {
+    display: block;
+    padding: 10px 6px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.segmented input:checked + span {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.segmented input:focus-visible + span {
+    box-shadow: inset 0 0 0 3px var(--amber);
+}
+
+/* Cada dia é um mini-bilhete */
+.day-card {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 40px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+}
+
+.mini-stub {
+    padding: 6px 0;
+    border-radius: 10px;
+    background: var(--amber-soft);
+    text-align: center;
+}
+
+.mini-stub b {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.mini-stub span {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Duas linhas: data e objetivo em cima, horas em baixo */
+.day-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px 10px;
+}
+
+.day-fields label,
+.expense-row label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.day-fields input,
+.expense-row input,
+.expense-row select {
+    min-width: 0;
+    min-height: 42px;
+    margin-top: 2px;
+    padding: 8px 10px;
+    color: var(--ink);
+    font-size: 0.95rem;
+}
+
+.night {
+    grid-column: 2 / 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -2px 0 0;
+    font-size: 0.82rem;
+}
+
+.night i {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--amber);
+    font-style: normal;
+    font-weight: 700;
+}
+
+.remove-row {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.remove-row:hover {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.add-row {
+    margin: 2px 0 26px;
+}
+
+.expense-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 0.9fr) 40px;
+    gap: 8px;
+    align-items: end;
+    margin-bottom: 10px;
+}
+
+.money-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 2px solid var(--ink);
+}
+
+.money-line strong {
+    font-size: 1.25rem;
+}
+
+.money-note {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* Lista: cada evento é um bilhete com talão âmbar e picotado */
+.events-section .panel-heading {
+    margin-bottom: 16px;
+}
+
+.tickets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+}
+
+.ticket {
+    position: relative;
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    background: var(--paper);
+    overflow: hidden;
+}
+
+.ticket-stub {
+    display: grid;
+    place-content: center;
+    padding: 14px 6px;
+    border-right: 2px dashed var(--ink);
+    background: var(--amber);
+    text-align: center;
+}
+
+.ticket-day {
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+}
+
+.ticket-month {
+    margin-top: 2px;
+    font-weight: 700;
+}
+
+.ticket-year {
+    font-size: 0.8rem;
+}
+
+.ticket::before,
+.ticket::after {
+    content: '';
+    position: absolute;
+    left: 85px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+}
+
+.ticket::before {
+    top: -13px;
+}
+
+.ticket::after {
+    bottom: -13px;
+}
+
+.ticket-body {
+    padding: 16px 18px;
+}
+
+.ticket-name {
+    margin: 0 0 2px;
+    font-size: 1.15rem;
+}
+
+.ticket-place {
+    margin-bottom: 12px;
+    color: var(--muted);
+}
+
+.ticket-days {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.day-pill {
+    padding: 3px 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.empty-state {
+    padding: 28px;
+    border: 2px dashed var(--field-line);
+    border-radius: 16px;
+    color: var(--muted);
+    text-align: center;
+}
+
 /* ---------- Ecrãs mais pequenos ---------- */
 
 @media (max-width: 900px) {
@@ -848,8 +1220,14 @@ th {
     .welcome,
     .brand-panel,
     .users-layout,
-    .credential-grid {
+    .credential-grid,
+    .planner-body {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .planner-col + .planner-col {
+        border-left: 0;
+        border-top: 2px solid var(--line);
     }
 
     .badge-hero {
@@ -891,6 +1269,59 @@ th {
     th:nth-child(3),
     td:nth-child(3) {
         display: none;
+    }
+
+    /* No telemóvel o mini-bilhete fica por cima, deitado, e os campos ocupam a largura toda */
+    .day-card {
+        grid-template-columns: minmax(0, 1fr) 40px;
+    }
+
+    .mini-stub {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        padding: 4px 12px;
+    }
+
+    .day-fields {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .day-fields .day-date-field,
+    .day-fields .day-target-field {
+        grid-column: 1 / -1;
+    }
+
+    .night {
+        grid-column: 1 / -1;
+    }
+
+    .expense-row {
+        grid-template-columns: 1fr 1fr 40px;
+    }
+
+    .expense-row .expense-desc {
+        grid-column: 1 / 3;
+    }
+
+    .expense-row .remove-row {
+        grid-column: 3;
+        grid-row: 1;
+        align-self: end;
+    }
+
+    .planner-foot .button {
+        width: 100%;
+    }
+
+    .ticket {
+        grid-template-columns: 82px minmax(0, 1fr);
+    }
+
+    .ticket::before,
+    .ticket::after {
+        left: 71px;
     }
 }
 
