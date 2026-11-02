@@ -15,6 +15,8 @@
     --green: #2e7d4f;        /* lucro / objetivo atingido */
     --green-soft: #e3f2e8;
     --font: 'Rubik', 'Segoe UI', Arial, sans-serif;
+    /* Títulos em letra estreita e grossa, como os cartazes das festas */
+    --font-display: 'Archivo', 'Arial Narrow', 'Rubik', sans-serif;
 }
 
 /* ---------- Base ---------- */
@@ -51,14 +53,20 @@ h3 {
 }
 
 h1 {
-    font-size: clamp(2rem, 4.2vw, 3rem);
-    font-weight: 800;
-    letter-spacing: -0.015em;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5.6vw, 4rem);
+    font-stretch: 70%;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
 }
 
 h2 {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-stretch: 78%;
+    font-weight: 800;
+    letter-spacing: 0.005em;
 }
 
 h3 {
@@ -327,8 +335,9 @@ input[type="file"]::file-selector-button:hover {
 
 .panel {
     padding: clamp(20px, 3vw, 32px);
-    border: 2px solid var(--ink);
-    border-radius: 18px;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--ink);
+    border-radius: 4px 4px 16px 16px;
     background: var(--paper);
 }
 
@@ -519,15 +528,33 @@ input[type="file"]::file-selector-button:hover {
     justify-content: space-between;
     gap: 16px;
     padding: 16px clamp(16px, 5vw, 56px);
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 5px solid var(--red);
+    background: var(--ink);
 }
 
 .wordmark {
-    color: var(--ink);
-    font-size: 1.25rem;
-    font-weight: 800;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-stretch: 78%;
+    font-weight: 900;
     text-decoration: none;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.01em;
+}
+
+.site-header .button-ghost {
+    border-color: var(--paper);
+    background: transparent;
+    color: var(--paper);
+}
+
+.site-header .button-ghost:hover {
+    background: var(--paper);
+    color: var(--ink);
+}
+
+.site-header .header-link {
+    color: #b9b5ac;
 }
 
 .header-link {
@@ -586,6 +613,14 @@ input[type="file"]::file-selector-button:hover {
     align-self: center;
     width: 100%;
     max-width: 520px;
+    border: 2px solid var(--ink);
+    border-top: 10px solid var(--ink);
+    border-radius: 18px;
+}
+
+/* O título da entrada, em letra de cartaz */
+.login-intro h1 {
+    font-size: clamp(3rem, 7vw, 5.2rem);
 }
 
 .panel-footnote {
@@ -684,16 +719,21 @@ input[type="file"]::file-selector-button:hover {
     align-items: center;
     gap: 16px 28px;
     padding: 10px clamp(16px, 5vw, 56px);
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 5px solid var(--red);
+    background: var(--ink);
+    color: var(--paper);
 }
 
 .app-brand {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    color: var(--red);
-    font-size: 1.2rem;
-    font-weight: 800;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-stretch: 78%;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: 0.01em;
     text-decoration: none;
 }
 
@@ -720,16 +760,18 @@ input[type="file"]::file-selector-button:hover {
 .app-nav a {
     padding: 8px 0;
     border-bottom: 3px solid transparent;
-    color: var(--ink);
+    color: #d9d6cf;
     text-decoration: none;
 }
 
 .app-nav a:hover {
+    color: var(--paper);
     border-bottom-color: var(--amber);
 }
 
 .app-nav a[aria-current="page"] {
-    border-bottom-color: var(--red);
+    color: var(--paper);
+    border-bottom-color: var(--amber);
 }
 
 .user-area {
@@ -739,8 +781,28 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .user-email {
-    color: var(--muted);
+    color: #b9b5ac;
     font-size: 0.9rem;
+}
+
+/* No cabeçalho preto, os botões Conta e Sair ficam em contorno branco */
+.app-header .button-ghost {
+    border-color: var(--paper);
+    background: transparent;
+    color: var(--paper);
+}
+
+.app-header .button-ghost:hover {
+    background: var(--paper);
+    color: var(--ink);
+}
+
+.app-header .role-chip {
+    border-color: var(--paper);
+}
+
+.app-header .header-logo .monogram {
+    border-color: var(--paper);
 }
 
 /* ---------- Página da marca ---------- */
@@ -3473,4 +3535,31 @@ textarea:focus-visible {
 .login-forgot {
     margin-top: 14px;
     text-align: center;
+}
+
+/* ---------- Números grandes com a letra dos títulos (cartaz) ---------- */
+
+.hero-value,
+.figure-value,
+.today-stub-value,
+.ticket-day,
+.stub-day,
+.cart-total strong {
+    font-family: var(--font-display);
+    font-stretch: 75%;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.hero-value {
+    font-size: clamp(2.4rem, 5vw, 3.2rem);
+}
+
+.site-header .header-link a {
+    color: var(--amber);
+}
+
+.site-header .button,
+.app-header .button {
+    white-space: nowrap;
 }
