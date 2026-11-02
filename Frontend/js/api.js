@@ -76,3 +76,29 @@ function apiListEvents() {
 function apiCreateEvent(eventData) {
     return apiRequest('POST', '/api/events', eventData);
 }
+
+// ---------- Fornecedores e produtos (só Gestor e Administrador) ----------
+
+function apiListSuppliers() {
+    return apiRequest('GET', '/api/suppliers');
+}
+
+function apiCreateSupplier(supplierData) {
+    return apiRequest('POST', '/api/suppliers', supplierData);
+}
+
+function apiListProducts() {
+    return apiRequest('GET', '/api/products');
+}
+
+function apiCreateProduct(productData) {
+    return apiRequest('POST', '/api/products', productData);
+}
+
+function apiListPrices(productId) {
+    return apiRequest('GET', `/api/products/${productId}/prices`);
+}
+
+function apiAddPrice(productId, supplierId, packagePrice) {
+    return apiRequest('POST', `/api/products/${productId}/prices`, { supplierId, packagePrice });
+}

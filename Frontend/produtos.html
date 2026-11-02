@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="produtos.html" data-required-role="Gestor" aria-current="page">Produtos</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading">
+            <div>
+                <h1>Produtos e fornecedores</h1>
+                <p class="lead">O que a marca compra, a quem compra e quanto custa. Partilhados por todos os eventos.</p>
+            </div>
+            <div class="heading-actions">
+                <button class="button button-ghost" type="button" id="newSupplierButton">Novo fornecedor</button>
+                <button class="button" type="button" id="newProductButton">Novo produto</button>
+            </div>
+        </div>
+
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <!-- Novo fornecedor (RF11) -->
+        <section class="planner" id="supplierPlanner" aria-labelledby="supplierPlannerTitle" hidden>
+            <form id="supplierForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="supplierPlannerTitle">Novo fornecedor</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body planner-body-even">
+                    <div class="planner-col">
+                        <div class="field">
+                            <label for="supplierName">Nome</label>
+                            <input type="text" id="supplierName" maxlength="100" placeholder="Ex.: Distribuidora do Norte" aria-describedby="supplierNameError">
+                            <small class="error" id="supplierNameError"></small>
+                        </div>
+                        <div class="field">
+                            <label for="supplierContact">Contacto</label>
+                            <input type="text" id="supplierContact" maxlength="50" placeholder="Ex.: 912 345 678" aria-describedby="supplierContactError">
+                            <small class="error" id="supplierContactError"></small>
+                        </div>
+                        <label class="check-line">
+                            <input type="checkbox" id="supplierAcceptsReturns">
+                            <span>Aceita devoluções de produtos fechados</span>
+                        </label>
+                    </div>
+                    <div class="planner-col">
+                        <div class="field">
+                            <label for="supplierEmail">Email <span class="optional">(opcional)</span></label>
+                            <input type="email" id="supplierEmail" placeholder="encomendas@fornecedor.pt">
+                        </div>
+                        <div class="field-pair">
+                            <div class="field">
+                                <label for="supplierNif">NIF <span class="optional">(opcional)</span></label>
+                                <input type="text" id="supplierNif" maxlength="9" inputmode="numeric">
+                            </div>
+                            <div class="field">
+                                <label for="supplierAddress">Morada <span class="optional">(opcional)</span></label>
+                                <input type="text" id="supplierAddress" maxlength="255">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="supplierFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Criar fornecedor</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Novo produto (RF07) com fornecedores e preços (RF11) -->
+        <section class="planner" id="productPlanner" aria-labelledby="productPlannerTitle" hidden>
+            <form id="productForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="productPlannerTitle">Novo produto</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body">
+                    <div class="planner-col">
+                        <h3>Sobre o produto</h3>
+                        <div class="field">
+                            <label for="productName">Nome</label>
+                            <input type="text" id="productName" maxlength="100" placeholder="Ex.: Cerveja em barril" aria-describedby="productNameError">
+                            <small class="error" id="productNameError"></small>
+                        </div>
+
+                        <fieldset class="field segmented-field">
+                            <legend>Mede-se em</legend>
+                            <div class="segmented">
+                                <label><input type="radio" name="unit" value="unidade" checked><span>unidades</span></label>
+                                <label><input type="radio" name="unit" value="mililitro"><span>ml</span></label>
+                                <label><input type="radio" name="unit" value="grama"><span>gramas</span></label>
+                            </div>
+                        </fieldset>
+
+                        <div class="field-pair">
+                            <div class="field">
+                                <label for="packageQuantity">Cada embalagem tem</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="packageQuantity" min="0" step="any" inputmode="decimal" aria-describedby="packageQuantityError packageHint">
+                                    <span class="unit-suffix" data-unit-label>un.</span>
+                                </div>
+                                <small class="error" id="packageQuantityError"></small>
+                            </div>
+                            <div class="field">
+                                <label for="minStock">Stock mínimo <span class="optional">(opcional)</span></label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="minStock" min="0" step="any" inputmode="decimal">
+                                    <span class="unit-suffix" data-unit-label>un.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="hint package-hint" id="packageHint">Um barril de 30 L tem 30000 ml; um saco de 1 kg tem 1000 g; uma grade tem 24 unidades.</p>
+
+                        <label class="check-line">
+                            <input type="checkbox" id="isPerishable">
+                            <span>Perecível <small>(tem prazo de validade curto)</small></span>
+                        </label>
+                        <label class="check-line">
+                            <input type="checkbox" id="isResidual">
+                            <span>Consumo residual <small>(como sal ou hortelã: entra nos custos, mas não desconta em cada venda)</small></span>
+                        </label>
+                    </div>
+
+                    <div class="planner-col">
+                        <h3>Fornecedores e preços</h3>
+                        <p class="col-hint">O preço é por embalagem, como aparece na fatura. Marca um fornecedor como principal; os outros ficam como alternativos.</p>
+                        <p class="empty-state empty-small" id="noSuppliersNote" hidden>Ainda não há fornecedores. Podes criar o produto sem fornecedor, ou criar primeiro um fornecedor.</p>
+                        <div id="productSupplierList"></div>
+                        <button type="button" class="button button-ghost button-small add-row" id="addProductSupplierButton">Acrescentar fornecedor</button>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="productFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Criar produto</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="catalog-layout">
+            <section class="panel" aria-labelledby="productsTitle">
+                <div class="panel-heading">
+                    <h2 id="productsTitle">Produtos</h2>
+                    <span class="counter" id="productCount">0</span>
+                </div>
+                <div id="productList" class="product-list"></div>
+                <p class="empty-state" id="productsEmpty" hidden>Ainda não há produtos. Carrega em "Novo produto" para criar o primeiro.</p>
+            </section>
+
+            <section class="panel" aria-labelledby="suppliersTitle">
+                <div class="panel-heading">
+                    <h2 id="suppliersTitle">Fornecedores</h2>
+                    <span class="counter" id="supplierCount">0</span>
+                </div>
+                <ul id="supplierList" class="supplier-list"></ul>
+                <p class="empty-state" id="suppliersEmpty" hidden>Ainda não há fornecedores.</p>
+            </section>
+        </div>
+    </main>
+
+    <template id="productSupplierTemplate">
+        <div class="supplier-row">
+            <label class="supplier-pick">Fornecedor<select class="ps-supplier"></select></label>
+            <label>Preço da embalagem (€)<input type="number" class="ps-price" min="0" step="0.01" inputmode="decimal" placeholder="opcional"></label>
+            <label class="main-pick"><input type="radio" name="mainSupplier" class="ps-main"><span>Principal</span></label>
+            <button type="button" class="remove-row" aria-label="Tirar este fornecedor">×</button>
+        </div>
+    </template>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/produtos.js"></script>
+</body>
+</html>

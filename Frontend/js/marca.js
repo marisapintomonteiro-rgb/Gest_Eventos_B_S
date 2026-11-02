@@ -7,8 +7,9 @@ const APP_AREAS = [
         title: 'Planeamento do evento',
         features: [
             { name: 'Criar evento e configurar os dias', requiredRole: 'Gestor', link: 'eventos.html' },
-            { name: 'Gerir produtos e ementa', requiredRole: 'Gestor' },
-            { name: 'Gerir fornecedores', requiredRole: 'Gestor' },
+            { name: 'Gerir produtos', requiredRole: 'Gestor', link: 'produtos.html' },
+            { name: 'Gerir ementa', requiredRole: 'Gestor' },
+            { name: 'Gerir fornecedores', requiredRole: 'Gestor', link: 'produtos.html' },
             { name: 'Consultar previsão de compras', requiredRole: 'Gestor' }
         ]
     },

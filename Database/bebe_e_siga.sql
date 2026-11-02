@@ -82,3 +82,67 @@ CREATE TABLE IF NOT EXISTS expenses (
     CONSTRAINT fk_expenses_user
         FOREIGN KEY (created_by) REFERENCES users (user_id)
 ) ENGINE=InnoDB;
+
+-- Fornecedores de cada marca (RF11). Partilhados entre os eventos da marca.
+CREATE TABLE IF NOT EXISTS suppliers (
+    supplier_id INT AUTO_INCREMENT PRIMARY KEY,
+    brand_id INT NOT NULL,
+    supplier_name VARCHAR(100) NOT NULL,
+    contact VARCHAR(50) NOT NULL,
+    email VARCHAR(255) NULL,
+    nif VARCHAR(20) NULL,
+    address VARCHAR(255) NULL,
+    accepts_returns BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_suppliers_brand
+        FOREIGN KEY (brand_id) REFERENCES brands (brand_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Produtos de cada marca (RF07). A quantidade é sempre na unidade base:
+-- unidade, grama ou mililitro (ex.: um barril de 30 L tem package_quantity = 30000 ml).
+CREATE TABLE IF NOT EXISTS products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    brand_id INT NOT NULL,
+    product_name VARCHAR(100) NOT NULL,
+    unit ENUM('unidade', 'grama', 'mililitro') NOT NULL,
+    package_quantity DECIMAL(10,2) NOT NULL,
+    min_stock DECIMAL(10,2) NULL,
+    is_perishable BOOLEAN NOT NULL DEFAULT FALSE,
+    is_residual BOOLEAN NOT NULL DEFAULT FALSE,  -- consumo residual (sal, açúcar...): não desconta por venda
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_products_name UNIQUE (brand_id, product_name),
+    CONSTRAINT fk_products_brand
+        FOREIGN KEY (brand_id) REFERENCES brands (brand_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Que fornecedores vendem cada produto: um principal e os alternativos (RF11)
+CREATE TABLE IF NOT EXISTS product_suppliers (
+    product_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    is_main BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (product_id, supplier_id),
+    CONSTRAINT fk_product_suppliers_product
+        FOREIGN KEY (product_id) REFERENCES products (product_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_product_suppliers_supplier
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (supplier_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Histórico de preços (RF11): cada preço novo é uma linha nova; os antigos nunca mudam.
+-- O preço é por embalagem (ex.: o barril de 30 L custa 85 €).
+CREATE TABLE IF NOT EXISTS product_prices (
+    price_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    package_price DECIMAL(10,2) NOT NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_product_prices_link
+        FOREIGN KEY (product_id, supplier_id) REFERENCES product_suppliers (product_id, supplier_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_product_prices_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;
