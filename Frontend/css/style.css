@@ -3276,3 +3276,177 @@ textarea:focus-visible {
     padding: 0;
     font-weight: 500;
 }
+
+/* ---------- Início ("Hoje") ---------- */
+
+.today-head {
+    margin-bottom: 20px;
+}
+
+.today-date {
+    margin: 0 0 4px;
+    color: var(--red);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.today-head h1 {
+    margin: 0;
+}
+
+/* O evento de hoje, como um bilhete grande */
+.today-event {
+    position: relative;
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr);
+    margin-bottom: 20px;
+    border: 2px solid var(--ink);
+    border-radius: 18px;
+    background: var(--paper);
+    overflow: hidden;
+}
+
+.today-stub {
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    padding: 18px 10px;
+    border-right: 2px dashed var(--ink);
+    background: var(--amber);
+    text-align: center;
+}
+
+.today-stub-label,
+.today-stub-unit {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.today-stub-value {
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.today-event-body {
+    padding: 18px 22px;
+}
+
+.today-event-body h2 {
+    margin: 4px 0;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+.today-event-meta {
+    margin: 0 0 10px;
+    color: var(--muted);
+}
+
+.day-pill.is-today {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.today-empty {
+    margin-bottom: 20px;
+}
+
+.today-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.quick-action {
+    display: grid;
+    gap: 2px;
+    padding: 14px 16px;
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.quick-action span {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.quick-action:hover,
+.quick-action:focus-visible {
+    background: var(--amber-soft);
+}
+
+.quick-action.is-main {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.quick-action.is-main span {
+    color: var(--amber);
+}
+
+.quick-action.is-main:hover,
+.quick-action.is-main:focus-visible {
+    background: var(--red);
+    border-color: var(--red);
+}
+
+.todo-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.todo-list li {
+    padding: 10px 0 10px 12px;
+    border-bottom: 1px solid var(--line);
+    border-left: 3px solid var(--field-line);
+}
+
+.todo-list li.todo-alert {
+    border-left-color: var(--red);
+}
+
+.todo-list li.todo-warning {
+    border-left-color: var(--amber);
+}
+
+.todo-list a {
+    color: var(--ink);
+}
+
+@media (max-width: 900px) {
+    .today-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .today-event {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .today-stub {
+        grid-auto-flow: column;
+        align-items: baseline;
+        justify-content: start;
+        gap: 8px;
+        padding: 12px 16px;
+        border-right: 0;
+        border-bottom: 2px dashed var(--ink);
+    }
+
+    .today-stub-value {
+        font-size: 2rem;
+    }
+}

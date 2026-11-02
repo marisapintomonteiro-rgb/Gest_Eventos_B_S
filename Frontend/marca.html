@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área da marca | Gestão de Eventos</title>
+    <title>Início | Gestão de Eventos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
@@ -38,29 +38,60 @@
     </header>
 
     <main class="page">
-        <section class="welcome" aria-labelledby="welcomeTitle">
-            <figure class="badge badge-hero">
-                <div class="badge-logo" id="badgeLogo"></div>
-                <figcaption class="badge-brand" id="badgeBrandName"></figcaption>
-                <span class="badge-band" id="badgeRole"></span>
-                <span class="badge-email" id="badgeEmail"></span>
-            </figure>
-
-            <div class="welcome-text">
+        <!-- Início: o que há para fazer hoje, conforme o perfil -->
+        <section class="today-head" aria-labelledby="welcomeTitle">
+            <div>
+                <p class="today-date" id="todayDate"></p>
                 <h1 id="welcomeTitle"></h1>
                 <p class="lead" id="welcomeRole"></p>
-                <p class="session-info" id="sessionInfo"></p>
             </div>
         </section>
 
-        <section class="panel access-panel" aria-labelledby="accessTitle">
-            <div class="access-heading">
-                <h2 id="accessTitle">O que podes fazer</h2>
-                <p>O que está marcado com «Em breve» chega nas próximas fases do projeto.</p>
-            </div>
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
 
-            <div class="areas" id="areas"></div>
+        <!-- O evento de agora (ou o próximo) -->
+        <section class="today-event" id="todayEvent" aria-labelledby="todayEventName" hidden>
+            <div class="today-stub">
+                <span class="today-stub-label" id="todayStubLabel"></span>
+                <strong class="today-stub-value" id="todayStubValue"></strong>
+                <span class="today-stub-unit" id="todayStubUnit"></span>
+            </div>
+            <div class="today-event-body">
+                <span class="ticket-status" id="todayStatus"></span>
+                <h2 id="todayEventName"></h2>
+                <p class="today-event-meta" id="todayEventMeta"></p>
+                <div class="ticket-days" id="todayDays"></div>
+            </div>
         </section>
+
+        <section class="panel today-empty" id="noEventPanel" hidden>
+            <h2>Não há eventos marcados</h2>
+            <p class="lead" id="noEventText"></p>
+            <a class="button" href="eventos.html" data-required-role="Gestor">Planear um evento</a>
+        </section>
+
+        <!-- Números do dia -->
+        <section class="hero-figures" id="todayFigures" aria-label="Números do evento" hidden></section>
+
+        <div class="today-grid" id="todayGrid" hidden>
+            <section class="panel" aria-labelledby="actionsTitle">
+                <div class="panel-heading">
+                    <h2 id="actionsTitle">Atalhos</h2>
+                </div>
+                <div class="quick-actions" id="quickActions"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="todoTitle">
+                <div class="panel-heading">
+                    <h2 id="todoTitle">Para tratar</h2>
+                    <span class="counter" id="todoCount">0</span>
+                </div>
+                <ul class="todo-list" id="todoList"></ul>
+                <p class="empty-state empty-small" id="todoEmpty" hidden>Está tudo em dia.</p>
+            </section>
+        </div>
+
+        <p class="session-info" id="sessionInfo"></p>
     </main>
 
     <footer class="site-footer">
