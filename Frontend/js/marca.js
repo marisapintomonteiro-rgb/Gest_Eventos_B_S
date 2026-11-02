@@ -10,13 +10,13 @@ const APP_AREAS = [
             { name: 'Gerir produtos', requiredRole: 'Gestor', link: 'produtos.html' },
             { name: 'Gerir ementa', requiredRole: 'Gestor', link: 'ementa.html' },
             { name: 'Gerir fornecedores', requiredRole: 'Gestor', link: 'produtos.html' },
-            { name: 'Consultar previsão de compras', requiredRole: 'Gestor' }
+            { name: 'Consultar previsão de compras', requiredRole: 'Gestor', link: 'compras.html' }
         ]
     },
     {
         title: 'Operação diária',
         features: [
-            { name: 'Consultar calendário', requiredRole: 'Colaborador' },
+            { name: 'Consultar calendário', requiredRole: 'Colaborador', link: 'calendario.html' },
             { name: 'Consultar ementa', requiredRole: 'Colaborador', link: 'ementa.html' },
             { name: 'Registar vendas', requiredRole: 'Colaborador', link: 'vendas.html' },
             { name: 'Registar consumo interno', requiredRole: 'Colaborador', link: 'stock.html' },

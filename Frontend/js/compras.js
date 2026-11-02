@@ -61,7 +61,13 @@ function setupForm() {
         supplierSelect.appendChild(option);
     });
 
-    document.getElementById('newPurchaseButton').addEventListener('click', openPurchaseForm);
+    document.getElementById('newPurchaseButton').addEventListener('click', () => openPurchaseForm());
+    document.getElementById('forecastButton').addEventListener('click', toggleForecast);
+    document.getElementById('previousForm').addEventListener('submit', savePreviousEvent);
+    document.getElementById('marginForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        renderForecast();
+    });
     document.querySelector('[data-close-planner]').addEventListener('click', () => {
         purchasePlanner.hidden = true;
     });
@@ -77,7 +83,8 @@ function setupForm() {
     purchaseForm.addEventListener('submit', savePurchase);
 }
 
-function openPurchaseForm() {
+// Abre o formulário vazio, ou já preenchido pela previsão (prefill: fornecedor e linhas)
+function openPurchaseForm(prefill = null) {
     hideMessage(pageMessage);
     purchaseForm.reset();
     clearFormErrors(purchaseForm);
@@ -95,7 +102,10 @@ function openPurchaseForm() {
     dateInput.value = event.last_day && today > event.last_day ? event.last_day : today;
     dateInput.max = event.last_day || '';
 
-    if (canBuy) {
+    if (canBuy && prefill) {
+        supplierSelect.value = prefill.supplierId;
+        prefill.lines.forEach((line) => addPurchaseLine(line));
+    } else if (canBuy) {
         addPurchaseLine();
     }
 
@@ -108,8 +118,8 @@ function findProduct(productId) {
     return products.find((product) => String(product.product_id) === String(productId));
 }
 
-// Uma linha: produto, número de embalagens e preço de cada embalagem
-function addPurchaseLine() {
+// Uma linha: produto, número de embalagens e preço de cada embalagem (line: valores já preenchidos)
+function addPurchaseLine(line = null) {
     const row = document.getElementById('purchaseLineTemplate').content.firstElementChild.cloneNode(true);
     const select = row.querySelector('.pl-product');
 
@@ -139,8 +149,17 @@ function addPurchaseLine() {
         updateTotals();
     });
 
+    if (line) {
+        select.value = line.productId;
+    }
+
     purchaseLineList.appendChild(row);
     suggestPrice(row);
+
+    if (line) {
+        row.querySelector('.pl-packages').value = line.packages;
+    }
+
     updateTotals();
 }
 
@@ -468,5 +487,143 @@ function renderStock(stock) {
         }
 
         list.append(item);
+    });
+}
+
+// ---------- Previsão de compras (RF13) ----------
+// Usa o que se gastou na edição anterior do mesmo evento, mais a margem de segurança.
+
+function toggleForecast() {
+    const panel = document.getElementById('forecastPanel');
+    panel.hidden = !panel.hidden;
+
+    if (!panel.hidden) {
+        fillPreviousSelect();
+        renderForecast();
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// Só podem ser edição anterior os eventos que começaram antes deste
+function fillPreviousSelect() {
+    const current = events.find((item) => item.event_id === currentEventId);
+    const select = document.getElementById('previousSelect');
+    select.replaceChildren(new Option('Sem edição anterior', ''));
+
+    events
+        .filter((item) => item.event_id !== currentEventId && item.first_day && current.first_day && item.first_day < current.first_day)
+        .forEach((item) => select.append(new Option(formatEventOption(item), item.event_id)));
+}
+
+async function savePreviousEvent(event) {
+    event.preventDefault();
+
+    try {
+        const result = await apiSetPreviousEvent(currentEventId, document.getElementById('previousSelect').value);
+        showMessage(pageMessage, result.message, 'is-success');
+        await renderForecast();
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
+}
+
+async function renderForecast() {
+    const marginInput = document.getElementById('marginInput');
+    let result;
+
+    try {
+        result = await apiGetForecast(currentEventId, marginInput.value);
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+        return;
+    }
+
+    document.getElementById('previousSelect').value = result.previous ? result.previous.event_id : '';
+    marginInput.value = result.margin;
+
+    const body = document.getElementById('forecastRows');
+    body.replaceChildren();
+    const hasLines = result.lines.length > 0;
+    document.getElementById('forecastTableWrap').hidden = !hasLines;
+    document.getElementById('forecastActions').replaceChildren();
+
+    const empty = document.getElementById('forecastEmpty');
+    empty.hidden = hasLines;
+    empty.textContent = result.previous
+        ? 'A edição anterior não tem consumos registados. Indica as quantidades à mão, em "Nova compra".'
+        : 'Escolhe a edição anterior deste evento para ver a sugestão. Sem histórico, as quantidades introduzem-se à mão, em "Nova compra".';
+
+    result.lines.forEach((line) => body.append(createForecastRow(line)));
+    updateForecastTotals(result.lines);
+}
+
+// Uma linha da previsão. "A comprar" pode ser ajustado (RF13: o utilizador ajusta as sugestões).
+function createForecastRow(line) {
+    const tr = document.createElement('tr');
+    tr.dataset.productId = line.productId;
+
+    const toBuyInput = document.createElement('input');
+    toBuyInput.type = 'number';
+    toBuyInput.min = '0';
+    toBuyInput.step = '1';
+    toBuyInput.value = line.toBuy;
+    toBuyInput.className = 'forecast-input';
+    toBuyInput.setAttribute('aria-label', `Embalagens de ${line.productName} a comprar`);
+    toBuyInput.addEventListener('input', () => updateForecastTotals());
+
+    const nameCell = document.createElement('th');
+    nameCell.scope = 'row';
+    nameCell.append(createElementWithText('span', '', line.productName));
+    nameCell.append(createElementWithText('small', 'forecast-supplier', line.supplierName ? line.supplierName : 'sem fornecedor'));
+
+    const toBuyCell = document.createElement('td');
+    toBuyCell.append(toBuyInput);
+
+    tr.append(
+        nameCell,
+        createElementWithText('td', '', formatQuantity(line.consumed, line.unit)),
+        createElementWithText('td', '', `${line.suggestedPackages} × ${formatQuantity(line.packageQuantity, line.unit)}`),
+        createElementWithText('td', '', QUANTITY.format(line.boughtPackages)),
+        toBuyCell,
+        createElementWithText('td', 'forecast-cost', '')
+    );
+
+    tr.forecastLine = line;
+    return tr;
+}
+
+// Custo estimado de cada linha (preço mais recente do fornecedor principal) e botões para preparar as compras
+function updateForecastTotals() {
+    const rows = Array.from(document.getElementById('forecastRows').children);
+    const groups = {};
+    let total = 0;
+
+    rows.forEach((tr) => {
+        const line = tr.forecastLine;
+        const packages = Math.max(0, Math.floor(Number(tr.querySelector('.forecast-input').value) || 0));
+        const cost = line.packagePrice !== null ? packages * line.packagePrice : null;
+        tr.querySelector('.forecast-cost').textContent = cost !== null ? MONEY.format(cost) : '—';
+        total += cost || 0;
+
+        if (packages > 0 && line.supplierId !== null) {
+            if (!groups[line.supplierId]) {
+                groups[line.supplierId] = { supplierId: line.supplierId, supplierName: line.supplierName, lines: [] };
+            }
+
+            groups[line.supplierId].lines.push({ productId: line.productId, packages });
+        }
+    });
+
+    document.getElementById('forecastTotal').textContent = MONEY.format(total);
+
+    // Uma compra por fornecedor principal: o botão abre a "Nova compra" já preenchida
+    const actions = document.getElementById('forecastActions');
+    actions.replaceChildren();
+
+    Object.values(groups).forEach((group) => {
+        const button = createElementWithText('button', 'button button-ghost button-small', `Preparar compra a ${group.supplierName}`);
+        button.type = 'button';
+        button.addEventListener('click', () => openPurchaseForm(group));
+        actions.append(button);
     });
 }

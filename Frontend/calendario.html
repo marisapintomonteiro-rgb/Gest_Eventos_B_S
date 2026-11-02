@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="painel.html">Painel</a>
+            <a href="calendario.html" aria-current="page">Calendário</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="stock.html">Stock</a>
+            <a href="ementa.html">Ementa</a>
+            <a href="compras.html" data-required-role="Gestor">Compras</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="relatorio.html" data-required-role="Gestor">Relatório</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading">
+            <div>
+                <h1>Calendário</h1>
+                <p class="lead">Os dias de todos os eventos. A cor diz como correu cada dia em relação ao objetivo de faturação.</p>
+            </div>
+        </div>
+
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <section class="panel calendar-panel" aria-labelledby="monthTitle">
+            <div class="calendar-head">
+                <button class="button button-ghost button-small" type="button" id="previousMonthButton" aria-label="Mês anterior">‹</button>
+                <h2 id="monthTitle" aria-live="polite"></h2>
+                <button class="button button-ghost button-small" type="button" id="nextMonthButton" aria-label="Mês seguinte">›</button>
+            </div>
+
+            <ul class="calendar-legend" aria-label="Legenda">
+                <li><span class="perf-swatch perf-acima"></span> Acima do expectável (mais de 110%)</li>
+                <li><span class="perf-swatch perf-cumpriu"></span> Cumpriu (90% a 110%)</li>
+                <li><span class="perf-swatch perf-abaixo"></span> Abaixo do expectável (menos de 90%)</li>
+                <li><span class="perf-swatch"></span> Sem objetivo ou sem vendas</li>
+                <li data-required-role="Gestor"><span class="profit-mark">€</span> Primeiro dia com lucro</li>
+            </ul>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="weekday">seg</div>
+                <div class="weekday">ter</div>
+                <div class="weekday">qua</div>
+                <div class="weekday">qui</div>
+                <div class="weekday">sex</div>
+                <div class="weekday">sáb</div>
+                <div class="weekday">dom</div>
+            </div>
+        </section>
+
+        <!-- Aviso de lucro (RF32), para o Gestor e o Administrador -->
+        <section class="panel profit-panel" id="profitPanel" aria-labelledby="profitTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="profitTitle">Avisos de lucro</h2>
+            </div>
+            <ul class="profit-list" id="profitList"></ul>
+        </section>
+
+        <!-- Os dias do mês em lista (também para quem usa leitor de ecrã) -->
+        <section class="panel" aria-labelledby="monthListTitle">
+            <div class="panel-heading">
+                <h2 id="monthListTitle">Dias de eventos neste mês</h2>
+            </div>
+            <ul class="month-list" id="monthList"></ul>
+            <p class="empty-state empty-small" id="monthEmpty" hidden>Sem dias de eventos neste mês.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/calendario.js"></script>
+</body>
+</html>

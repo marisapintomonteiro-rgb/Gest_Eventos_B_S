@@ -54,6 +54,9 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | DELETE | `/api/events/:eventId/returns/:returnId` | Gestor e Administrador |
 | GET | `/api/events/:eventId/report` | Gestor e Administrador (RF27, dados do relatório final) |
 | POST | `/api/events/:eventId/close` | Gestor e Administrador (RF25; todos os dias fechados) |
+| GET | `/api/events/calendar` | quem tem sessão (RF06, RF32; o aviso de lucro só para Gestor e Administrador) |
+| GET | `/api/events/:eventId/forecast?margin=10` | Gestor e Administrador (RF13) |
+| PUT | `/api/events/:eventId/previous` | Gestor e Administrador (edição anterior do evento) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |

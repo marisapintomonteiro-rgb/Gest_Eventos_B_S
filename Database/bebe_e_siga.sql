@@ -348,3 +348,16 @@ CREATE TABLE IF NOT EXISTS event_closings (
     CONSTRAINT fk_event_closings_user
         FOREIGN KEY (closed_by) REFERENCES users (user_id)
 ) ENGINE=InnoDB;
+
+-- Edições do mesmo evento (RF13): cada evento pode apontar para a edição anterior
+-- (ex.: Festa do Mar 2027 -> Festa do Mar 2026). A previsão de compras usa essa edição.
+CREATE TABLE IF NOT EXISTS event_editions (
+    event_id INT PRIMARY KEY,
+    previous_event_id INT NOT NULL,
+    CONSTRAINT fk_event_editions_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_event_editions_previous
+        FOREIGN KEY (previous_event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;

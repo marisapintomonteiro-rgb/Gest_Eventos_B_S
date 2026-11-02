@@ -60,4 +60,20 @@ async function createMovement(eventId, userId, movement) {
     );
 }
 
-module.exports = { findStockByEvent, findStockOfProducts, findMovementsByEvent, createMovement };
+// O que se gastou de cada produto num evento: todas as saídas (vendas, consumos, perdas)
+// menos as entradas por correção. As devoluções não contam: o produto voltou ao fornecedor.
+async function findConsumptionByEvent(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT p.product_id, p.product_name, p.unit, p.package_quantity, -SUM(sm.quantity) AS consumed
+         FROM stock_movements sm
+         JOIN products p ON p.product_id = sm.product_id
+         WHERE sm.event_id = ? AND sm.movement_type <> 'Devolução'
+         GROUP BY p.product_id
+         HAVING consumed > 0
+         ORDER BY p.product_name`,
+        [eventId]
+    );
+    return rows;
+}
+
+module.exports = { findStockByEvent, findStockOfProducts, findMovementsByEvent, createMovement, findConsumptionByEvent };

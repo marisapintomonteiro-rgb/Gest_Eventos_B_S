@@ -172,6 +172,20 @@ function apiCloseEvent(eventId) {
     return apiRequest('POST', `/api/events/${eventId}/close`);
 }
 
+// ---------- Previsão de compras e calendário ----------
+
+function apiGetForecast(eventId, margin) {
+    return apiRequest('GET', `/api/events/${eventId}/forecast?margin=${encodeURIComponent(margin)}`);
+}
+
+function apiSetPreviousEvent(eventId, previousEventId) {
+    return apiRequest('PUT', `/api/events/${eventId}/previous`, { previousEventId });
+}
+
+function apiGetCalendar() {
+    return apiRequest('GET', '/api/events/calendar');
+}
+
 // ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
 
 function apiGetMenu(eventId) {

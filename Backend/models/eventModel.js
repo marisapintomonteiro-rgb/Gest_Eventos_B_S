@@ -112,7 +112,65 @@ async function closeEvent(eventId, userId) {
     await pool.execute('INSERT INTO event_closings (event_id, closed_by) VALUES (?, ?)', [eventId, userId]);
 }
 
+// Edição anterior do evento (RF13), ou null se não estiver definida
+async function findPreviousEvent(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT e.event_id, e.event_name
+         FROM event_editions ed
+         JOIN events e ON e.event_id = ed.previous_event_id
+         WHERE ed.event_id = ?`,
+        [eventId]
+    );
+    return rows[0] || null;
+}
+
+// Define (ou tira, com previousEventId null) a edição anterior de um evento
+async function setPreviousEvent(eventId, previousEventId) {
+    await pool.execute('DELETE FROM event_editions WHERE event_id = ?', [eventId]);
+
+    if (previousEventId !== null) {
+        await pool.execute('INSERT INTO event_editions (event_id, previous_event_id) VALUES (?, ?)', [eventId, previousEventId]);
+    }
+}
+
+// Todos os dias dos eventos da marca, com a faturação e o objetivo de cada um (calendário, RF06 e RF32)
+async function findCalendarDays(brandId) {
+    const [rows] = await pool.execute(
+        `SELECT d.event_day_id, d.event_date, d.start_time, d.end_time, d.revenue_target,
+                e.event_id, e.event_name, e.location,
+                COALESCE(SUM(CASE WHEN s.cancelled_at IS NULL THEN s.quantity * s.unit_price END), 0) AS revenue,
+                COUNT(s.sale_id) AS sale_count
+         FROM event_days d
+         JOIN events e ON e.event_id = d.event_id
+         LEFT JOIN sales s ON s.event_day_id = d.event_day_id
+         WHERE e.brand_id = ?
+         GROUP BY d.event_day_id
+         ORDER BY d.event_date`,
+        [brandId]
+    );
+    return rows;
+}
+
+// O que cada evento da marca já pagou: despesas + compras (para o aviso de lucro, RF32)
+async function findPaidByEvent(brandId) {
+    const [rows] = await pool.execute(
+        `SELECT e.event_id,
+                (SELECT COALESCE(SUM(x.amount), 0) FROM expenses x WHERE x.event_id = e.event_id)
+                + (SELECT COALESCE(SUM(pl.packages * pl.package_price), 0)
+                   FROM purchase_lines pl JOIN purchases pu ON pu.purchase_id = pl.purchase_id
+                   WHERE pu.event_id = e.event_id) AS paid
+         FROM events e
+         WHERE e.brand_id = ?`,
+        [brandId]
+    );
+    return rows;
+}
+
 module.exports = {
+    findPreviousEvent,
+    setPreviousEvent,
+    findCalendarDays,
+    findPaidByEvent,
     closeEvent,
     createEvent,
     findEventsByBrand,

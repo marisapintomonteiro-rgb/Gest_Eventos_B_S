@@ -19,6 +19,7 @@
         <nav class="app-nav" aria-label="Navegação principal">
             <a href="marca.html">Início</a>
             <a href="painel.html">Painel</a>
+            <a href="calendario.html">Calendário</a>
             <a href="eventos.html">Eventos</a>
             <a href="vendas.html">Vendas</a>
             <a href="stock.html">Stock</a>
@@ -43,6 +44,7 @@
                 <p class="lead">O que se comprou para cada evento, antes ou durante. Cada compra entra no stock do evento.</p>
             </div>
             <div class="heading-actions">
+                <button class="button button-ghost" type="button" id="forecastButton">Previsão de compras</button>
                 <button class="button" type="button" id="newPurchaseButton">Nova compra</button>
             </div>
         </div>
@@ -57,6 +59,55 @@
         <p class="empty-state" id="noEventsNote" hidden>
             Ainda não há eventos. As compras pertencem a um evento: <a href="eventos.html">cria primeiro o evento</a>.
         </p>
+
+        <!-- Previsão de compras (RF13) -->
+        <section class="panel forecast-panel" id="forecastPanel" aria-labelledby="forecastTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="forecastTitle">Previsão de compras</h2>
+            </div>
+            <p class="col-hint">Sugestão = o que se gastou na edição anterior × (1 + margem de segurança), arredondado para cima em embalagens. Ajusta as quantidades antes de preparar a compra.</p>
+
+            <div class="forecast-controls">
+                <form class="inline-form" id="previousForm" novalidate>
+                    <label for="previousSelect">Edição anterior</label>
+                    <select id="previousSelect"></select>
+                    <button class="button button-ghost button-small" type="submit">Guardar</button>
+                </form>
+                <form class="inline-form" id="marginForm" novalidate>
+                    <label for="marginInput">Margem de segurança</label>
+                    <span class="input-with-unit margin-field">
+                        <input type="number" id="marginInput" min="0" max="200" step="1" value="10" inputmode="numeric">
+                        <span class="unit-suffix">%</span>
+                    </span>
+                    <button class="button button-ghost button-small" type="submit">Recalcular</button>
+                </form>
+            </div>
+
+            <div class="table-wrap" id="forecastTableWrap" hidden>
+                <table class="stock-table forecast-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Produto</th>
+                            <th scope="col">Gasto na edição anterior</th>
+                            <th scope="col">Sugestão</th>
+                            <th scope="col">Já comprado</th>
+                            <th scope="col">A comprar (emb.)</th>
+                            <th scope="col">Custo estimado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="forecastRows"></tbody>
+                    <tfoot>
+                        <tr>
+                            <th scope="row">Total estimado</th>
+                            <td colspan="4"></td>
+                            <td><strong id="forecastTotal">0,00 €</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="empty-state empty-small" id="forecastEmpty" hidden></p>
+            <div class="forecast-actions" id="forecastActions"></div>
+        </section>
 
         <!-- Nova compra (RF12) -->
         <section class="planner" id="purchasePlanner" aria-labelledby="purchasePlannerTitle" hidden>

@@ -2387,10 +2387,10 @@ th {
 
 /* No telemóvel, a tabela do stock mostra só o produto e o que há em stock */
 @media (max-width: 600px) {
-    .stock-table th:nth-child(2),
-    .stock-table th:nth-child(3),
-    .stock-table td:nth-child(2),
-    .stock-table td:nth-child(3) {
+    .stock-table:not(.forecast-table) th:nth-child(2),
+    .stock-table:not(.forecast-table) th:nth-child(3),
+    .stock-table:not(.forecast-table) td:nth-child(2),
+    .stock-table:not(.forecast-table) td:nth-child(3) {
         display: none;
     }
 
@@ -2970,5 +2970,304 @@ textarea:focus-visible {
 @media (max-width: 1360px) {
     .app-nav {
         gap: 16px;
+    }
+}
+
+/* ---------- Previsão de compras ---------- */
+
+.forecast-panel {
+    margin-bottom: 20px;
+}
+
+.forecast-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-bottom: 14px;
+}
+
+.inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-form label {
+    margin: 0;
+    font-weight: 500;
+}
+
+.inline-form select {
+    width: auto;
+    min-height: 42px;
+    padding: 6px 10px;
+}
+
+.margin-field {
+    display: inline-block;
+    width: 110px;
+}
+
+.margin-field input {
+    min-height: 42px;
+}
+
+.forecast-table .forecast-input {
+    width: 90px;
+    min-height: 38px;
+    padding: 4px 8px;
+    text-align: right;
+}
+
+.forecast-supplier {
+    display: block;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 400;
+}
+
+.forecast-table tfoot th,
+.forecast-table tfoot td {
+    border-top: 2px solid var(--ink);
+}
+
+.forecast-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* ---------- Calendário (RF06, RF32) ---------- */
+
+:root {
+    --perf-above: #2e7d4f;       /* acima do expectável */
+    --perf-met: #f1b21b;         /* cumpriu (âmbar da marca) */
+    --perf-below: #cd3929;       /* abaixo do expectável */
+}
+
+.calendar-panel {
+    margin-bottom: 20px;
+}
+
+.calendar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.calendar-head h2 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 14px;
+    padding: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    list-style: none;
+}
+
+.calendar-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.perf-swatch {
+    display: inline-block;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--field-line);
+    border-radius: 4px;
+    background: var(--paper);
+}
+
+.perf-swatch.perf-acima,
+.day-chip.perf-acima {
+    border-color: var(--perf-above);
+    background: var(--perf-above);
+    color: #fff;
+}
+
+.perf-swatch.perf-cumpriu,
+.day-chip.perf-cumpriu {
+    border-color: var(--perf-met);
+    background: var(--perf-met);
+    color: var(--ink);
+}
+
+.perf-swatch.perf-abaixo,
+.day-chip.perf-abaixo {
+    border-color: var(--perf-below);
+    background: var(--perf-below);
+    color: #fff;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.weekday {
+    padding: 4px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.calendar-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 92px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.calendar-cell.is-empty {
+    border: 0;
+}
+
+.calendar-cell.is-today {
+    border: 2px solid var(--ink);
+}
+
+.calendar-number {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.day-chip {
+    position: relative;
+    display: grid;
+    padding: 4px 6px;
+    border: 1.5px dashed var(--field-line);
+    border-radius: 6px;
+    color: var(--ink);
+    font-size: 0.75rem;
+    line-height: 1.25;
+    text-decoration: none;
+}
+
+.day-chip:hover,
+.day-chip:focus-visible {
+    outline: 2px solid var(--ink);
+}
+
+.chip-name {
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chip-revenue {
+    font-weight: 700;
+}
+
+.profit-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.day-chip .profit-mark {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+}
+
+.profit-panel {
+    margin-bottom: 20px;
+    border-color: var(--green);
+    background: var(--green-soft);
+}
+
+.profit-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.month-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.month-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.month-list-text {
+    flex: 1 1 260px;
+}
+
+.tag-profit {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+@media (max-width: 600px) {
+    .calendar-cell {
+        min-height: 60px;
+        padding: 3px;
+    }
+
+    .chip-name,
+    .chip-revenue {
+        display: none;
+    }
+
+    .day-chip {
+        min-height: 14px;
+        padding: 0;
+    }
+
+    .weekday {
+        font-size: 0.7rem;
+    }
+}
+
+/* Com todos os módulos, o menu já não cabe ao lado da marca: passa para uma linha própria */
+@media (max-width: 1440px) {
+    .app-header {
+        flex-wrap: wrap;
+    }
+
+    .app-nav {
+        order: 3;
+        flex-wrap: wrap;
+        gap: 0 20px;
+        width: 100%;
+    }
+
+    .user-area {
+        margin-left: auto;
     }
 }
