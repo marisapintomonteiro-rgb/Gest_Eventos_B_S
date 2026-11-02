@@ -25,6 +25,7 @@
             <a href="ementa.html">Ementa</a>
             <a href="compras.html" data-required-role="Gestor" aria-current="page">Compras</a>
             <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="relatorio.html" data-required-role="Gestor">Relatório</a>
             <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
         </nav>
 
@@ -120,6 +121,20 @@
                 <p class="empty-state empty-small" id="stockEmpty" hidden>Sem stock: ainda não há compras.</p>
             </section>
         </div>
+
+        <!-- Devoluções a fornecedores (RF22) -->
+        <section class="panel returns-panel" id="returnsPanel" aria-labelledby="returnsTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="returnsTitle">Devoluções a fornecedores</h2>
+            </div>
+            <p class="col-hint">Só aparecem os fornecedores que aceitam devoluções. A sugestão conta as embalagens fechadas que ainda há em stock; confirma a quantidade real antes de devolver.</p>
+            <div id="returnableList" class="returnable-list"></div>
+            <p class="empty-state empty-small" id="returnableEmpty" hidden>Nada para devolver: não há compras a fornecedores que aceitem devoluções.</p>
+
+            <h3 class="sales-log-title">Devoluções feitas</h3>
+            <ul class="expense-list" id="returnList"></ul>
+            <p class="empty-state empty-small" id="returnsEmpty" hidden>Ainda não há devoluções.</p>
+        </section>
     </main>
 
     <template id="purchaseLineTemplate">

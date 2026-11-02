@@ -288,10 +288,34 @@ function createTicket(item) {
 
     body.appendChild(days);
 
-    // Atalho para a ementa deste evento
-    const menuLink = createElementWithText('a', 'ticket-link', 'Ver ementa');
-    menuLink.href = `ementa.html?event=${item.event_id}`;
-    body.appendChild(menuLink);
+    // Estado do evento (RF25, RF26) e atalhos para as páginas deste evento (histórico, RF28)
+    let status = 'A decorrer';
+
+    if (item.is_closed) {
+        status = 'Encerrado';
+    }
+
+    if (item.is_editable === false) {
+        status = item.is_closed ? 'Encerrado · só consulta' : 'Só consulta';
+    }
+
+    body.insertBefore(createElementWithText('span', item.is_closed ? 'ticket-status is-closed' : 'ticket-status', status), body.firstChild);
+
+    const links = document.createElement('div');
+    links.className = 'ticket-links';
+    const shortcuts = [['Painel', 'painel.html'], ['Vendas', 'vendas.html'], ['Ementa', 'ementa.html']];
+
+    if (hasRole(page.session.role, 'Gestor')) {
+        shortcuts.push(['Relatório', 'relatorio.html']);
+    }
+
+    shortcuts.forEach(([text, file]) => {
+        const link = createElementWithText('a', 'ticket-link', text);
+        link.href = `${file}?event=${item.event_id}`;
+        links.append(link);
+    });
+
+    body.appendChild(links);
 
     ticket.append(stub, body);
     return ticket;

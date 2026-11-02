@@ -30,10 +30,10 @@ const APP_AREAS = [
         title: 'Análise e encerramento',
         features: [
             { name: 'Gerir despesas', requiredRole: 'Gestor', link: 'painel.html' },
-            { name: 'Registar devoluções', requiredRole: 'Gestor' },
+            { name: 'Registar devoluções', requiredRole: 'Gestor', link: 'compras.html' },
             { name: 'Consultar resultados e dashboard', requiredRole: 'Gestor', link: 'painel.html' },
-            { name: 'Encerrar evento e gerar relatório', requiredRole: 'Gestor' },
-            { name: 'Consultar histórico de eventos', requiredRole: 'Gestor' }
+            { name: 'Encerrar evento e gerar relatório', requiredRole: 'Gestor', link: 'relatorio.html' },
+            { name: 'Consultar histórico de eventos', requiredRole: 'Gestor', link: 'eventos.html' }
         ]
     },
     {

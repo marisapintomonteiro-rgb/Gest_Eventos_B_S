@@ -307,3 +307,44 @@ CREATE TABLE IF NOT EXISTS event_notes (
     CONSTRAINT fk_event_notes_user
         FOREIGN KEY (created_by) REFERENCES users (user_id)
 ) ENGINE=InnoDB;
+
+-- Devoluções a fornecedores (RF22): só de embalagens fechadas e a fornecedores que aceitam devoluções.
+-- A quantidade é confirmada por quem regista. O valor devolvido baixa o custo das compras.
+-- movement_id liga ao movimento de stock que tirou as embalagens do stock.
+CREATE TABLE IF NOT EXISTS purchase_returns (
+    return_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    supplier_id INT NOT NULL,
+    product_id INT NOT NULL,
+    packages DECIMAL(10,2) NOT NULL,
+    package_quantity DECIMAL(10,2) NOT NULL,
+    package_price DECIMAL(10,2) NOT NULL,
+    return_date DATE NOT NULL,
+    movement_id INT NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_purchase_returns_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_purchase_returns_supplier
+        FOREIGN KEY (supplier_id) REFERENCES suppliers (supplier_id),
+    CONSTRAINT fk_purchase_returns_product
+        FOREIGN KEY (product_id) REFERENCES products (product_id),
+    CONSTRAINT fk_purchase_returns_movement
+        FOREIGN KEY (movement_id) REFERENCES stock_movements (movement_id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_purchase_returns_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;
+
+-- Eventos encerrados (RF25). O encerramento é manual e só acontece com todos os dias fechados.
+CREATE TABLE IF NOT EXISTS event_closings (
+    event_id INT PRIMARY KEY,
+    closed_by INT NOT NULL,
+    closed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_event_closings_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_event_closings_user
+        FOREIGN KEY (closed_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;

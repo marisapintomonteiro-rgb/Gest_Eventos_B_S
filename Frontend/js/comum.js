@@ -231,11 +231,32 @@ function setupEventPicker(events, pageFile, onChange) {
     select.value = eventId;
 
     document.getElementById('eventPicker').hidden = false;
+    showReadOnlyNote(events, eventId);
     select.addEventListener('change', () => {
         const chosenId = Number(select.value);
         history.replaceState(null, '', `${pageFile}?event=${chosenId}`);
+        showReadOnlyNote(events, chosenId);
         onChange(chosenId);
     });
 
     return eventId;
+}
+
+// Aviso por baixo da lista de eventos quando o prazo de edição já terminou (RF26)
+function showReadOnlyNote(events, eventId) {
+    const event = events.find((item) => item.event_id === eventId);
+    let note = document.getElementById('readOnlyNote');
+
+    if (!note) {
+        note = createElementWithText('p', 'readonly-note', '');
+        note.id = 'readOnlyNote';
+        document.getElementById('eventPicker').after(note);
+    }
+
+    note.hidden = !event || event.is_editable !== false;
+
+    if (event && event.edit_deadline) {
+        const deadline = event.edit_deadline.split('-').reverse().join('/');
+        note.textContent = `Só consulta: o prazo de edição deste evento terminou a ${deadline} (um mês depois do último dia).`;
+    }
 }

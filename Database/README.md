@@ -10,7 +10,8 @@ O ficheiro `bebe_e_siga.sql` cria a base de dados e as tabelas:
 - ementa: `menu_items` e `menu_item_products` (o que sai do stock em cada venda);
 - compras: `purchases` e `purchase_lines` (o stock de cada evento começa com as suas compras);
 - operação: `day_closings` (dias fechados), `sales` (vendas) e `stock_movements` (tudo o que muda o stock, menos as compras);
-- notas: `event_notes` (notas diárias e finais).
+- notas: `event_notes` (notas diárias e finais);
+- fim do evento: `purchase_returns` (devoluções a fornecedores) e `event_closings` (eventos encerrados).
 
 O stock de um produto num evento é: soma das compras + soma dos movimentos (as saídas são negativas).
 

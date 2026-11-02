@@ -4,6 +4,7 @@
 const express = require('express');
 const saleController = require('../controllers/saleController');
 const { requireLogin } = require('../middleware/authMiddleware');
+const { requireEditableEvent } = require('../middleware/eventMiddleware');
 
 // mergeParams: deixa este router ler o :eventId que está no endereço do server.js
 const router = express.Router({ mergeParams: true });
@@ -12,9 +13,9 @@ const router = express.Router({ mergeParams: true });
 router.get('/', requireLogin, saleController.listSales);
 
 // POST /api/events/:eventId/sales: registar vendas no dia escolhido
-router.post('/', requireLogin, saleController.createSales);
+router.post('/', requireLogin, requireEditableEvent, saleController.createSales);
 
 // POST /api/events/:eventId/sales/:saleId/cancel: anular uma venda (o controller confirma quem pode)
-router.post('/:saleId/cancel', requireLogin, saleController.cancelSale);
+router.post('/:saleId/cancel', requireLogin, requireEditableEvent, saleController.cancelSale);
 
 module.exports = router;

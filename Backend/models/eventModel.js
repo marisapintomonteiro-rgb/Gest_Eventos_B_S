@@ -49,9 +49,11 @@ async function findEventsByBrand(brandId) {
         `SELECT e.event_id, e.event_name, e.location,
                 MIN(d.event_date) AS first_day, MAX(d.event_date) AS last_day,
                 COUNT(d.event_day_id) AS day_count,
-                GROUP_CONCAT(d.event_date ORDER BY d.event_date SEPARATOR ',') AS dates
+                GROUP_CONCAT(d.event_date ORDER BY d.event_date SEPARATOR ',') AS dates,
+                MAX(ec.event_id IS NOT NULL) AS is_closed
          FROM events e
          LEFT JOIN event_days d ON d.event_id = e.event_id
+         LEFT JOIN event_closings ec ON ec.event_id = e.event_id
          WHERE e.brand_id = ?
          GROUP BY e.event_id
          ORDER BY first_day DESC`,
@@ -63,9 +65,11 @@ async function findEventsByBrand(brandId) {
 // Procura um evento desta marca pelo número (para confirmar que o evento é mesmo da marca)
 async function findEventById(brandId, eventId) {
     const [rows] = await pool.execute(
-        `SELECT e.event_id, e.event_name, e.budget, MIN(d.event_date) AS first_day, MAX(d.event_date) AS last_day
+        `SELECT e.event_id, e.event_name, e.location, e.budget, MIN(d.event_date) AS first_day,
+                MAX(d.event_date) AS last_day, MAX(ec.event_id IS NOT NULL) AS is_closed, MAX(ec.closed_at) AS closed_at
          FROM events e
          LEFT JOIN event_days d ON d.event_id = e.event_id
+         LEFT JOIN event_closings ec ON ec.event_id = e.event_id
          WHERE e.brand_id = ? AND e.event_id = ?
          GROUP BY e.event_id`,
         [brandId, eventId]
@@ -103,7 +107,13 @@ async function reopenDay(dayId) {
     await pool.execute('DELETE FROM day_closings WHERE event_day_id = ?', [dayId]);
 }
 
+// Encerra o evento (RF25)
+async function closeEvent(eventId, userId) {
+    await pool.execute('INSERT INTO event_closings (event_id, closed_by) VALUES (?, ?)', [eventId, userId]);
+}
+
 module.exports = {
+    closeEvent,
     createEvent,
     findEventsByBrand,
     findEventById,

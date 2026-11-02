@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header no-print">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="painel.html">Painel</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="stock.html">Stock</a>
+            <a href="ementa.html">Ementa</a>
+            <a href="compras.html" data-required-role="Gestor">Compras</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="relatorio.html" data-required-role="Gestor" aria-current="page">Relatório</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading no-print">
+            <div>
+                <h1>Encerrar e relatório</h1>
+                <p class="lead">Fecha o evento, junta as notas finais e guarda o relatório em PDF.</p>
+            </div>
+            <div class="heading-actions">
+                <button class="button button-ghost" type="button" id="closeEventButton" hidden>Encerrar evento</button>
+                <button class="button" type="button" id="printButton">Guardar PDF</button>
+            </div>
+        </div>
+
+        <div class="event-picker no-print" id="eventPicker" hidden>
+            <label for="eventSelect">Evento</label>
+            <select id="eventSelect"></select>
+        </div>
+
+        <p id="pageMessage" class="form-message no-print" role="status" hidden></p>
+
+        <p class="empty-state" id="noEventsNote" hidden>
+            Ainda não há eventos. <a href="eventos.html">Cria primeiro o evento</a>.
+        </p>
+
+        <!-- Estado do evento: encerramento (RF25) e prazo de edição (RF26) -->
+        <section class="panel status-panel no-print" id="statusPanel" hidden>
+            <div class="status-grid">
+                <div class="figure">
+                    <span class="figure-label">Estado</span>
+                    <strong class="figure-value figure-text" id="statusText"></strong>
+                </div>
+                <div class="figure">
+                    <span class="figure-label">Dias fechados</span>
+                    <strong class="figure-value figure-text" id="daysClosedText"></strong>
+                </div>
+                <div class="figure">
+                    <span class="figure-label">Pode ser alterado até</span>
+                    <strong class="figure-value figure-text" id="deadlineText"></strong>
+                </div>
+            </div>
+            <p class="col-hint" id="statusHint"></p>
+
+            <h3 class="sales-log-title">Notas finais</h3>
+            <form class="note-form" id="finalNoteForm" novalidate>
+                <select id="finalNoteType" aria-label="Assunto da nota"></select>
+                <input type="text" id="finalNoteText" maxlength="500" placeholder="Ex.: para o ano, comprar mais gelo e menos rum" aria-label="Nota final">
+                <button class="button button-small" type="submit">Juntar nota</button>
+            </form>
+        </section>
+
+        <!-- O relatório: é isto que vai para o PDF (RF27) -->
+        <article class="report" id="report" hidden>
+            <header class="report-head">
+                <p class="report-brand" id="reportBrand"></p>
+                <h2 id="reportTitle"></h2>
+                <p class="report-meta" id="reportMeta"></p>
+            </header>
+
+            <section class="report-section">
+                <h3>Resumo</h3>
+                <dl class="money-table" id="reportFinance"></dl>
+            </section>
+
+            <section class="report-section">
+                <h3>Faturação por dia</h3>
+                <table class="report-table">
+                    <thead><tr><th scope="col">Dia</th><th scope="col">Objetivo</th><th scope="col">Faturação</th></tr></thead>
+                    <tbody id="reportDays"></tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h3>Vendas por artigo</h3>
+                <table class="report-table">
+                    <thead><tr><th scope="col">Artigo</th><th scope="col">Quantidade</th><th scope="col">Faturação</th></tr></thead>
+                    <tbody id="reportItems"></tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h3>Despesas</h3>
+                <table class="report-table">
+                    <thead><tr><th scope="col">Descrição</th><th scope="col">Tipo</th><th scope="col">Valor</th></tr></thead>
+                    <tbody id="reportExpenses"></tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h3>Devoluções</h3>
+                <table class="report-table">
+                    <thead><tr><th scope="col">Produto</th><th scope="col">Fornecedor</th><th scope="col">Valor</th></tr></thead>
+                    <tbody id="reportReturns"></tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h3>Stock final</h3>
+                <table class="report-table">
+                    <thead><tr><th scope="col">Produto</th><th scope="col">Comprado</th><th scope="col">Sobrou</th></tr></thead>
+                    <tbody id="reportStock"></tbody>
+                </table>
+            </section>
+
+            <section class="report-section">
+                <h3>Notas</h3>
+                <ul class="report-notes" id="reportNotes"></ul>
+            </section>
+
+            <p class="report-foot" id="reportFoot"></p>
+        </article>
+    </main>
+
+    <footer class="site-footer no-print">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/relatorio.js"></script>
+</body>
+</html>

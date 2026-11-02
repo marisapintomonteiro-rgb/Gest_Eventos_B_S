@@ -2,6 +2,7 @@
 // Valida os dados recebidos e pede ao eventModel para gravar.
 
 const eventModel = require('../models/eventModel');
+const { getEditDeadline, isEventEditable, formatDate } = require('../middleware/eventMiddleware');
 
 const SPACE_TYPES = ['Interior', 'Exterior', 'Misto'];
 const EXPENSE_TYPES = ['Fixa', 'Variável'];
@@ -149,7 +150,15 @@ async function createEvent(req, res) {
 async function listEvents(req, res) {
     try {
         const events = await eventModel.findEventsByBrand(req.session.user.brandId);
-        res.json({ events });
+
+        // Cada evento leva o prazo de edição (RF26), para as páginas mostrarem "só consulta"
+        const withDeadline = events.map((event) => ({
+            ...event,
+            edit_deadline: getEditDeadline(event.last_day),
+            is_editable: isEventEditable(event.last_day)
+        }));
+
+        res.json({ events: withDeadline });
     } catch (error) {
         console.error('Erro ao listar os eventos:', error.message);
         res.status(500).json({ error: 'Não foi possível carregar os eventos. Tenta novamente.' });
@@ -213,6 +222,13 @@ async function reopenDay(req, res) {
             return res.status(400).json({ error: 'Este dia já está aberto.' });
         }
 
+        // Depois do encerramento já não se reabrem dias; os acertos fazem-se com correções e devoluções
+        const event = await eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
+
+        if (event.is_closed) {
+            return res.status(400).json({ error: 'O evento já está encerrado: os dias não podem ser reabertos. Usa a correção de stock.' });
+        }
+
         await eventModel.reopenDay(day.event_day_id);
         res.json({ message: 'Dia reaberto. Depois de corrigir, volta a fechá-lo.' });
     } catch (error) {
@@ -221,4 +237,32 @@ async function reopenDay(req, res) {
     }
 }
 
-module.exports = { createEvent, listEvents, listDays, closeDay, reopenDay };
+// POST /api/events/:eventId/close: encerrar o evento (RF25). Só com todos os dias fechados.
+async function closeEvent(req, res) {
+    try {
+        const event = await eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
+
+        if (!event) {
+            return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        if (event.is_closed) {
+            return res.status(400).json({ error: 'Este evento já está encerrado.' });
+        }
+
+        const days = await eventModel.findDaysByEvent(event.event_id);
+        const openDays = days.filter((day) => !day.is_closed);
+
+        if (openDays.length > 0) {
+            return res.status(400).json({ error: `Antes de encerrar, fecha todos os dias (faltam ${openDays.length}).` });
+        }
+
+        await eventModel.closeEvent(event.event_id, req.session.user.userId);
+        res.json({ message: `Evento encerrado. Ainda podes fazer correções e devoluções até ${formatDate(getEditDeadline(event.last_day))}.` });
+    } catch (error) {
+        console.error('Erro ao encerrar o evento:', error.message);
+        res.status(500).json({ error: 'Não foi possível encerrar o evento. Tenta novamente.' });
+    }
+}
+
+module.exports = { createEvent, listEvents, listDays, closeDay, reopenDay, closeEvent };

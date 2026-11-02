@@ -2740,3 +2740,235 @@ textarea:focus-visible {
     border-radius: 3px;
     background: var(--green);
 }
+
+/* ---------- Devoluções ---------- */
+
+.returns-panel {
+    margin-top: 20px;
+}
+
+.returnable-list {
+    display: grid;
+    gap: 10px;
+}
+
+.returnable-line {
+    display: grid;
+    gap: 8px;
+    padding: 12px 14px;
+    border: 1.5px dashed var(--field-line);
+    border-radius: 12px;
+}
+
+.returnable-line strong {
+    display: block;
+}
+
+.returnable-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    gap: 8px;
+    align-items: end;
+}
+
+.returnable-fields label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.returnable-fields input {
+    min-height: 40px;
+    margin-top: 2px;
+    padding: 6px 10px;
+    color: var(--ink);
+}
+
+@media (max-width: 600px) {
+    .returnable-fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ---------- Estado dos eventos e só consulta ---------- */
+
+.readonly-note {
+    margin: -12px 0 20px;
+    padding: 8px 12px;
+    border-left: 3px solid var(--red);
+    background: var(--red-soft);
+    font-size: 0.92rem;
+}
+
+.ticket-status {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 2px 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.ticket-status.is-closed {
+    border-color: var(--muted);
+    color: var(--muted);
+}
+
+.ticket-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin-top: 10px;
+}
+
+.ticket-links .ticket-link {
+    margin-top: 0;
+}
+
+/* ---------- Relatório ---------- */
+
+.status-panel {
+    margin-bottom: 20px;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.report {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 48px);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--paper);
+}
+
+.report-head {
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 4px solid var(--ink);
+}
+
+.report-brand {
+    margin: 0;
+    color: var(--red);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.report-head h2 {
+    margin: 4px 0;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+.report-meta {
+    margin: 0;
+    color: var(--muted);
+}
+
+.report-section {
+    margin-bottom: 22px;
+    break-inside: avoid;
+}
+
+.report-section h3 {
+    margin: 0 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--ink);
+    font-size: 1rem;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.report-table th,
+.report-table td {
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+}
+
+.report-table th:first-child,
+.report-table td:first-child {
+    text-align: left;
+}
+
+.report-table thead th {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.report-total td {
+    border-top: 2px solid var(--ink);
+    font-weight: 700;
+}
+
+.report-empty {
+    color: var(--muted);
+    text-align: left !important;
+}
+
+.report-notes {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.92rem;
+}
+
+.report-notes li {
+    margin-bottom: 4px;
+}
+
+.report-foot {
+    margin: 24px 0 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+/* Na impressão (e no PDF) fica só o relatório */
+@media print {
+    @page {
+        margin: 16mm;
+    }
+
+    body {
+        background: #fff;
+    }
+
+    .no-print,
+    .form-message,
+    .readonly-note {
+        display: none !important;
+    }
+
+    .page {
+        padding: 0;
+    }
+
+    .report {
+        max-width: none;
+        padding: 0;
+        border: 0;
+    }
+}
+
+/* Com muitos links no menu, o nome da marca não parte e os links ficam mais juntos */
+.app-brand {
+    white-space: nowrap;
+}
+
+@media (max-width: 1360px) {
+    .app-nav {
+        gap: 16px;
+    }
+}

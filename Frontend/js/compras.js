@@ -234,6 +234,139 @@ async function renderPurchases() {
     document.getElementById('purchaseLayout').hidden = false;
     renderPurchaseList(result.purchases);
     renderStock(result.stock);
+    await renderReturns();
+}
+
+// ---------- Devoluções a fornecedores (RF22) ----------
+
+async function renderReturns() {
+    let result;
+
+    try {
+        result = await apiListReturns(currentEventId);
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+        return;
+    }
+
+    document.getElementById('returnsPanel').hidden = false;
+
+    const returnable = document.getElementById('returnableList');
+    returnable.replaceChildren();
+    document.getElementById('returnableEmpty').hidden = result.returnable.length > 0;
+    result.returnable.forEach((line) => returnable.append(createReturnableLine(line)));
+
+    const list = document.getElementById('returnList');
+    list.replaceChildren();
+    document.getElementById('returnsEmpty').hidden = result.returns.length > 0;
+
+    result.returns.forEach((item) => {
+        const line = document.createElement('li');
+        const text = document.createElement('div');
+        text.append(
+            createElementWithText('strong', '', `${QUANTITY.format(Number(item.packages))} × ${item.product_name}`),
+            createElementWithText('span', 'expense-meta', `${item.supplier_name} · ${new Date(`${item.return_date}T12:00:00`).toLocaleDateString('pt-PT')}`)
+        );
+
+        const deleteButton = createElementWithText('button', 'link-button', 'Apagar');
+        deleteButton.type = 'button';
+        deleteButton.setAttribute('aria-label', `Apagar a devolução de ${item.product_name}`);
+        deleteButton.addEventListener('click', () => deleteReturn(item, deleteButton));
+
+        line.append(text, createElementWithText('span', 'receipt-amount', `+${MONEY.format(Number(item.packages) * Number(item.package_price))}`), deleteButton);
+        list.append(line);
+    });
+}
+
+// Uma linha por fornecedor e produto: o que foi comprado, a sugestão e o formulário para confirmar
+function createReturnableLine(line) {
+    const form = document.createElement('form');
+    form.className = 'returnable-line';
+    form.noValidate = true;
+
+    const info = document.createElement('div');
+    info.append(
+        createElementWithText('strong', '', `${line.productName} · ${line.supplierName}`),
+        createElementWithText('span', 'expense-meta',
+            `Compradas ${QUANTITY.format(line.packagesBought)} embalagens de ${formatQuantity(line.packageQuantity, line.unit)}`
+            + (line.packagesReturned > 0 ? `, já devolvidas ${QUANTITY.format(line.packagesReturned)}` : '')
+            + ` · sugestão: ${line.suggested} fechadas`)
+    );
+
+    const packagesInput = document.createElement('input');
+    packagesInput.type = 'number';
+    packagesInput.min = '1';
+    packagesInput.step = '1';
+    packagesInput.value = line.suggested;
+    packagesInput.setAttribute('aria-label', `Embalagens de ${line.productName} a devolver`);
+
+    const priceInput = document.createElement('input');
+    priceInput.type = 'number';
+    priceInput.min = '0';
+    priceInput.step = '0.01';
+    priceInput.value = line.averagePrice;
+    priceInput.setAttribute('aria-label', `Valor devolvido por embalagem de ${line.productName} (€)`);
+
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = new Date().toLocaleDateString('sv-SE');
+    dateInput.setAttribute('aria-label', 'Data da devolução');
+
+    const button = createElementWithText('button', 'button button-small', 'Devolver');
+    button.type = 'submit';
+    button.disabled = line.suggested === 0 && line.packagesBought <= line.packagesReturned;
+
+    const fields = document.createElement('div');
+    fields.className = 'returnable-fields';
+    fields.append(
+        labelWrap('Embalagens', packagesInput),
+        labelWrap('€ por embalagem', priceInput),
+        labelWrap('Data', dateInput),
+        button
+    );
+
+    form.append(info, fields);
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        try {
+            const result = await apiCreateReturn(currentEventId, {
+                supplierId: line.supplierId,
+                productId: line.productId,
+                packages: packagesInput.value,
+                packagePrice: priceInput.value,
+                returnDate: dateInput.value
+            });
+            await renderPurchases();
+            showMessage(pageMessage, result.message, 'is-success');
+        } catch (error) {
+            showMessage(pageMessage, error.message, 'is-error');
+        }
+    });
+
+    return form;
+}
+
+function labelWrap(text, input) {
+    const label = document.createElement('label');
+    label.append(text, input);
+    return label;
+}
+
+async function deleteReturn(item, button) {
+    if (!button.classList.contains('is-confirming')) {
+        button.classList.add('is-confirming');
+        button.textContent = 'Confirmar';
+        return;
+    }
+
+    try {
+        const result = await apiDeleteReturn(currentEventId, item.return_id);
+        await renderPurchases();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
 }
 
 function getPurchaseTotal(purchase) {

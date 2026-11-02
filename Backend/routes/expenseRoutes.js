@@ -4,12 +4,13 @@
 const express = require('express');
 const expenseController = require('../controllers/expenseController');
 const { requireRole } = require('../middleware/authMiddleware');
+const { requireEditableEvent } = require('../middleware/eventMiddleware');
 
 // mergeParams: deixa este router ler o :eventId que está no endereço do server.js
 const router = express.Router({ mergeParams: true });
 
 router.get('/', requireRole('Gestor'), expenseController.listExpenses);
-router.post('/', requireRole('Gestor'), expenseController.createExpense);
-router.delete('/:expenseId', requireRole('Gestor'), expenseController.deleteExpense);
+router.post('/', requireRole('Gestor'), requireEditableEvent, expenseController.createExpense);
+router.delete('/:expenseId', requireRole('Gestor'), requireEditableEvent, expenseController.deleteExpense);
 
 module.exports = router;

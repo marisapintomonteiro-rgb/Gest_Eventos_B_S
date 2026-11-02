@@ -7,6 +7,9 @@ const saleModel = require('../models/saleModel');
 const purchaseModel = require('../models/purchaseModel');
 const expenseModel = require('../models/expenseModel');
 const stockModel = require('../models/stockModel');
+const returnModel = require('../models/returnModel');
+const noteModel = require('../models/noteModel');
+const { getEditDeadline, isEventEditable } = require('../middleware/eventMiddleware');
 
 function roundMoney(value) {
     return Math.round(value * 100) / 100;
@@ -38,6 +41,36 @@ function calculateStockValue(stock, costs) {
     });
 
     return roundMoney(remaining);
+}
+
+// Resultados financeiros do evento (RF21). As compras não entram nas despesas (não se contam duas vezes);
+// as devoluções baixam o custo das compras; o stock que sobra fica separado do que foi consumido.
+async function calculateFinance(event, revenue, stock) {
+    const [costs, expenses, returnTotal] = await Promise.all([
+        purchaseModel.findPurchaseCostByProduct(event.event_id),
+        expenseModel.findExpensesByEvent(event.event_id),
+        returnModel.sumReturnsByEvent(event.event_id)
+    ]);
+
+    const purchases = roundMoney(costs.reduce((sum, cost) => sum + Number(cost.cost), 0));
+    const expenseTotal = roundMoney(expenses.reduce((sum, expense) => sum + Number(expense.amount), 0));
+    const returns = roundMoney(returnTotal);
+    const spent = roundMoney(purchases - returns + expenseTotal);
+    const stockValue = calculateStockValue(stock, costs);
+
+    return {
+        expenses,
+        totals: {
+            budget: event.budget === null ? null : Number(event.budget),
+            purchases,
+            returns,
+            expenses: expenseTotal,
+            spent,
+            result: roundMoney(revenue - spent),
+            stockValue,
+            consumedValue: roundMoney(purchases - returns - stockValue)
+        }
+    };
 }
 
 // GET /api/events/:eventId/dashboard
@@ -73,27 +106,8 @@ async function getDashboard(req, res) {
 
         // Valores financeiros: só para quem gere (RF21)
         if (isManager) {
-            const [costs, expenses] = await Promise.all([
-                purchaseModel.findPurchaseCostByProduct(event.event_id),
-                expenseModel.findExpensesByEvent(event.event_id)
-            ]);
-
-            const purchases = roundMoney(costs.reduce((sum, cost) => sum + Number(cost.cost), 0));
-            const expenseTotal = roundMoney(expenses.reduce((sum, expense) => sum + Number(expense.amount), 0));
-            const returns = 0;
-            const spent = roundMoney(purchases - returns + expenseTotal);
-            const stockValue = calculateStockValue(stock, costs);
-
-            dashboard.finance = {
-                budget: event.budget === null ? null : Number(event.budget),
-                purchases,
-                returns,
-                expenses: expenseTotal,
-                spent,
-                result: roundMoney(revenue - spent),
-                stockValue,
-                consumedValue: roundMoney(purchases - returns - stockValue)
-            };
+            const finance = await calculateFinance(event, revenue, stock);
+            dashboard.finance = finance.totals;
         }
 
         res.json(dashboard);
@@ -103,4 +117,51 @@ async function getDashboard(req, res) {
     }
 }
 
-module.exports = { getDashboard };
+// GET /api/events/:eventId/report: tudo o que entra no relatório final (RF27), só Gestor e Administrador
+async function getReport(req, res) {
+    try {
+        const event = await eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
+
+        if (!event) {
+            return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        const [revenueDays, closedDays, items, stock, returns, notes] = await Promise.all([
+            saleModel.findRevenueByDay(event.event_id),
+            eventModel.findDaysByEvent(event.event_id),
+            saleModel.findTopItems(event.event_id, 1000),
+            stockModel.findStockByEvent(event.event_id),
+            returnModel.findReturnsByEvent(event.event_id),
+            noteModel.findNotesByEvent(event.event_id)
+        ]);
+
+        const revenue = roundMoney(revenueDays.reduce((sum, day) => sum + Number(day.revenue), 0));
+        const finance = await calculateFinance(event, revenue, stock);
+
+        res.json({
+            event: {
+                ...event,
+                edit_deadline: getEditDeadline(event.last_day),
+                is_editable: isEventEditable(event.last_day)
+            },
+            revenue,
+            days: revenueDays.map((day) => ({
+                date: day.event_date,
+                revenue: Number(day.revenue),
+                target: day.revenue_target === null ? null : Number(day.revenue_target),
+                isClosed: Boolean(closedDays.find((item) => item.event_day_id === day.event_day_id).is_closed)
+            })),
+            items: items.map((item) => ({ itemName: item.item_name, quantity: Number(item.quantity), revenue: Number(item.revenue) })),
+            finance: finance.totals,
+            expenses: finance.expenses,
+            returns,
+            stock,
+            notes
+        });
+    } catch (error) {
+        console.error('Erro ao montar o relatório:', error.message);
+        res.status(500).json({ error: 'Não foi possível carregar o relatório. Tenta novamente.' });
+    }
+}
+
+module.exports = { getDashboard, getReport };

@@ -49,6 +49,11 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | POST | `/api/events/:eventId/expenses` | Gestor e Administrador (do evento ou de um dia) |
 | DELETE | `/api/events/:eventId/expenses/:expenseId` | Gestor e Administrador |
 | GET | `/api/events/:eventId/dashboard` | quem tem sessão (RF23; os valores financeiros do RF21 só para Gestor e Administrador) |
+| GET | `/api/events/:eventId/returns` | Gestor e Administrador (RF22, devoluções e sugestão do que se pode devolver) |
+| POST | `/api/events/:eventId/returns` | Gestor e Administrador (embalagens fechadas, fornecedor que aceita) |
+| DELETE | `/api/events/:eventId/returns/:returnId` | Gestor e Administrador |
+| GET | `/api/events/:eventId/report` | Gestor e Administrador (RF27, dados do relatório final) |
+| POST | `/api/events/:eventId/close` | Gestor e Administrador (RF25; todos os dias fechados) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |
@@ -58,6 +63,10 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | GET | `/api/products/:id/prices` | Gestor e Administrador (histórico de preços) |
 | POST | `/api/products/:id/prices` | Gestor e Administrador (novo preço; o anterior fica no histórico) |
 | GET | `/api/health` | qualquer pessoa (teste do servidor e da base de dados) |
+
+## Prazo de edição (RF26)
+
+Todas as rotas que alteram um evento passam pelo `middleware/eventMiddleware.js` (`requireEditableEvent`): um mês depois do último dia, o evento fica só para consulta e o servidor responde com erro 403.
 
 ## Limitações conhecidas
 

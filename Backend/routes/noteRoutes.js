@@ -3,6 +3,7 @@
 const express = require('express');
 const noteController = require('../controllers/noteController');
 const { requireLogin, requireRole } = require('../middleware/authMiddleware');
+const { requireEditableEvent } = require('../middleware/eventMiddleware');
 
 // mergeParams: deixa este router ler o :eventId que está no endereço do server.js
 const router = express.Router({ mergeParams: true });
@@ -11,9 +12,9 @@ const router = express.Router({ mergeParams: true });
 router.get('/', requireLogin, noteController.listNotes);
 
 // POST /api/events/:eventId/notes: escrever uma nota (Gestor e Administrador)
-router.post('/', requireRole('Gestor'), noteController.createNote);
+router.post('/', requireRole('Gestor'), requireEditableEvent, noteController.createNote);
 
 // DELETE /api/events/:eventId/notes/:noteId: apagar uma nota (Gestor e Administrador)
-router.delete('/:noteId', requireRole('Gestor'), noteController.deleteNote);
+router.delete('/:noteId', requireRole('Gestor'), requireEditableEvent, noteController.deleteNote);
 
 module.exports = router;

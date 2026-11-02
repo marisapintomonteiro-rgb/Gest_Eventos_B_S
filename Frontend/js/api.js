@@ -150,6 +150,28 @@ function apiDeleteExpense(eventId, expenseId) {
     return apiRequest('DELETE', `/api/events/${eventId}/expenses/${expenseId}`);
 }
 
+// ---------- Devoluções, encerramento e relatório (Gestor e Administrador) ----------
+
+function apiListReturns(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/returns`);
+}
+
+function apiCreateReturn(eventId, returnData) {
+    return apiRequest('POST', `/api/events/${eventId}/returns`, returnData);
+}
+
+function apiDeleteReturn(eventId, returnId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/returns/${returnId}`);
+}
+
+function apiGetReport(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/report`);
+}
+
+function apiCloseEvent(eventId) {
+    return apiRequest('POST', `/api/events/${eventId}/close`);
+}
+
 // ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
 
 function apiGetMenu(eventId) {

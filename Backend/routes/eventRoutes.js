@@ -3,6 +3,7 @@
 const express = require('express');
 const eventController = require('../controllers/eventController');
 const { requireLogin, requireRole } = require('../middleware/authMiddleware');
+const { requireEditableEvent } = require('../middleware/eventMiddleware');
 
 const router = express.Router();
 
@@ -16,9 +17,12 @@ router.post('/', requireRole('Gestor'), eventController.createEvent);
 router.get('/:eventId/days', requireLogin, eventController.listDays);
 
 // POST /api/events/:eventId/days/:dayId/close: fechar o dia (RF19)
-router.post('/:eventId/days/:dayId/close', requireRole('Gestor'), eventController.closeDay);
+router.post('/:eventId/days/:dayId/close', requireRole('Gestor'), requireEditableEvent, eventController.closeDay);
 
 // POST /api/events/:eventId/days/:dayId/reopen: reabrir o dia para corrigir
-router.post('/:eventId/days/:dayId/reopen', requireRole('Gestor'), eventController.reopenDay);
+router.post('/:eventId/days/:dayId/reopen', requireRole('Gestor'), requireEditableEvent, eventController.reopenDay);
+
+// POST /api/events/:eventId/close: encerrar o evento (RF25)
+router.post('/:eventId/close', requireRole('Gestor'), requireEditableEvent, eventController.closeEvent);
 
 module.exports = router;
