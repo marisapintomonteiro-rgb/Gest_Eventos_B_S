@@ -10,7 +10,21 @@ function getSslOptions() {
         return undefined;
     }
 
-    return { ca: process.env.DB_SSL_CA.replace(/\\n/g, '\n') };
+    return { ca: normalizeCertificate(process.env.DB_SSL_CA) };
+}
+
+// Quando o certificado é colado num campo de uma só linha, as mudanças de linha perdem-se
+// (ficam espaços ou "\n"). Aqui volta a ficar no formato certo: cabeçalho, linhas de 64 caracteres e fim.
+function normalizeCertificate(text) {
+    const match = text.match(/-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----/);
+
+    if (!match) {
+        return text;
+    }
+
+    const body = match[1].replace(/\\n|\s/g, '');
+    const lines = body.match(/.{1,64}/g).join('\n');
+    return `-----BEGIN CERTIFICATE-----\n${lines}\n-----END CERTIFICATE-----\n`;
 }
 
 const connectionOptions = {
