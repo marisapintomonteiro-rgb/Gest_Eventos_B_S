@@ -113,8 +113,9 @@ async function createSupplier(event) {
         return;
     }
 
-    if (contactInput.value.trim() === '') {
-        showFieldError(contactInput, 'Indica um contacto.');
+    // Telefone com 9 algarismos; aceita espaços e o indicativo +351 (o servidor volta a confirmar)
+    if (!/^(\+351)?\d{9}$/.test(contactInput.value.replace(/\s/g, ''))) {
+        showFieldError(contactInput, 'O telefone tem de ter 9 algarismos (ex.: 912 345 678).');
         return;
     }
 

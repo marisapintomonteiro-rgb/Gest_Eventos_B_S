@@ -6,6 +6,11 @@ function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Telefone português: 9 algarismos (pode ter espaços e o indicativo +351 no início)
+function isValidPhone(phone) {
+    return /^(\+351)?\d{9}$/.test(phone.replace(/\s/g, ''));
+}
+
 // Campo de texto opcional: vazio passa a null
 function toOptionalText(value) {
     const text = String(value || '').trim();
@@ -38,8 +43,8 @@ async function createSupplier(req, res) {
         return res.status(400).json({ error: 'Indica o nome do fornecedor (até 100 caracteres).' });
     }
 
-    if (supplier.contact.length === 0 || supplier.contact.length > 50) {
-        return res.status(400).json({ error: 'Indica um contacto do fornecedor (até 50 caracteres).' });
+    if (!isValidPhone(supplier.contact)) {
+        return res.status(400).json({ error: 'O telefone tem de ter 9 algarismos (ex.: 912 345 678).' });
     }
 
     if (supplier.email !== null && !isValidEmail(supplier.email)) {
