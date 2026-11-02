@@ -8,10 +8,21 @@ const ROLE_LEVELS = {
     Administrador: 3
 };
 
+// Enquanto a palavra-passe for temporária, só se pode mudar a palavra-passe (e sair)
+const TEMPORARY_PASSWORD_ERROR = 'Tens de escolher uma palavra-passe nova antes de continuar.';
+
+function isChangingPassword(req) {
+    return req.originalUrl === '/api/auth/password';
+}
+
 // Só deixa passar quem tem sessão iniciada
 function requireLogin(req, res, next) {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Tens de iniciar sessão.' });
+    }
+
+    if (req.session.user.mustChangePassword && !isChangingPassword(req)) {
+        return res.status(403).json({ error: TEMPORARY_PASSWORD_ERROR });
     }
 
     next();
@@ -22,6 +33,10 @@ function requireRole(minimumRole) {
     return (req, res, next) => {
         if (!req.session.user) {
             return res.status(401).json({ error: 'Tens de iniciar sessão.' });
+        }
+
+        if (req.session.user.mustChangePassword) {
+            return res.status(403).json({ error: TEMPORARY_PASSWORD_ERROR });
         }
 
         const userLevel = ROLE_LEVELS[req.session.user.role] || 0;

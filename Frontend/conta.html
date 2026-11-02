@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A minha conta | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="painel.html">Painel</a>
+            <a href="calendario.html">Calendário</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="stock.html">Stock</a>
+            <a href="ementa.html">Ementa</a>
+            <a href="compras.html" data-required-role="Gestor">Compras</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="relatorio.html" data-required-role="Gestor">Relatório</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page page-narrow">
+        <div class="events-heading">
+            <div>
+                <h1>A minha conta</h1>
+                <p class="lead" id="accountInfo"></p>
+            </div>
+        </div>
+
+        <p class="form-message is-info" id="temporaryNote" hidden>
+            O Administrador repôs a tua palavra-passe. Escolhe uma palavra-passe nova para continuar.
+        </p>
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <section class="panel" aria-labelledby="passwordTitle">
+            <div class="panel-heading">
+                <h2 id="passwordTitle">Mudar a palavra-passe</h2>
+            </div>
+            <form id="passwordForm" novalidate>
+                <div class="field">
+                    <label for="currentPassword" id="currentPasswordLabel">Palavra-passe atual</label>
+                    <div class="password-field">
+                        <input type="password" id="currentPassword" autocomplete="current-password" aria-describedby="currentPasswordError">
+                        <button type="button" class="toggle-password" data-toggle-password="currentPassword" aria-pressed="false">Mostrar</button>
+                    </div>
+                    <small class="error" id="currentPasswordError"></small>
+                </div>
+                <div class="field">
+                    <label for="newPassword">Palavra-passe nova <span class="optional">(pelo menos 8 caracteres)</span></label>
+                    <div class="password-field">
+                        <input type="password" id="newPassword" autocomplete="new-password" aria-describedby="newPasswordError">
+                        <button type="button" class="toggle-password" data-toggle-password="newPassword" aria-pressed="false">Mostrar</button>
+                    </div>
+                    <small class="error" id="newPasswordError"></small>
+                </div>
+                <div class="field">
+                    <label for="confirmPassword">Repete a palavra-passe nova</label>
+                    <div class="password-field">
+                        <input type="password" id="confirmPassword" autocomplete="new-password" aria-describedby="confirmPasswordError">
+                        <button type="button" class="toggle-password" data-toggle-password="confirmPassword" aria-pressed="false">Mostrar</button>
+                    </div>
+                    <small class="error" id="confirmPasswordError"></small>
+                </div>
+                <p class="form-message is-error" id="formMessage" role="alert" hidden></p>
+                <button class="button" type="submit">Guardar palavra-passe</button>
+            </form>
+            <p class="col-hint">Esqueceste-te da palavra-passe? Pede ao Administrador da marca para a repor na página Utilizadores.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/conta.js"></script>
+</body>
+</html>

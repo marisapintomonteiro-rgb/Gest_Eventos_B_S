@@ -15,4 +15,7 @@ router.post('/', requireRole('Administrador'), userController.createUser);
 // DELETE /api/users/:id: remover uma conta da marca
 router.delete('/:id', requireRole('Administrador'), userController.removeUser);
 
+// POST /api/users/:id/password: repor a palavra-passe de uma conta (fica temporária)
+router.post('/:id/password', requireRole('Administrador'), userController.resetPassword);
+
 module.exports = router;

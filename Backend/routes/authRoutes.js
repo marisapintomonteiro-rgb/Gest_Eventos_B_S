@@ -2,6 +2,7 @@
 
 const express = require('express');
 const authController = require('../controllers/authController');
+const { requireLogin } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // POST /api/auth/register: registar uma marca nova
@@ -15,5 +16,8 @@ router.get('/me', authController.getCurrentUser);
 
 // POST /api/auth/logout: terminar sessão
 router.post('/logout', authController.logout);
+
+// PUT /api/auth/password: mudar a própria palavra-passe
+router.put('/password', requireLogin, authController.changePassword);
 
 module.exports = router;

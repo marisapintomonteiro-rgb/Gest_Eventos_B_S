@@ -120,6 +120,15 @@ async function renderUsers() {
         const actionCell = document.createElement('td');
 
         if (!isCurrentUser) {
+            // Repor a palavra-passe: abre um pequeno formulário na própria linha
+            const resetButton = document.createElement('button');
+            resetButton.type = 'button';
+            resetButton.className = 'link-button';
+            resetButton.textContent = 'Repor palavra-passe';
+            resetButton.setAttribute('aria-label', `Repor a palavra-passe de ${account.email}`);
+            resetButton.addEventListener('click', () => toggleResetForm(actionCell, account));
+            actionCell.appendChild(resetButton);
+
             const removeButton = document.createElement('button');
             removeButton.type = 'button';
             removeButton.className = 'link-button';
@@ -148,4 +157,52 @@ async function removeUser(account) {
     } catch (error) {
         showMessage(pageMessage, error.message, 'is-error');
     }
+}
+
+// Formulário para a palavra-passe temporária. O Administrador diz-a à pessoa,
+// que tem de escolher outra quando entrar (o servidor obriga).
+function toggleResetForm(cell, account) {
+    const existing = cell.querySelector('.reset-form');
+
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.className = 'reset-form';
+    form.noValidate = true;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.autocomplete = 'off';
+    input.placeholder = 'Palavra-passe temporária';
+    input.setAttribute('aria-label', `Palavra-passe temporária para ${account.email}`);
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.className = 'button button-small';
+    saveButton.textContent = 'Guardar';
+
+    form.append(input, saveButton);
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (input.value.length < 8) {
+            showMessage(pageMessage, 'A palavra-passe temporária tem de ter pelo menos 8 caracteres.', 'is-error');
+            input.focus();
+            return;
+        }
+
+        try {
+            const result = await apiResetPassword(account.user_id, input.value);
+            form.remove();
+            showMessage(pageMessage, `${account.email}: ${result.message}`, 'is-success');
+        } catch (error) {
+            showMessage(pageMessage, error.message, 'is-error');
+        }
+    });
+
+    cell.appendChild(form);
+    input.focus();
 }

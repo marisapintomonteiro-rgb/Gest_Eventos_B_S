@@ -77,4 +77,34 @@ async function removeUser(req, res) {
     }
 }
 
-module.exports = { listUsers, createUser, removeUser };
+// POST /api/users/:id/password: o Administrador repõe a palavra-passe de uma conta da marca.
+// A palavra-passe fica temporária: a pessoa tem de a mudar quando entrar.
+async function resetPassword(req, res) {
+    const userId = Number(req.params.id);
+    const password = String(req.body.password || '');
+
+    if (password.length < MIN_PASSWORD_LENGTH) {
+        return res.status(400).json({ error: `A palavra-passe temporária tem de ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.` });
+    }
+
+    // A própria palavra-passe muda-se em "A minha conta", com a palavra-passe atual
+    if (userId === req.session.user.userId) {
+        return res.status(400).json({ error: 'Para mudares a tua palavra-passe, usa "A minha conta".' });
+    }
+
+    try {
+        const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+        const wasReset = await userModel.resetPassword(userId, req.session.user.brandId, passwordHash, req.session.user.userId);
+
+        if (!wasReset) {
+            return res.status(404).json({ error: 'Esta conta não existe nesta marca.' });
+        }
+
+        res.json({ message: 'Palavra-passe reposta. Diz a palavra-passe temporária à pessoa: vai ter de a mudar quando entrar.' });
+    } catch (error) {
+        console.error('Erro ao repor a palavra-passe:', error.message);
+        res.status(500).json({ error: 'Não foi possível repor a palavra-passe. Tenta novamente.' });
+    }
+}
+
+module.exports = { listUsers, createUser, removeUser, resetPassword };

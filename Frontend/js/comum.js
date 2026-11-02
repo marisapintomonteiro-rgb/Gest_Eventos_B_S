@@ -47,6 +47,12 @@ async function startPrivatePage(requiredRole) {
         return null;
     }
 
+    // Com uma palavra-passe temporária, a pessoa tem de escolher outra antes de usar a aplicação
+    if (session.mustChangePassword && !window.location.pathname.endsWith('conta.html')) {
+        window.location.href = 'conta.html';
+        return null;
+    }
+
     if (requiredRole && !hasRole(session.role, requiredRole)) {
         window.location.href = 'marca.html';
         return null;
@@ -70,6 +76,15 @@ function renderAppHeader(brand, session) {
     roleChip.textContent = session.role;
     roleChip.className = `role-chip ${getRoleClass(session.role)}`;
     document.getElementById('headerEmail').textContent = session.email;
+
+    // Atalho para "A minha conta" (mudar a palavra-passe), ao lado do botão Sair
+    const logoutButton = document.getElementById('logoutButton');
+    if (!document.getElementById('accountLink')) {
+        const accountLink = createElementWithText('a', 'button button-ghost button-small', 'Conta');
+        accountLink.id = 'accountLink';
+        accountLink.href = 'conta.html';
+        logoutButton.before(accountLink);
+    }
 
     // Esconde as ligações que este perfil não pode usar
     document.querySelectorAll('[data-required-role]').forEach((element) => {

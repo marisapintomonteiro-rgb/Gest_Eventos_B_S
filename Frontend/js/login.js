@@ -30,8 +30,10 @@ loginForm.addEventListener('submit', async (event) => {
 
     // O servidor confirma a palavra-passe e, se estiver certa, abre a sessão
     try {
-        await apiLogin(email, password);
-        window.location.href = 'marca.html';
+        const result = await apiLogin(email, password);
+
+        // Palavra-passe temporária (reposta pelo Administrador): primeiro escolhe-se uma nova
+        window.location.href = result.user.mustChangePassword ? 'conta.html' : 'marca.html';
     } catch (error) {
         showMessage(formMessage, error.message, 'is-error');
         passwordInput.value = '';

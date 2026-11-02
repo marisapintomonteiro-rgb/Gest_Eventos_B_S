@@ -49,6 +49,11 @@ function apiLogout() {
     return apiRequest('POST', '/api/auth/logout');
 }
 
+// Mudar a própria palavra-passe (todos os perfis)
+function apiChangePassword(currentPassword, newPassword) {
+    return apiRequest('PUT', '/api/auth/password', { currentPassword, newPassword });
+}
+
 function apiGetCurrentUser() {
     return apiRequest('GET', '/api/auth/me');
 }
@@ -61,6 +66,11 @@ function apiListUsers() {
 
 function apiCreateUser(email, password, role) {
     return apiRequest('POST', '/api/users', { email, password, role });
+}
+
+// O Administrador repõe a palavra-passe de uma conta (fica temporária)
+function apiResetPassword(userId, password) {
+    return apiRequest('POST', `/api/users/${userId}/password`, { password });
 }
 
 function apiRemoveUser(userId) {

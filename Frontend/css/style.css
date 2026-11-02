@@ -3450,3 +3450,27 @@ textarea:focus-visible {
         font-size: 2rem;
     }
 }
+
+/* ---------- A minha conta e repor palavra-passe ---------- */
+
+.page-narrow {
+    max-width: 640px;
+}
+
+.reset-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.reset-form input {
+    flex: 1 1 180px;
+    min-height: 38px;
+    padding: 6px 10px;
+}
+
+.login-forgot {
+    margin-top: 14px;
+    text-align: center;
+}

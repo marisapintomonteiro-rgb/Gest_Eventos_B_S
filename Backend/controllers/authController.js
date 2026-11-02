@@ -124,6 +124,9 @@ async function login(req, res) {
 
         const brand = await brandModel.findBrandById(user.brand_id);
 
+        // Palavra-passe posta pelo Administrador: a pessoa tem de escolher outra antes de continuar
+        const temporary = await userModel.hasTemporaryPassword(user.user_id);
+
         // Dá uma "pulseira" nova a quem acabou de entrar
         req.session.regenerate((error) => {
             if (error) {
@@ -135,7 +138,8 @@ async function login(req, res) {
                 userId: user.user_id,
                 brandId: user.brand_id,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                mustChangePassword: temporary
             };
 
             res.json({ user: { ...req.session.user, brandName: brand.brand_name } });
@@ -169,4 +173,34 @@ function logout(req, res) {
     });
 }
 
-module.exports = { registerBrand, login, getCurrentUser, logout };
+// PUT /api/auth/password: a própria pessoa muda a palavra-passe (confirma a atual primeiro)
+async function changePassword(req, res) {
+    const currentPassword = String(req.body.currentPassword || '');
+    const newPassword = String(req.body.newPassword || '');
+
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+        return res.status(400).json({ error: `A palavra-passe nova tem de ter pelo menos ${MIN_PASSWORD_LENGTH} caracteres.` });
+    }
+
+    if (newPassword === currentPassword) {
+        return res.status(400).json({ error: 'A palavra-passe nova tem de ser diferente da atual.' });
+    }
+
+    try {
+        const user = await userModel.findUserById(req.session.user.userId);
+        const isPasswordCorrect = user ? await bcrypt.compare(currentPassword, user.password_hash) : false;
+
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ error: 'A palavra-passe atual não está certa.' });
+        }
+
+        await userModel.changePassword(user.user_id, await bcrypt.hash(newPassword, BCRYPT_ROUNDS));
+        req.session.user.mustChangePassword = false;
+        res.json({ message: 'Palavra-passe alterada.' });
+    } catch (error) {
+        console.error('Erro ao mudar a palavra-passe:', error.message);
+        res.status(500).json({ error: 'Não foi possível mudar a palavra-passe. Tenta novamente.' });
+    }
+}
+
+module.exports = { registerBrand, login, getCurrentUser, logout, changePassword };

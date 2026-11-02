@@ -361,3 +361,17 @@ CREATE TABLE IF NOT EXISTS event_editions (
         FOREIGN KEY (previous_event_id) REFERENCES events (event_id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Palavras-passe temporárias: o Administrador repôs a palavra-passe desta conta.
+-- Enquanto a linha existir, a pessoa tem de escolher uma palavra-passe nova ao entrar.
+CREATE TABLE IF NOT EXISTS password_resets (
+    user_id INT PRIMARY KEY,
+    reset_by INT NOT NULL,
+    reset_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_password_resets_user
+        FOREIGN KEY (user_id) REFERENCES users (user_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_password_resets_admin
+        FOREIGN KEY (reset_by) REFERENCES users (user_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;

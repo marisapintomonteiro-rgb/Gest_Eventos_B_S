@@ -22,9 +22,11 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | POST | `/api/auth/login` | qualquer pessoa (entrar) |
 | GET | `/api/auth/me` | quem tem sessão |
 | POST | `/api/auth/logout` | quem tem sessão |
+| PUT | `/api/auth/password` | quem tem sessão (mudar a própria palavra-passe) |
 | GET | `/api/users` | Administrador |
 | POST | `/api/users` | Administrador |
 | DELETE | `/api/users/:id` | Administrador |
+| POST | `/api/users/:id/password` | Administrador (repor a palavra-passe; fica temporária) |
 | GET | `/api/events` | quem tem sessão (eventos da sua marca) |
 | POST | `/api/events` | Gestor e Administrador (US01) |
 | GET | `/api/events/:eventId/menu` | quem tem sessão (RF29; o Colaborador não recebe a composição) |
