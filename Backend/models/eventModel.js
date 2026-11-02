@@ -73,4 +73,24 @@ async function findEventById(brandId, eventId) {
     return rows[0] || null;
 }
 
-module.exports = { createEvent, findEventsByBrand, findEventById };
+// Dias de um evento, por ordem, com a indicação de fechado (RF19)
+async function findDaysByEvent(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT d.event_day_id, d.event_date, d.start_time, d.end_time, d.revenue_target,
+                (c.event_day_id IS NOT NULL) AS is_closed
+         FROM event_days d
+         LEFT JOIN day_closings c ON c.event_day_id = d.event_day_id
+         WHERE d.event_id = ?
+         ORDER BY d.event_date`,
+        [eventId]
+    );
+    return rows;
+}
+
+// Um dia deste evento (ou null se o dia não for deste evento)
+async function findDayInEvent(eventId, dayId) {
+    const days = await findDaysByEvent(eventId);
+    return days.find((day) => day.event_day_id === dayId) || null;
+}
+
+module.exports = { createEvent, findEventsByBrand, findEventById, findDaysByEvent, findDayInEvent };

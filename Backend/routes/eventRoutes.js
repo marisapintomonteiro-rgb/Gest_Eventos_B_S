@@ -12,4 +12,7 @@ router.get('/', requireLogin, eventController.listEvents);
 // POST /api/events: criar um evento (só Gestor e Administrador, US01)
 router.post('/', requireRole('Gestor'), eventController.createEvent);
 
+// GET /api/events/:eventId/days: dias do evento (todos os perfis, ex.: para escolher o dia das vendas)
+router.get('/:eventId/days', requireLogin, eventController.listDays);
+
 module.exports = router;

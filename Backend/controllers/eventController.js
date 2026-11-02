@@ -156,4 +156,21 @@ async function listEvents(req, res) {
     }
 }
 
-module.exports = { createEvent, listEvents };
+// GET /api/events/:eventId/days: dias do evento, com a indicação de fechado (todos os perfis)
+async function listDays(req, res) {
+    try {
+        const event = await eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
+
+        if (!event) {
+            return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        const days = await eventModel.findDaysByEvent(event.event_id);
+        res.json({ event, days });
+    } catch (error) {
+        console.error('Erro ao listar os dias:', error.message);
+        res.status(500).json({ error: 'Não foi possível carregar os dias do evento. Tenta novamente.' });
+    }
+}
+
+module.exports = { createEvent, listEvents, listDays };

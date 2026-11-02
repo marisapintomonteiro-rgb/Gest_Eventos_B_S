@@ -30,21 +30,6 @@ async function findPurchasesByEvent(eventId) {
     }));
 }
 
-// Stock do evento: o que entrou com as compras, por produto (as vendas e acertos entram nas próximas etapas)
-async function findStockByEvent(eventId) {
-    const [rows] = await pool.execute(
-        `SELECT p.product_id, p.product_name, p.unit, p.min_stock, SUM(pl.quantity) AS quantity
-         FROM purchase_lines pl
-         JOIN purchases pu ON pu.purchase_id = pl.purchase_id
-         JOIN products p ON p.product_id = pl.product_id
-         WHERE pu.event_id = ?
-         GROUP BY p.product_id
-         ORDER BY p.product_name`,
-        [eventId]
-    );
-    return rows;
-}
-
 // Confirma que a compra pertence a este evento
 async function findPurchaseInEvent(eventId, purchaseId) {
     const [rows] = await pool.execute(
@@ -125,7 +110,6 @@ async function deletePurchase(purchaseId) {
 
 module.exports = {
     findPurchasesByEvent,
-    findStockByEvent,
     findPurchaseInEvent,
     createPurchase,
     deletePurchase

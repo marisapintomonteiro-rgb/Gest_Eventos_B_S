@@ -215,3 +215,74 @@ CREATE TABLE IF NOT EXISTS purchase_lines (
     CONSTRAINT fk_purchase_lines_product
         FOREIGN KEY (product_id) REFERENCES products (product_id)
 ) ENGINE=InnoDB;
+
+-- Dias fechados (RF19). Se o dia tem uma linha aqui, está fechado: não aceita novos registos.
+-- Reabrir apaga a linha; voltar a fechar cria outra.
+CREATE TABLE IF NOT EXISTS day_closings (
+    event_day_id INT PRIMARY KEY,
+    closed_by INT NOT NULL,
+    closed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_day_closings_day
+        FOREIGN KEY (event_day_id) REFERENCES event_days (event_day_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_day_closings_user
+        FOREIGN KEY (closed_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;
+
+-- Vendas (RF14). Cada venda fica no dia operacional escolhido por quem regista (não pela hora do sistema).
+-- item_name e unit_price são guardados no momento da venda: se a ementa mudar, a venda antiga não muda.
+CREATE TABLE IF NOT EXISTS sales (
+    sale_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    event_day_id INT NOT NULL,
+    menu_item_id INT NOT NULL,
+    item_name VARCHAR(100) NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    cancelled_by INT NULL,
+    cancelled_at DATETIME NULL,
+    CONSTRAINT fk_sales_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_sales_day
+        FOREIGN KEY (event_day_id) REFERENCES event_days (event_day_id),
+    CONSTRAINT fk_sales_item
+        FOREIGN KEY (menu_item_id) REFERENCES menu_items (menu_item_id),
+    CONSTRAINT fk_sales_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id),
+    CONSTRAINT fk_sales_cancelled_user
+        FOREIGN KEY (cancelled_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;
+
+-- Movimentos de stock (RF15, RF16, RF17): tudo o que muda o stock, exceto as compras.
+-- quantity é negativa quando sai do stock (vendas, consumos, quebras...) e positiva quando entra.
+-- As vendas criam um movimento por ingrediente, com a receita desse momento (o histórico não muda).
+-- Nas correções manuais guarda-se a quantidade anterior, a nova e o motivo.
+CREATE TABLE IF NOT EXISTS stock_movements (
+    movement_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    product_id INT NOT NULL,
+    event_day_id INT NULL,
+    movement_type ENUM('Venda', 'Consumo interno', 'Oferta', 'Quebra', 'Desperdício', 'Correção', 'Devolução') NOT NULL,
+    quantity DECIMAL(12,2) NOT NULL,
+    sale_id INT NULL,
+    reason VARCHAR(255) NULL,
+    previous_quantity DECIMAL(12,2) NULL,
+    new_quantity DECIMAL(12,2) NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_stock_movements_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_stock_movements_product
+        FOREIGN KEY (product_id) REFERENCES products (product_id),
+    CONSTRAINT fk_stock_movements_day
+        FOREIGN KEY (event_day_id) REFERENCES event_days (event_day_id),
+    CONSTRAINT fk_stock_movements_sale
+        FOREIGN KEY (sale_id) REFERENCES sales (sale_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_stock_movements_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;

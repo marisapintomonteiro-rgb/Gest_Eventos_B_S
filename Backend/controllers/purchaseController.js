@@ -5,6 +5,8 @@ const purchaseModel = require('../models/purchaseModel');
 const eventModel = require('../models/eventModel');
 const supplierModel = require('../models/supplierModel');
 const productModel = require('../models/productModel');
+const stockModel = require('../models/stockModel');
+const saleModel = require('../models/saleModel');
 
 // Data no formato AAAA-MM-DD e que existe mesmo no calendário (ex.: não aceita 2027-02-30)
 function isValidDate(text) {
@@ -93,7 +95,7 @@ async function listPurchases(req, res) {
 
         const [purchases, stock] = await Promise.all([
             purchaseModel.findPurchasesByEvent(event.event_id),
-            purchaseModel.findStockByEvent(event.event_id)
+            stockModel.findStockByEvent(event.event_id)
         ]);
 
         res.json({ event, purchases, stock });
@@ -148,7 +150,7 @@ async function createPurchase(req, res) {
 }
 
 // DELETE /api/events/:eventId/purchases/:purchaseId: apagar uma compra registada por engano.
-// Ainda não há vendas; quando houver, só se poderá apagar se o stock não ficar negativo.
+// Só enquanto o evento não tem vendas; depois disso, os acertos fazem-se com a correção de stock.
 async function deletePurchase(req, res) {
     const purchaseId = Number(req.params.purchaseId);
 
@@ -157,6 +159,10 @@ async function deletePurchase(req, res) {
 
         if (!event || !await purchaseModel.findPurchaseInEvent(event.event_id, purchaseId)) {
             return res.status(404).json({ error: 'Esta compra não existe.' });
+        }
+
+        if (await saleModel.eventHasSales(event.event_id)) {
+            return res.status(400).json({ error: 'O evento já tem vendas: a compra não pode ser apagada. Usa a correção de stock.' });
         }
 
         await purchaseModel.deletePurchase(purchaseId);
