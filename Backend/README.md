@@ -37,6 +37,9 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | GET | `/api/events/:eventId/sales?day=ID` | quem tem sessão (vendas e faturação do dia, RF30) |
 | POST | `/api/events/:eventId/sales` | quem tem sessão (RF14; desconta o stock pela receita) |
 | POST | `/api/events/:eventId/sales/:saleId/cancel` | Colaborador (as suas), Gestor e Administrador (todas) |
+| GET | `/api/events/:eventId/stock` | quem tem sessão (stock e movimentos, sem valores em euros) |
+| POST | `/api/events/:eventId/stock/movements` | consumo interno: todos; oferta, quebra e desperdício: Gestor (RF16) |
+| POST | `/api/events/:eventId/stock/corrections` | Gestor e Administrador (RF17; guarda anterior, nova e motivo) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |

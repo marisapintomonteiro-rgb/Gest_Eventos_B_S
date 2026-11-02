@@ -32,4 +32,32 @@ async function findStockOfProducts(eventId, productIds) {
     return stock.filter((row) => productIds.includes(row.product_id));
 }
 
-module.exports = { findStockByEvent, findStockOfProducts };
+// Movimentos do evento que não vêm de vendas (consumos, ofertas, quebras, desperdícios, correções e devoluções),
+// do mais recente para o mais antigo
+async function findMovementsByEvent(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT sm.movement_id, sm.movement_type, sm.quantity, sm.reason, sm.previous_quantity, sm.new_quantity,
+                sm.created_at, p.product_name, p.unit, d.event_date, u.email AS created_by_email
+         FROM stock_movements sm
+         JOIN products p ON p.product_id = sm.product_id
+         JOIN users u ON u.user_id = sm.created_by
+         LEFT JOIN event_days d ON d.event_day_id = sm.event_day_id
+         WHERE sm.event_id = ? AND sm.movement_type <> 'Venda'
+         ORDER BY sm.created_at DESC, sm.movement_id DESC`,
+        [eventId]
+    );
+    return rows;
+}
+
+// Grava um movimento de stock. Nas correções leva também a quantidade anterior e a nova.
+async function createMovement(eventId, userId, movement) {
+    await pool.execute(
+        `INSERT INTO stock_movements
+             (event_id, product_id, event_day_id, movement_type, quantity, reason, previous_quantity, new_quantity, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [eventId, movement.productId, movement.eventDayId, movement.type, movement.quantity, movement.reason,
+            movement.previousQuantity, movement.newQuantity, userId]
+    );
+}
+
+module.exports = { findStockByEvent, findStockOfProducts, findMovementsByEvent, createMovement };

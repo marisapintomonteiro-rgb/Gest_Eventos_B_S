@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="vendas.html">Vendas</a>
+            <a href="stock.html" aria-current="page">Stock</a>
+            <a href="ementa.html">Ementa</a>
+            <a href="compras.html" data-required-role="Gestor">Compras</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading">
+            <div>
+                <h1>Stock</h1>
+                <p class="lead">O que há de cada produto no evento: compras, menos vendas, consumos e perdas.</p>
+            </div>
+            <div class="heading-actions">
+                <button class="button button-ghost" type="button" id="correctionButton" data-required-role="Gestor">Corrigir stock</button>
+                <button class="button" type="button" id="outButton">Registar saída</button>
+            </div>
+        </div>
+
+        <div class="event-picker" id="eventPicker" hidden>
+            <label for="eventSelect">Evento</label>
+            <select id="eventSelect"></select>
+        </div>
+
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <p class="empty-state" id="noEventsNote" hidden>
+            Ainda não há eventos. <a href="eventos.html">Cria primeiro o evento</a>.
+        </p>
+
+        <!-- Saída de stock que não é venda (RF16) -->
+        <section class="planner" id="outPlanner" aria-labelledby="outPlannerTitle" hidden>
+            <form id="outForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="outPlannerTitle">Registar saída de stock</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body">
+                    <div class="planner-col">
+                        <fieldset class="field segmented-field">
+                            <legend>O que aconteceu?</legend>
+                            <div class="segmented segmented-wrap" id="outTypes">
+                                <label><input type="radio" name="outType" value="Consumo interno" checked><span>Consumo interno</span></label>
+                                <label data-required-role="Gestor"><input type="radio" name="outType" value="Oferta"><span>Oferta</span></label>
+                                <label data-required-role="Gestor"><input type="radio" name="outType" value="Quebra"><span>Quebra</span></label>
+                                <label data-required-role="Gestor"><input type="radio" name="outType" value="Desperdício"><span>Desperdício</span></label>
+                            </div>
+                        </fieldset>
+                        <p class="hint" id="outTypeHint"></p>
+
+                        <div class="field">
+                            <label for="outDay">Dia</label>
+                            <select id="outDay"></select>
+                        </div>
+                    </div>
+                    <div class="planner-col">
+                        <div class="field">
+                            <label for="outProduct">Produto</label>
+                            <select id="outProduct"></select>
+                        </div>
+                        <div class="field">
+                            <label for="outQuantity">Quantidade que saiu</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="outQuantity" min="0" step="any" inputmode="decimal" aria-describedby="outQuantityError">
+                                <span class="unit-suffix" id="outUnit">un.</span>
+                            </div>
+                            <small class="error" id="outQuantityError"></small>
+                        </div>
+                        <div class="field">
+                            <label for="outReason">Motivo <span class="optional">(opcional)</span></label>
+                            <input type="text" id="outReason" maxlength="255" placeholder="Ex.: garrafa partida no transporte">
+                        </div>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="outFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Registar saída</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Correção manual (RF17): só Gestor e Administrador -->
+        <section class="planner" id="correctionPlanner" aria-labelledby="correctionPlannerTitle" hidden>
+            <form id="correctionForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="correctionPlannerTitle">Corrigir stock</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body">
+                    <div class="planner-col">
+                        <div class="field">
+                            <label for="correctionProduct">Produto</label>
+                            <select id="correctionProduct"></select>
+                        </div>
+                        <p class="conversion-note" id="correctionCurrent"></p>
+                    </div>
+                    <div class="planner-col">
+                        <div class="field">
+                            <label for="correctionQuantity">Quantidade contada</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="correctionQuantity" min="0" step="any" inputmode="decimal" aria-describedby="correctionQuantityError">
+                                <span class="unit-suffix" id="correctionUnit">un.</span>
+                            </div>
+                            <small class="error" id="correctionQuantityError"></small>
+                        </div>
+                        <div class="field">
+                            <label for="correctionReason">Motivo</label>
+                            <input type="text" id="correctionReason" maxlength="255" placeholder="Ex.: contagem física no fim do dia" aria-describedby="correctionReasonError">
+                            <small class="error" id="correctionReasonError"></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="correctionFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Guardar correção</button>
+                </div>
+            </form>
+        </section>
+
+        <div class="catalog-layout stock-layout" id="stockLayout" hidden>
+            <section class="panel" aria-labelledby="stockTitle">
+                <div class="panel-heading">
+                    <h2 id="stockTitle">Stock do evento</h2>
+                    <span class="counter counter-alert" id="lowCount" hidden></span>
+                </div>
+                <div class="table-wrap">
+                    <table class="stock-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Produto</th>
+                                <th scope="col">Entrou</th>
+                                <th scope="col">Vendas e outros</th>
+                                <th scope="col">Em stock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockRows"></tbody>
+                    </table>
+                </div>
+                <p class="empty-state empty-small" id="stockEmpty" hidden>Ainda não há stock: regista primeiro as compras do evento.</p>
+            </section>
+
+            <section class="panel" aria-labelledby="movementsTitle">
+                <div class="panel-heading">
+                    <h2 id="movementsTitle">Movimentos</h2>
+                </div>
+                <p class="col-hint">Consumos, ofertas, quebras, desperdícios e correções. As vendas estão na página Vendas.</p>
+                <ul class="movement-list" id="movementList"></ul>
+                <p class="empty-state empty-small" id="movementsEmpty" hidden>Ainda não há movimentos.</p>
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/stock.js"></script>
+</body>
+</html>

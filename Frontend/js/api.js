@@ -95,6 +95,20 @@ function apiCancelSale(eventId, saleId) {
     return apiRequest('POST', `/api/events/${eventId}/sales/${saleId}/cancel`);
 }
 
+// ---------- Stock (consultar e consumo interno: todos; o resto: Gestor e Administrador) ----------
+
+function apiGetStock(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/stock`);
+}
+
+function apiCreateStockMovement(eventId, movementData) {
+    return apiRequest('POST', `/api/events/${eventId}/stock/movements`, movementData);
+}
+
+function apiCreateStockCorrection(eventId, correctionData) {
+    return apiRequest('POST', `/api/events/${eventId}/stock/corrections`, correctionData);
+}
+
 // ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
 
 function apiGetMenu(eventId) {

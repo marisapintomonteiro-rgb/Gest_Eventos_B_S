@@ -19,10 +19,10 @@ const APP_AREAS = [
             { name: 'Consultar calendário', requiredRole: 'Colaborador' },
             { name: 'Consultar ementa', requiredRole: 'Colaborador', link: 'ementa.html' },
             { name: 'Registar vendas', requiredRole: 'Colaborador', link: 'vendas.html' },
-            { name: 'Registar consumo interno', requiredRole: 'Colaborador' },
+            { name: 'Registar consumo interno', requiredRole: 'Colaborador', link: 'stock.html' },
             { name: 'Consultar faturação do dia', requiredRole: 'Colaborador', link: 'vendas.html' },
             { name: 'Registar compras e consultar stock', requiredRole: 'Gestor', link: 'compras.html' },
-            { name: 'Corrigir stock', requiredRole: 'Gestor' },
+            { name: 'Corrigir stock e registar perdas', requiredRole: 'Gestor', link: 'stock.html' },
             { name: 'Fechar e reabrir dias', requiredRole: 'Gestor' }
         ]
     },
