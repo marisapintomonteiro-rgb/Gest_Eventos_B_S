@@ -110,10 +110,12 @@
 
                         <fieldset class="field segmented-field">
                             <legend>Mede-se em</legend>
-                            <div class="segmented">
-                                <label><input type="radio" name="unit" value="unidade" checked><span>unidades</span></label>
+                            <div class="segmented segmented-units">
+                                <label><input type="radio" name="unit" value="unidade" checked><span>unid.</span></label>
                                 <label><input type="radio" name="unit" value="mililitro"><span>ml</span></label>
-                                <label><input type="radio" name="unit" value="grama"><span>gramas</span></label>
+                                <label><input type="radio" name="unit" value="litro"><span>litros</span></label>
+                                <label><input type="radio" name="unit" value="grama"><span>g</span></label>
+                                <label><input type="radio" name="unit" value="quilograma"><span>kg</span></label>
                             </div>
                         </fieldset>
 
@@ -134,7 +136,8 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="hint package-hint" id="packageHint">Um barril de 30 L tem 30000 ml; um saco de 1 kg tem 1000 g; uma grade tem 24 unidades.</p>
+                        <p class="hint package-hint" id="packageHint">Escreve como vem na embalagem (ex.: 30 litros). O sistema guarda sempre em ml, g ou unidades, para depois a ementa poder usar doses em ml ou g.</p>
+                        <p class="conversion-note" id="conversionNote" hidden></p>
 
                         <label class="check-line">
                             <input type="checkbox" id="isPerishable">

@@ -5,6 +5,16 @@ const MONEY = new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR
 const QUANTITY = new Intl.NumberFormat('pt-PT', { maximumFractionDigits: 2 });
 const UNIT_LABELS = { unidade: 'un.', mililitro: 'ml', grama: 'g' };
 
+// Unidades que se podem escolher no formulário. Na base de dados fica sempre a unidade base
+// (unidade, mililitro ou grama), como diz a regra: 1 L = 1000 ml e 1 kg = 1000 g.
+const INPUT_UNITS = {
+    unidade: { baseUnit: 'unidade', factor: 1, label: 'un.' },
+    mililitro: { baseUnit: 'mililitro', factor: 1, label: 'ml' },
+    litro: { baseUnit: 'mililitro', factor: 1000, label: 'L' },
+    grama: { baseUnit: 'grama', factor: 1, label: 'g' },
+    quilograma: { baseUnit: 'grama', factor: 1000, label: 'kg' }
+};
+
 const pageMessage = document.getElementById('pageMessage');
 const supplierPlanner = document.getElementById('supplierPlanner');
 const productPlanner = document.getElementById('productPlanner');
@@ -38,6 +48,8 @@ async function startProductsPage() {
     productForm.querySelectorAll('input[name="unit"]').forEach((input) => {
         input.addEventListener('change', updateUnitLabels);
     });
+    document.getElementById('packageQuantity').addEventListener('input', updateConversionNote);
+    document.getElementById('minStock').addEventListener('input', updateConversionNote);
 
     clearErrorsWhileTyping(supplierForm);
     clearErrorsWhileTyping(productForm);
@@ -207,10 +219,50 @@ function resetProductForm() {
 
 // Mostra a unidade escolhida ao lado das quantidades (un., ml ou g)
 function updateUnitLabels() {
-    const unit = productForm.querySelector('input[name="unit"]:checked').value;
+    const inputUnit = getChosenUnit();
     document.querySelectorAll('[data-unit-label]').forEach((label) => {
-        label.textContent = UNIT_LABELS[unit];
+        label.textContent = inputUnit.label;
     });
+    updateConversionNote();
+}
+
+function getChosenUnit() {
+    return INPUT_UNITS[productForm.querySelector('input[name="unit"]:checked').value];
+}
+
+// Passa o valor escrito para a unidade base (ex.: 30 L passa a 30000 ml). Arredonda a 2 casas.
+function toBaseQuantity(value, inputUnit) {
+    if (value === '') {
+        return null;
+    }
+
+    return Math.round(Number(value) * inputUnit.factor * 100) / 100;
+}
+
+// Quando se escolhe litros ou kg, mostra como vai ficar guardado (ex.: "Fica guardado: 30 000 ml")
+function updateConversionNote() {
+    const note = document.getElementById('conversionNote');
+    const inputUnit = getChosenUnit();
+    const packageValue = document.getElementById('packageQuantity').value;
+    const minValue = document.getElementById('minStock').value;
+
+    if (inputUnit.factor === 1 || (packageValue === '' && minValue === '')) {
+        note.hidden = true;
+        return;
+    }
+
+    const parts = [];
+
+    if (packageValue !== '') {
+        parts.push(`embalagem de ${QUANTITY.format(toBaseQuantity(packageValue, inputUnit))} ${UNIT_LABELS[inputUnit.baseUnit]}`);
+    }
+
+    if (minValue !== '') {
+        parts.push(`stock mínimo de ${QUANTITY.format(toBaseQuantity(minValue, inputUnit))} ${UNIT_LABELS[inputUnit.baseUnit]}`);
+    }
+
+    note.textContent = `Fica guardado: ${parts.join('; ')}.`;
+    note.hidden = false;
 }
 
 // Uma linha de fornecedor no formulário do produto.
@@ -274,10 +326,18 @@ function openProductEditor(product) {
     setPlannerMode(productPlanner, 'Editar produto', 'Guardar alterações');
 
     document.getElementById('productName').value = product.product_name;
-    productForm.querySelector(`input[name="unit"][value="${product.unit}"]`).checked = true;
+    // Embalagens de 1000 ml ou mais aparecem em litros (e 1000 g ou mais em kg), como se escreveu ao criar
+    let unitChoice = product.unit;
+
+    if (product.unit !== 'unidade' && Number(product.package_quantity) >= 1000) {
+        unitChoice = product.unit === 'mililitro' ? 'litro' : 'quilograma';
+    }
+
+    const factor = INPUT_UNITS[unitChoice].factor;
+    productForm.querySelector(`input[name="unit"][value="${unitChoice}"]`).checked = true;
+    document.getElementById('packageQuantity').value = Number(product.package_quantity) / factor;
+    document.getElementById('minStock').value = product.min_stock !== null ? Number(product.min_stock) / factor : '';
     updateUnitLabels();
-    document.getElementById('packageQuantity').value = Number(product.package_quantity);
-    document.getElementById('minStock').value = product.min_stock !== null ? Number(product.min_stock) : '';
     document.getElementById('isPerishable').checked = Boolean(product.is_perishable);
     document.getElementById('isResidual').checked = Boolean(product.is_residual);
 
@@ -306,11 +366,13 @@ async function saveProduct(event) {
         return;
     }
 
+    // O servidor recebe sempre a unidade base: ml, g ou unidades
+    const inputUnit = getChosenUnit();
     const productData = {
         productName: nameInput.value,
-        unit: productForm.querySelector('input[name="unit"]:checked').value,
-        packageQuantity: packageInput.value,
-        minStock: document.getElementById('minStock').value || null,
+        unit: inputUnit.baseUnit,
+        packageQuantity: toBaseQuantity(packageInput.value, inputUnit),
+        minStock: toBaseQuantity(document.getElementById('minStock').value, inputUnit),
         isPerishable: document.getElementById('isPerishable').checked,
         isResidual: document.getElementById('isResidual').checked,
         suppliers: readProductSuppliers()
@@ -350,8 +412,18 @@ async function renderProducts() {
     products.forEach((product) => list.appendChild(createProductCard(product)));
 }
 
+// Mostra a quantidade guardada; a partir de 1000 ml ou 1000 g mostra também em L ou kg
+// (ex.: "30 L (30 000 ml)")
 function formatQuantity(value, unit) {
-    return `${QUANTITY.format(Number(value))} ${UNIT_LABELS[unit]}`;
+    const amount = Number(value);
+    const base = `${QUANTITY.format(amount)} ${UNIT_LABELS[unit]}`;
+
+    if (unit !== 'unidade' && amount >= 1000) {
+        const bigLabel = unit === 'mililitro' ? 'L' : 'kg';
+        return `${QUANTITY.format(amount / 1000)} ${bigLabel} (${base})`;
+    }
+
+    return base;
 }
 
 function createProductCard(product) {
