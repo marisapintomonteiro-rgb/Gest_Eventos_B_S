@@ -73,6 +73,14 @@ function apiListEvents() {
     return apiRequest('GET', '/api/events');
 }
 
+function apiGetEvent(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}`);
+}
+
+function apiUpdateEvent(eventId, eventData) {
+    return apiRequest('PUT', `/api/events/${eventId}`, eventData);
+}
+
 function apiCreateEvent(eventData) {
     return apiRequest('POST', '/api/events', eventData);
 }

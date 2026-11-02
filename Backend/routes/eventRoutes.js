@@ -24,6 +24,12 @@ router.get('/:eventId/forecast', requireRole('Gestor'), forecastController.getFo
 // PUT /api/events/:eventId/previous: definir a edição anterior do evento (RF13)
 router.put('/:eventId/previous', requireRole('Gestor'), requireEditableEvent, forecastController.setPreviousEvent);
 
+// GET /api/events/:eventId: dados do evento para editar (Gestor e Administrador; tem o orçamento)
+router.get('/:eventId', requireRole('Gestor'), eventController.getEvent);
+
+// PUT /api/events/:eventId: alterar o evento e os dias (dentro do prazo de edição, RF26)
+router.put('/:eventId', requireRole('Gestor'), requireEditableEvent, eventController.updateEvent);
+
 // GET /api/events/:eventId/days: dias do evento (todos os perfis, ex.: para escolher o dia das vendas)
 router.get('/:eventId/days', requireLogin, eventController.listDays);
 

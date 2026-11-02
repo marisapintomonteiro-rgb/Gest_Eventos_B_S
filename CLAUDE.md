@@ -700,36 +700,41 @@ Sprint 1 (apresentada a 8 de outubro de 2026):
 - diagrama de casos de uso em `Docs/UML/` e diagrama BPMN do processo Criar evento em `Docs/BPMN/`;
 - módulo de acesso no frontend: registo de marca com funções, email e palavra-passe (UC03), login (UC01), página da marca por perfil e gestão de utilizadores (UC02).
 
-Sprint 2 (em curso):
+Sprint 2 (backend e acesso):
 - backend Node.js/Express em `Backend/`, com o padrão MVC (secção 5.1), ligado ao MySQL com as credenciais no `.env`;
 - módulo de acesso passado para o servidor: registo da marca, login com sessão (`express-session`, 30 minutos sem atividade), logout e gestão de utilizadores;
 - palavras-passe protegidas com bcrypt no servidor e permissões RBAC validadas no backend (`middleware/authMiddleware.js`);
 - o frontend fala com o servidor só através de `Frontend/js/api.js` e é aberto em `http://localhost:3000`.
 
-Por fazer: o logótipo da marca ainda não é guardado no servidor (decisão pendente). O módulo Planear começa pela US01 Criar evento.
+Entrega final (6 de novembro de 2026): todos os requisitos funcionais, RF01 a RF32.
+
+| Página | Requisitos |
+| --- | --- |
+| `eventos.html` | RF04, RF05 (criar e editar eventos e dias), RF28 (histórico, com estado de cada evento) |
+| `produtos.html` | RF07, RF11 (produtos em ml/L, g/kg ou unidades; fornecedores; histórico de preços) |
+| `ementa.html` | RF08, RF09, RF10, RF29 (ementa por evento, venda direta ou composto, cópia de outro evento) |
+| `compras.html` | RF12, RF13, RF22 (compras em embalagens, previsão pela edição anterior, devoluções) |
+| `vendas.html` | RF14, RF19, RF24, RF30 (caixa por dia operacional, fecho e reabertura do dia, notas do dia) |
+| `stock.html` | RF15, RF16, RF17, RF18 (stock, consumos e perdas, correções, stock baixo) |
+| `painel.html` | RF20, RF21, RF23 (despesas, resultados, dashboard com gráficos) |
+| `calendario.html` | RF06, RF32 (calendário com desempenho de cada dia e aviso de lucro) |
+| `relatorio.html` | RF24, RF25, RF26, RF27 (notas finais, encerramento, prazo de edição, relatório em PDF) |
+
+Regras transversais:
+- prazo de edição (RF26) no `middleware/eventMiddleware.js`, aplicado a todas as rotas que alteram um evento;
+- stock de um produto num evento = compras + movimentos (`stock_movements`, saídas negativas);
+- vendas, compras e movimentos guardam os valores do momento (nome, preço, tamanho da embalagem, receita), para o histórico não mudar (secção 16);
+- os controllers `dashboardController`, `calendarController` e `forecastController` não têm model próprio: juntam dados de outros models.
+
+Trabalho futuro: guardar o logótipo da marca e as fotografias dos artigos no servidor; registar compras por fotografia da fatura.
 
 ---
 
 ## 31. Prioridade atual
 
-A prioridade seguinte é desenvolver o módulo **Planear**.
+Todos os requisitos estão implementados. A prioridade é testar a aplicação com a base de dados real, corrigir os erros encontrados e preparar o relatório e a apresentação.
 
-Ordem sugerida:
-
-1. Criar evento
-2. Definir dias e horários
-3. Registar orçamento e despesas iniciais
-4. Criar ou copiar ementa
-5. Selecionar/criar produtos
-6. Definir artigos e receitas
-7. Associar fornecedores
-8. Registar compras iniciais
-9. Consultar previsão de compras
-10. Ajustar margem de segurança
-11. Rever resumo do planeamento
-12. Guardar o evento
-
-Não desenvolver toda a aplicação de uma só vez.
+Não acrescentar funcionalidades novas sem confirmação.
 
 ---
 

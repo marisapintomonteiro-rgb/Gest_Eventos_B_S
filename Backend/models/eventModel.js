@@ -166,7 +166,91 @@ async function findPaidByEvent(brandId) {
     return rows;
 }
 
+// Dados do evento para o formulário de edição: o evento e os seus dias
+async function findEventDetails(brandId, eventId) {
+    const [rows] = await pool.execute(
+        `SELECT event_id, event_name, location, space_type, expected_audience, budget
+         FROM events
+         WHERE brand_id = ? AND event_id = ?`,
+        [brandId, eventId]
+    );
+
+    if (rows.length === 0) {
+        return null;
+    }
+
+    return { ...rows[0], days: await findDaysByEvent(eventId) };
+}
+
+// Dias do evento que já têm registos (vendas, movimentos de stock ou despesas): não podem ser retirados
+async function findDaysWithRecords(eventId) {
+    const [rows] = await pool.execute(
+        `SELECT d.event_date
+         FROM event_days d
+         WHERE d.event_id = ?
+           AND (EXISTS (SELECT 1 FROM sales s WHERE s.event_day_id = d.event_day_id)
+             OR EXISTS (SELECT 1 FROM stock_movements m WHERE m.event_day_id = d.event_day_id)
+             OR EXISTS (SELECT 1 FROM expenses x WHERE x.event_day_id = d.event_day_id))`,
+        [eventId]
+    );
+    return rows.map((row) => row.event_date);
+}
+
+// Altera o evento e os seus dias, de uma só vez (transação).
+// Os dias são comparados pela data: os que já existiam são atualizados (o histórico deles fica),
+// os novos são acrescentados e os que deixaram de estar na lista são apagados.
+async function updateEvent(eventId, eventData, days) {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        await connection.execute(
+            `UPDATE events
+             SET event_name = ?, location = ?, space_type = ?, expected_audience = ?, budget = ?
+             WHERE event_id = ?`,
+            [eventData.eventName, eventData.location, eventData.spaceType, eventData.expectedAudience,
+                eventData.budget, eventId]
+        );
+
+        const [existing] = await connection.execute('SELECT event_day_id, event_date FROM event_days WHERE event_id = ?', [eventId]);
+        const newDates = days.map((day) => day.date);
+
+        for (const old of existing) {
+            if (!newDates.includes(old.event_date)) {
+                await connection.execute('DELETE FROM event_days WHERE event_day_id = ?', [old.event_day_id]);
+            }
+        }
+
+        for (const day of days) {
+            const old = existing.find((item) => item.event_date === day.date);
+
+            if (old) {
+                await connection.execute(
+                    'UPDATE event_days SET start_time = ?, end_time = ?, revenue_target = ? WHERE event_day_id = ?',
+                    [day.startTime, day.endTime, day.revenueTarget, old.event_day_id]
+                );
+            } else {
+                await connection.execute(
+                    'INSERT INTO event_days (event_id, event_date, start_time, end_time, revenue_target) VALUES (?, ?, ?, ?, ?)',
+                    [eventId, day.date, day.startTime, day.endTime, day.revenueTarget]
+                );
+            }
+        }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
 module.exports = {
+    findEventDetails,
+    findDaysWithRecords,
+    updateEvent,
     findPreviousEvent,
     setPreviousEvent,
     findCalendarDays,

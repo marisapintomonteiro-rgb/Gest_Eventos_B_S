@@ -15,7 +15,24 @@ A aplicação corre num servidor Node.js e guarda os dados em MySQL.
 
 Não abrir as páginas com duplo clique: têm de ser abertas através do servidor, para a sessão funcionar.
 
-## Tecnologias previstas
+Sempre que o ficheiro `Database/bebe_e_siga.sql` mudar, basta importá-lo outra vez: só são criadas as tabelas que faltam e os dados não se perdem.
+
+## O que a aplicação faz
+
+| Página | Para quê | Perfis |
+| --- | --- | --- |
+| Painel | Faturação acumulada, resultado estimado, stock baixo, gráficos, resultados e despesas | Todos (valores financeiros só Gestor e Administrador) |
+| Calendário | Dias de todos os eventos, com a cor do desempenho e o aviso de lucro | Todos (aviso de lucro só Gestor e Administrador) |
+| Eventos | Criar e editar eventos, dias, horários e objetivos; histórico | Todos (criar e editar: Gestor e Administrador) |
+| Vendas | Caixa por dia operacional, faturação do dia, fecho do dia e notas | Todos (fechar dias e notas: Gestor e Administrador) |
+| Stock | Stock do evento, consumo interno, ofertas, quebras, desperdícios e correções | Todos (consumo interno); o resto Gestor e Administrador |
+| Ementa | Ementa de cada evento, receitas e cópia de outro evento | Todos consultam; Gestor e Administrador alteram |
+| Compras | Compras em embalagens, previsão de compras e devoluções | Gestor e Administrador |
+| Produtos | Produtos, fornecedores e histórico de preços | Gestor e Administrador |
+| Relatório | Encerrar o evento, notas finais e relatório em PDF | Gestor e Administrador |
+| Utilizadores | Criar e retirar contas da marca | Administrador |
+
+## Tecnologias
 
 - HTML
 - CSS

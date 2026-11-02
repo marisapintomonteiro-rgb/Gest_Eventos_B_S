@@ -22,6 +22,9 @@ const pageMessage = document.getElementById('pageMessage');
 
 let page = null;
 
+// Número do evento que está a ser editado; ao criar, fica null
+let editingEventId = null;
+
 startEventsPage();
 
 // Pergunta ao servidor quem entrou e só depois prepara a página
@@ -43,7 +46,7 @@ async function startEventsPage() {
         document.getElementById('addExpenseButton').addEventListener('click', () => addExpenseRow());
         budgetInput.addEventListener('input', updateExpenseTotal);
         clearErrorsWhileTyping(eventForm);
-        eventForm.addEventListener('submit', createEvent);
+        eventForm.addEventListener('submit', saveEvent);
     }
 
     await renderEvents();
@@ -52,6 +55,8 @@ async function startEventsPage() {
 // ---------- Abrir e fechar o planeamento ----------
 
 function openPlanner() {
+    editingEventId = null;
+    setPlannerMode('Novo evento', 'Criar evento', false);
     resetPlanner();
     planner.hidden = false;
     newEventButton.hidden = true;
@@ -62,6 +67,47 @@ function openPlanner() {
 function closePlanner() {
     planner.hidden = true;
     newEventButton.hidden = false;
+    editingEventId = null;
+}
+
+// O mesmo formulário serve para criar e editar. Ao editar não há despesas iniciais (estão no Painel).
+function setPlannerMode(title, buttonText, isEditing) {
+    document.getElementById('plannerTitle').textContent = title;
+    document.getElementById('createEventButton').textContent = buttonText;
+    document.getElementById('initialExpenses').hidden = isEditing;
+    document.getElementById('editExpensesHint').hidden = !isEditing;
+}
+
+// Abre o formulário preenchido com os dados do evento escolhido
+async function openEditor(eventId) {
+    let event;
+
+    try {
+        event = (await apiGetEvent(eventId)).event;
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+        return;
+    }
+
+    resetPlanner();
+    editingEventId = eventId;
+    setPlannerMode('Editar evento', 'Guardar alterações', true);
+
+    document.getElementById('eventName').value = event.event_name;
+    document.getElementById('location').value = event.location;
+    document.getElementById('expectedAudience').value = event.expected_audience !== null ? event.expected_audience : '';
+    budgetInput.value = event.budget !== null ? Number(event.budget) : '';
+    eventForm.querySelectorAll('input[name="spaceType"]').forEach((input) => {
+        input.checked = input.value === event.space_type;
+    });
+
+    dayList.replaceChildren();
+    event.days.forEach((day) => addDayRow(day));
+
+    planner.hidden = false;
+    newEventButton.hidden = true;
+    hideMessage(pageMessage);
+    planner.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // Formulário limpo, com uma linha de dia vazia (é obrigatório pelo menos um dia)
@@ -77,8 +123,16 @@ function resetPlanner() {
 
 // ---------- Dias do evento ----------
 
-function addDayRow() {
+// Uma linha de dia; ao editar, vem preenchida com o dia que já existe
+function addDayRow(day = null) {
     const row = document.getElementById('dayTemplate').content.firstElementChild.cloneNode(true);
+
+    if (day) {
+        row.querySelector('.day-date').value = day.event_date;
+        row.querySelector('.day-start').value = day.start_time ? day.start_time.slice(0, 5) : '';
+        row.querySelector('.day-end').value = day.end_time ? day.end_time.slice(0, 5) : '';
+        row.querySelector('.day-target').value = day.revenue_target !== null ? Number(day.revenue_target) : '';
+    }
 
     row.querySelectorAll('input').forEach((input) => {
         input.addEventListener('input', () => updateDayRow(row));
@@ -92,7 +146,12 @@ function addDayRow() {
     });
 
     dayList.appendChild(row);
-    row.querySelector('.day-date').focus();
+
+    if (day) {
+        updateDayRow(row);
+    } else {
+        row.querySelector('.day-date').focus();
+    }
 }
 
 // Atualiza o mini-bilhete (dia e dia da semana) e o aviso de "passa da meia-noite"
@@ -176,7 +235,8 @@ function updateExpenseTotal() {
 
 // ---------- Criar o evento ----------
 
-async function createEvent(event) {
+// Cria um evento novo ou guarda as alterações, conforme o modo do formulário
+async function saveEvent(event) {
     event.preventDefault();
     clearFormErrors(eventForm);
     hideMessage(formMessage);
@@ -216,10 +276,17 @@ async function createEvent(event) {
     createButton.disabled = true;
 
     try {
-        await apiCreateEvent(eventData);
+        const wasEditing = editingEventId !== null;
+
+        if (wasEditing) {
+            await apiUpdateEvent(editingEventId, eventData);
+        } else {
+            await apiCreateEvent(eventData);
+        }
+
         closePlanner();
         await renderEvents();
-        showMessage(pageMessage, `O evento "${eventData.eventName}" foi criado.`, 'is-success');
+        showMessage(pageMessage, `O evento "${eventData.eventName}" foi ${wasEditing ? 'alterado' : 'criado'}.`, 'is-success');
     } catch (error) {
         // A mensagem vem do servidor, por exemplo "Escolhe pelo menos um dia para o evento."
         showMessage(formMessage, error.message, 'is-error');
@@ -307,6 +374,15 @@ function createTicket(item) {
 
     if (hasRole(page.session.role, 'Gestor')) {
         shortcuts.push(['Relatório', 'relatorio.html']);
+    }
+
+    // Editar só aparece dentro do prazo de edição (RF26); o servidor confirma
+    if (hasRole(page.session.role, 'Gestor') && item.is_editable !== false) {
+        const editButton = createElementWithText('button', 'link-button ticket-edit', 'Editar');
+        editButton.type = 'button';
+        editButton.setAttribute('aria-label', `Editar ${item.event_name}`);
+        editButton.addEventListener('click', () => openEditor(item.event_id));
+        links.append(editButton);
     }
 
     shortcuts.forEach(([text, file]) => {

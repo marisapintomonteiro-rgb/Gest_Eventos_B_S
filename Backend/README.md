@@ -6,6 +6,8 @@ Trata de:
 
 - registo de marca e login, com palavras-passe guardadas com bcrypt;
 - validação das permissões de cada perfil (RBAC) em cada pedido;
+- eventos, produtos, fornecedores, ementas, compras, vendas, stock, despesas, devoluções, notas, resultados, calendário, previsão de compras e relatório;
+- prazo de edição de cada evento (`middleware/eventMiddleware.js`);
 - ligação à base de dados MySQL (ver `Database/bebe_e_siga.sql`).
 
 O código segue o padrão MVC: `routes` (endereços da API), `controllers` (validam e respondem aos pedidos), `models` (SQL) e `middleware` (sessão e permissões). A explicação completa está na secção 5.1 do `CLAUDE.md`.
@@ -54,6 +56,8 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | DELETE | `/api/events/:eventId/returns/:returnId` | Gestor e Administrador |
 | GET | `/api/events/:eventId/report` | Gestor e Administrador (RF27, dados do relatório final) |
 | POST | `/api/events/:eventId/close` | Gestor e Administrador (RF25; todos os dias fechados) |
+| GET | `/api/events/:eventId` | Gestor e Administrador (dados para editar o evento) |
+| PUT | `/api/events/:eventId` | Gestor e Administrador (alterar o evento e os dias; os dias com registos não se retiram) |
 | GET | `/api/events/calendar` | quem tem sessão (RF06, RF32; o aviso de lucro só para Gestor e Administrador) |
 | GET | `/api/events/:eventId/forecast?margin=10` | Gestor e Administrador (RF13) |
 | PUT | `/api/events/:eventId/previous` | Gestor e Administrador (edição anterior do evento) |
@@ -74,4 +78,5 @@ Todas as rotas que alteram um evento passam pelo `middleware/eventMiddleware.js`
 ## Limitações conhecidas
 
 - As sessões ficam na memória do servidor: ao reiniciar o servidor, todos têm de entrar outra vez.
-- O logótipo da marca ainda não é guardado no servidor.
+- O logótipo da marca e as fotografias dos artigos ainda não são guardados no servidor.
+- O PDF do relatório é feito pelo browser ("Guardar como PDF" na janela de impressão).

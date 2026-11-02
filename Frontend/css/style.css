@@ -3271,3 +3271,8 @@ textarea:focus-visible {
         margin-left: auto;
     }
 }
+
+.ticket-links .ticket-edit {
+    padding: 0;
+    font-weight: 500;
+}

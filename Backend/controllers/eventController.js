@@ -105,10 +105,8 @@ function validateEvent(eventData, days, expenses) {
     return null;
 }
 
-// POST /api/events: cria um evento com os seus dias e as despesas iniciais (US01)
-async function createEvent(req, res) {
-    const body = req.body;
-
+// Lê os dados do evento, os dias e as despesas que vieram no pedido
+function readEventBody(body) {
     const eventData = {
         eventName: String(body.eventName || '').trim(),
         location: String(body.location || '').trim(),
@@ -119,8 +117,8 @@ async function createEvent(req, res) {
 
     const days = (Array.isArray(body.days) ? body.days : []).map((day) => ({
         date: String(day.date || ''),
-        startTime: day.startTime ? String(day.startTime) : null,
-        endTime: day.endTime ? String(day.endTime) : null,
+        startTime: day.startTime ? String(day.startTime).slice(0, 5) : null,
+        endTime: day.endTime ? String(day.endTime).slice(0, 5) : null,
         revenueTarget: toOptionalNumber(day.revenueTarget)
     }));
 
@@ -130,6 +128,12 @@ async function createEvent(req, res) {
         amount: Number(expense.amount)
     }));
 
+    return { eventData, days, expenses };
+}
+
+// POST /api/events: cria um evento com os seus dias e as despesas iniciais (US01)
+async function createEvent(req, res) {
+    const { eventData, days, expenses } = readEventBody(req.body);
     const errorMessage = validateEvent(eventData, days, expenses);
 
     if (errorMessage) {
@@ -143,6 +147,56 @@ async function createEvent(req, res) {
     } catch (error) {
         console.error('Erro ao criar o evento:', error.message);
         res.status(500).json({ error: 'Não foi possível criar o evento. Tenta novamente.' });
+    }
+}
+
+// GET /api/events/:eventId: dados do evento para o formulário de edição (Gestor e Administrador)
+async function getEvent(req, res) {
+    try {
+        const event = await eventModel.findEventDetails(req.session.user.brandId, Number(req.params.eventId));
+
+        if (!event) {
+            return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        res.json({ event });
+    } catch (error) {
+        console.error('Erro ao ler o evento:', error.message);
+        res.status(500).json({ error: 'Não foi possível carregar o evento. Tenta novamente.' });
+    }
+}
+
+// PUT /api/events/:eventId: alterar o evento e os seus dias (as despesas mudam-se no Painel)
+async function updateEvent(req, res) {
+    const { eventData, days } = readEventBody(req.body);
+    const errorMessage = validateEvent(eventData, days, []);
+
+    if (errorMessage) {
+        return res.status(400).json({ error: errorMessage });
+    }
+
+    try {
+        const event = await eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
+
+        if (!event) {
+            return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        // Um dia com vendas, saídas de stock ou despesas não pode desaparecer (o histórico ficava sem dia)
+        const datesWithRecords = await eventModel.findDaysWithRecords(event.event_id);
+        const newDates = days.map((day) => day.date);
+        const blocked = datesWithRecords.filter((date) => !newDates.includes(date));
+
+        if (blocked.length > 0) {
+            const list = blocked.map((date) => date.split('-').reverse().join('/')).join(', ');
+            return res.status(400).json({ error: `O dia ${list} já tem registos (vendas, saídas de stock ou despesas) e não pode ser retirado.` });
+        }
+
+        await eventModel.updateEvent(event.event_id, eventData, days);
+        res.json({ message: `O evento "${eventData.eventName}" foi alterado.` });
+    } catch (error) {
+        console.error('Erro ao alterar o evento:', error.message);
+        res.status(500).json({ error: 'Não foi possível alterar o evento. Tenta novamente.' });
     }
 }
 
@@ -265,4 +319,4 @@ async function closeEvent(req, res) {
     }
 }
 
-module.exports = { createEvent, listEvents, listDays, closeDay, reopenDay, closeEvent };
+module.exports = { createEvent, getEvent, updateEvent, listEvents, listDays, closeDay, reopenDay, closeEvent };
