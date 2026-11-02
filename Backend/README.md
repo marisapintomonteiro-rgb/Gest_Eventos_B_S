@@ -27,8 +27,10 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | POST | `/api/events` | Gestor e Administrador (US01) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
+| PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |
 | GET | `/api/products` | Gestor e Administrador (RF07, com fornecedores e preço mais recente) |
 | POST | `/api/products` | Gestor e Administrador (RF07) |
+| PUT | `/api/products/:id` | Gestor e Administrador (editar produto; os preços mudam só com "Novo preço") |
 | GET | `/api/products/:id/prices` | Gestor e Administrador (histórico de preços) |
 | POST | `/api/products/:id/prices` | Gestor e Administrador (novo preço; o anterior fica no histórico) |
 | GET | `/api/health` | qualquer pessoa (teste do servidor e da base de dados) |

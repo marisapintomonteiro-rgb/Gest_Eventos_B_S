@@ -1417,6 +1417,30 @@ th {
     margin-top: 4px;
 }
 
+/* Botão "Editar" no canto de cada produto e de cada fornecedor */
+.product-top .edit-button {
+    margin-left: auto;
+}
+
+.supplier-list li {
+    position: relative;
+    padding-right: 64px;
+}
+
+.supplier-list .edit-button {
+    position: absolute;
+    top: 8px;
+    right: 0;
+}
+
+/* Fornecedor já ligado ao produto, no modo editar */
+.linked-note {
+    margin: 0;
+    align-self: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
 .supplier-details {
     color: var(--muted);
     font-size: 0.9rem;

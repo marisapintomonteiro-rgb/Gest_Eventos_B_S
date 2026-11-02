@@ -66,11 +66,8 @@ async function listProducts(req, res) {
     }
 }
 
-// POST /api/products: cria um produto com os seus fornecedores e o primeiro preço de cada um
-async function createProduct(req, res) {
-    const body = req.body;
-    const { brandId, userId } = req.session.user;
-
+// Lê os dados do produto e a lista de fornecedores que vieram no pedido
+function readProduct(body) {
     const product = {
         productName: String(body.productName || '').trim(),
         unit: String(body.unit || ''),
@@ -86,6 +83,29 @@ async function createProduct(req, res) {
         packagePrice: toOptionalNumber(supplier.packagePrice)
     }));
 
+    return { product, suppliers };
+}
+
+// Confirma as regras que precisam da base de dados: nome repetido e fornecedores de outra marca
+async function checkProductInDatabase(brandId, product, suppliers, exceptProductId = 0) {
+    if (await productModel.findProductByName(brandId, product.productName, exceptProductId)) {
+        return 'Já existe um produto com este nome.';
+    }
+
+    const supplierIds = suppliers.map((supplier) => supplier.supplierId);
+    const brandSupplierIds = await supplierModel.findSupplierIdsOfBrand(brandId, supplierIds);
+
+    if (brandSupplierIds.length !== supplierIds.length) {
+        return 'Um dos fornecedores escolhidos não existe nesta marca.';
+    }
+
+    return null;
+}
+
+// POST /api/products: cria um produto com os seus fornecedores e o primeiro preço de cada um
+async function createProduct(req, res) {
+    const { brandId, userId } = req.session.user;
+    const { product, suppliers } = readProduct(req.body);
     const errorMessage = validateProduct(product, suppliers);
 
     if (errorMessage) {
@@ -93,16 +113,10 @@ async function createProduct(req, res) {
     }
 
     try {
-        if (await productModel.findProductByName(brandId, product.productName)) {
-            return res.status(400).json({ error: 'Já existe um produto com este nome.' });
-        }
+        const databaseError = await checkProductInDatabase(brandId, product, suppliers);
 
-        // Os fornecedores têm de ser da marca de quem tem a sessão
-        const supplierIds = suppliers.map((supplier) => supplier.supplierId);
-        const brandSupplierIds = await supplierModel.findSupplierIdsOfBrand(brandId, supplierIds);
-
-        if (brandSupplierIds.length !== supplierIds.length) {
-            return res.status(400).json({ error: 'Um dos fornecedores escolhidos não existe nesta marca.' });
+        if (databaseError) {
+            return res.status(400).json({ error: databaseError });
         }
 
         const productId = await productModel.createProduct(brandId, userId, product, suppliers);
@@ -110,6 +124,36 @@ async function createProduct(req, res) {
     } catch (error) {
         console.error('Erro ao criar o produto:', error.message);
         res.status(500).json({ error: 'Não foi possível criar o produto. Tenta novamente.' });
+    }
+}
+
+// PUT /api/products/:id: altera o produto. Os preços não mudam aqui: usa-se "Novo preço" (histórico).
+async function updateProduct(req, res) {
+    const { brandId, userId } = req.session.user;
+    const productId = Number(req.params.id);
+    const { product, suppliers } = readProduct(req.body);
+    const errorMessage = validateProduct(product, suppliers);
+
+    if (errorMessage) {
+        return res.status(400).json({ error: errorMessage });
+    }
+
+    try {
+        if (!await productModel.findProductById(brandId, productId)) {
+            return res.status(404).json({ error: 'Este produto não existe.' });
+        }
+
+        const databaseError = await checkProductInDatabase(brandId, product, suppliers, productId);
+
+        if (databaseError) {
+            return res.status(400).json({ error: databaseError });
+        }
+
+        await productModel.updateProduct(productId, userId, product, suppliers);
+        res.json({ message: `Produto "${product.productName}" alterado.` });
+    } catch (error) {
+        console.error('Erro ao alterar o produto:', error.message);
+        res.status(500).json({ error: 'Não foi possível alterar o produto. Tenta novamente.' });
     }
 }
 
@@ -148,4 +192,4 @@ async function listPrices(req, res) {
     }
 }
 
-module.exports = { listProducts, createProduct, addPrice, listPrices };
+module.exports = { listProducts, createProduct, updateProduct, addPrice, listPrices };

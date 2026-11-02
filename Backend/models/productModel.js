@@ -35,11 +35,21 @@ async function findProductsByBrand(brandId) {
     }));
 }
 
-// Procura um produto pelo nome, dentro de uma marca (para não haver dois produtos com o mesmo nome)
-async function findProductByName(brandId, productName) {
+// Procura um produto pelo nome, dentro de uma marca (para não haver dois produtos com o mesmo nome).
+// Ao editar, exceptProductId deixa de fora o próprio produto.
+async function findProductByName(brandId, productName, exceptProductId = 0) {
     const [rows] = await pool.execute(
-        'SELECT product_id FROM products WHERE brand_id = ? AND product_name = ?',
-        [brandId, productName]
+        'SELECT product_id FROM products WHERE brand_id = ? AND product_name = ? AND product_id <> ?',
+        [brandId, productName, exceptProductId]
+    );
+    return rows[0] || null;
+}
+
+// Procura um produto desta marca pelo número
+async function findProductById(brandId, productId) {
+    const [rows] = await pool.execute(
+        'SELECT product_id FROM products WHERE brand_id = ? AND product_id = ?',
+        [brandId, productId]
     );
     return rows[0] || null;
 }
@@ -95,6 +105,62 @@ async function createProduct(brandId, userId, product, suppliers) {
     }
 }
 
+// Altera o produto e os seus fornecedores, de uma só vez (transação).
+// Os fornecedores que já estavam ligados ficam (para não perder o histórico de preços);
+// só muda qual é o principal. Os fornecedores novos entram com o primeiro preço, se tiver.
+async function updateProduct(productId, userId, product, suppliers) {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        await connection.execute(
+            `UPDATE products
+             SET product_name = ?, unit = ?, package_quantity = ?, min_stock = ?, is_perishable = ?, is_residual = ?
+             WHERE product_id = ?`,
+            [product.productName, product.unit, product.packageQuantity, product.minStock,
+                product.isPerishable, product.isResidual, productId]
+        );
+
+        const [linkedRows] = await connection.execute(
+            'SELECT supplier_id FROM product_suppliers WHERE product_id = ?',
+            [productId]
+        );
+        const linkedIds = linkedRows.map((row) => row.supplier_id);
+
+        await connection.execute('UPDATE product_suppliers SET is_main = FALSE WHERE product_id = ?', [productId]);
+
+        for (const supplier of suppliers) {
+            if (linkedIds.includes(supplier.supplierId)) {
+                await connection.execute(
+                    'UPDATE product_suppliers SET is_main = ? WHERE product_id = ? AND supplier_id = ?',
+                    [supplier.isMain, productId, supplier.supplierId]
+                );
+                continue;
+            }
+
+            await connection.execute(
+                'INSERT INTO product_suppliers (product_id, supplier_id, is_main) VALUES (?, ?, ?)',
+                [productId, supplier.supplierId, supplier.isMain]
+            );
+
+            if (supplier.packagePrice !== null) {
+                await connection.execute(
+                    'INSERT INTO product_prices (product_id, supplier_id, package_price, created_by) VALUES (?, ?, ?, ?)',
+                    [productId, supplier.supplierId, supplier.packagePrice, userId]
+                );
+            }
+        }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
 // Junta um preço novo ao histórico (os anteriores ficam como estão)
 async function addPrice(productId, supplierId, packagePrice, userId) {
     await pool.execute(
@@ -120,8 +186,10 @@ async function findPriceHistory(brandId, productId) {
 module.exports = {
     findProductsByBrand,
     findProductByName,
+    findProductById,
     findProductSupplierLink,
     createProduct,
+    updateProduct,
     addPrice,
     findPriceHistory
 };

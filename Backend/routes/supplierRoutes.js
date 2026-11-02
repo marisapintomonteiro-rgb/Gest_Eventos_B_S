@@ -12,4 +12,7 @@ router.get('/', requireRole('Gestor'), supplierController.listSuppliers);
 // POST /api/suppliers: criar um fornecedor
 router.post('/', requireRole('Gestor'), supplierController.createSupplier);
 
+// PUT /api/suppliers/:id: alterar um fornecedor
+router.put('/:id', requireRole('Gestor'), supplierController.updateSupplier);
+
 module.exports = router;

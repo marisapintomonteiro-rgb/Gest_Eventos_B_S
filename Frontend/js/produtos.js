@@ -14,6 +14,10 @@ const productSupplierList = document.getElementById('productSupplierList');
 
 let suppliers = [];
 
+// Quando se está a editar, guarda o número do fornecedor ou do produto; ao criar, fica null
+let editingSupplierId = null;
+let editingProductId = null;
+
 startProductsPage();
 
 // Só o Gestor e o Administrador entram nesta página; o servidor confirma o mesmo em cada pedido
@@ -37,8 +41,8 @@ async function startProductsPage() {
 
     clearErrorsWhileTyping(supplierForm);
     clearErrorsWhileTyping(productForm);
-    supplierForm.addEventListener('submit', createSupplier);
-    productForm.addEventListener('submit', createProduct);
+    supplierForm.addEventListener('submit', saveSupplier);
+    productForm.addEventListener('submit', saveProduct);
 
     await Promise.all([renderSuppliers(), renderProducts()]);
 }
@@ -64,6 +68,22 @@ function closePlanners() {
     supplierForm.reset();
     clearFormErrors(supplierForm);
     hideMessage(document.getElementById('supplierFormMessage'));
+    setPlannerMode(supplierPlanner, 'Novo fornecedor', 'Criar fornecedor');
+    setPlannerMode(productPlanner, 'Novo produto', 'Criar produto');
+    editingSupplierId = null;
+    editingProductId = null;
+}
+
+// O mesmo formulário serve para criar e para editar: só mudam o título e o texto do botão
+function setPlannerMode(planner, title, buttonText) {
+    planner.querySelector('h2').textContent = title;
+    planner.querySelector('button[type="submit"]').textContent = buttonText;
+}
+
+// Abre o formulário no sítio onde está, para quem está no fim da lista
+function showPlanner(planner) {
+    planner.hidden = false;
+    planner.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ---------- Fornecedores ----------
@@ -95,11 +115,35 @@ async function renderSuppliers() {
             item.append(createElementWithText('span', 'tag tag-you', 'Aceita devoluções'));
         }
 
+        const editButton = createElementWithText('button', 'link-button edit-button', 'Editar');
+        editButton.type = 'button';
+        editButton.setAttribute('aria-label', `Editar ${supplier.supplier_name}`);
+        editButton.addEventListener('click', () => openSupplierEditor(supplier));
+        item.append(editButton);
+
         list.appendChild(item);
     });
 }
 
-async function createSupplier(event) {
+// Preenche o formulário com os dados do fornecedor escolhido
+function openSupplierEditor(supplier) {
+    closePlanners();
+    hideMessage(pageMessage);
+    editingSupplierId = supplier.supplier_id;
+    setPlannerMode(supplierPlanner, 'Editar fornecedor', 'Guardar alterações');
+
+    document.getElementById('supplierName').value = supplier.supplier_name;
+    document.getElementById('supplierContact').value = supplier.contact;
+    document.getElementById('supplierEmail').value = supplier.email || '';
+    document.getElementById('supplierNif').value = supplier.nif || '';
+    document.getElementById('supplierAddress').value = supplier.address || '';
+    document.getElementById('supplierAcceptsReturns').checked = Boolean(supplier.accepts_returns);
+
+    showPlanner(supplierPlanner);
+}
+
+// Cria um fornecedor novo ou guarda as alterações, conforme o modo do formulário
+async function saveSupplier(event) {
     event.preventDefault();
     clearFormErrors(supplierForm);
     const formMessage = document.getElementById('supplierFormMessage');
@@ -119,17 +163,22 @@ async function createSupplier(event) {
         return;
     }
 
+    const supplierData = {
+        supplierName: nameInput.value,
+        contact: contactInput.value,
+        email: document.getElementById('supplierEmail').value,
+        nif: document.getElementById('supplierNif').value,
+        address: document.getElementById('supplierAddress').value,
+        acceptsReturns: document.getElementById('supplierAcceptsReturns').checked
+    };
+
     try {
-        const result = await apiCreateSupplier({
-            supplierName: nameInput.value,
-            contact: contactInput.value,
-            email: document.getElementById('supplierEmail').value,
-            nif: document.getElementById('supplierNif').value,
-            address: document.getElementById('supplierAddress').value,
-            acceptsReturns: document.getElementById('supplierAcceptsReturns').checked
-        });
+        const result = editingSupplierId
+            ? await apiUpdateSupplier(editingSupplierId, supplierData)
+            : await apiCreateSupplier(supplierData);
         closePlanners();
-        await renderSuppliers();
+        // O nome do fornecedor também aparece nos produtos
+        await Promise.all([renderSuppliers(), renderProducts()]);
         showMessage(pageMessage, result.message, 'is-success');
     } catch (error) {
         showMessage(formMessage, error.message, 'is-error');
@@ -164,7 +213,9 @@ function updateUnitLabels() {
     });
 }
 
-function addProductSupplierRow() {
+// Uma linha de fornecedor no formulário do produto.
+// Se "link" vier preenchido, é um fornecedor que já está ligado ao produto (ao editar).
+function addProductSupplierRow(link = null) {
     const row = document.getElementById('productSupplierTemplate').content.firstElementChild.cloneNode(true);
     const select = row.querySelector('.ps-supplier');
 
@@ -183,19 +234,60 @@ function addProductSupplierRow() {
         select.value = free.supplier_id;
     }
 
-    row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+    // Um fornecedor já ligado não se troca nem se tira (tem histórico de preços);
+    // o preço muda-se no cartão do produto, com "Novo preço"
+    if (link) {
+        select.value = link.supplier_id;
+        select.disabled = true;
+        row.querySelector('.ps-main').checked = Boolean(link.is_main);
+        row.querySelector('.ps-price').closest('label').replaceWith(
+            createElementWithText('p', 'linked-note', 'Preço: usa "Novo preço" no cartão')
+        );
+        row.querySelector('.remove-row').remove();
+        row.classList.add('is-linked');
+    } else {
+        row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+    }
+
     productSupplierList.appendChild(row);
 }
 
 function readProductSuppliers() {
-    return Array.from(productSupplierList.children).map((row) => ({
-        supplierId: row.querySelector('.ps-supplier').value,
-        packagePrice: row.querySelector('.ps-price').value || null,
-        isMain: row.querySelector('.ps-main').checked
-    }));
+    return Array.from(productSupplierList.children).map((row) => {
+        const priceInput = row.querySelector('.ps-price');
+
+        return {
+            supplierId: row.querySelector('.ps-supplier').value,
+            packagePrice: priceInput ? priceInput.value || null : null,
+            isMain: row.querySelector('.ps-main').checked
+        };
+    });
 }
 
-async function createProduct(event) {
+// Preenche o formulário com os dados do produto escolhido
+function openProductEditor(product) {
+    closePlanners();
+    hideMessage(pageMessage);
+    resetProductForm();
+    productSupplierList.replaceChildren();
+    editingProductId = product.product_id;
+    setPlannerMode(productPlanner, 'Editar produto', 'Guardar alterações');
+
+    document.getElementById('productName').value = product.product_name;
+    productForm.querySelector(`input[name="unit"][value="${product.unit}"]`).checked = true;
+    updateUnitLabels();
+    document.getElementById('packageQuantity').value = Number(product.package_quantity);
+    document.getElementById('minStock').value = product.min_stock !== null ? Number(product.min_stock) : '';
+    document.getElementById('isPerishable').checked = Boolean(product.is_perishable);
+    document.getElementById('isResidual').checked = Boolean(product.is_residual);
+
+    product.suppliers.forEach((link) => addProductSupplierRow(link));
+
+    showPlanner(productPlanner);
+}
+
+// Cria um produto novo ou guarda as alterações, conforme o modo do formulário
+async function saveProduct(event) {
     event.preventDefault();
     clearFormErrors(productForm);
     const formMessage = document.getElementById('productFormMessage');
@@ -214,16 +306,20 @@ async function createProduct(event) {
         return;
     }
 
+    const productData = {
+        productName: nameInput.value,
+        unit: productForm.querySelector('input[name="unit"]:checked').value,
+        packageQuantity: packageInput.value,
+        minStock: document.getElementById('minStock').value || null,
+        isPerishable: document.getElementById('isPerishable').checked,
+        isResidual: document.getElementById('isResidual').checked,
+        suppliers: readProductSuppliers()
+    };
+
     try {
-        const result = await apiCreateProduct({
-            productName: nameInput.value,
-            unit: productForm.querySelector('input[name="unit"]:checked').value,
-            packageQuantity: packageInput.value,
-            minStock: document.getElementById('minStock').value || null,
-            isPerishable: document.getElementById('isPerishable').checked,
-            isResidual: document.getElementById('isResidual').checked,
-            suppliers: readProductSuppliers()
-        });
+        const result = editingProductId
+            ? await apiUpdateProduct(editingProductId, productData)
+            : await apiCreateProduct(productData);
         closePlanners();
         await renderProducts();
         showMessage(pageMessage, result.message, 'is-success');
@@ -273,6 +369,12 @@ function createProductCard(product) {
     if (product.is_residual) {
         top.append(createElementWithText('span', 'tag', 'Consumo residual'));
     }
+
+    const editButton = createElementWithText('button', 'link-button edit-button', 'Editar');
+    editButton.type = 'button';
+    editButton.setAttribute('aria-label', `Editar ${product.product_name}`);
+    editButton.addEventListener('click', () => openProductEditor(product));
+    top.append(editButton);
 
     card.append(top);
 

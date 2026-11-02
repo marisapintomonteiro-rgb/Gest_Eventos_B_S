@@ -39,4 +39,16 @@ async function createSupplier(brandId, supplier) {
     return result.insertId;
 }
 
-module.exports = { findSuppliersByBrand, findSupplierIdsOfBrand, createSupplier };
+// Altera um fornecedor. Só altera se o fornecedor for desta marca; devolve false se não existir.
+async function updateSupplier(brandId, supplierId, supplier) {
+    const [result] = await pool.execute(
+        `UPDATE suppliers
+         SET supplier_name = ?, contact = ?, email = ?, nif = ?, address = ?, accepts_returns = ?
+         WHERE supplier_id = ? AND brand_id = ?`,
+        [supplier.supplierName, supplier.contact, supplier.email, supplier.nif, supplier.address,
+            supplier.acceptsReturns, supplierId, brandId]
+    );
+    return result.affectedRows > 0;
+}
+
+module.exports = { findSuppliersByBrand, findSupplierIdsOfBrand, createSupplier, updateSupplier };

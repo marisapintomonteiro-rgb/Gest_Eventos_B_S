@@ -13,6 +13,9 @@ router.get('/', requireRole('Gestor'), productController.listProducts);
 // POST /api/products: criar um produto
 router.post('/', requireRole('Gestor'), productController.createProduct);
 
+// PUT /api/products/:id: alterar um produto e os seus fornecedores
+router.put('/:id', requireRole('Gestor'), productController.updateProduct);
+
 // GET /api/products/:id/prices: histórico de preços de um produto
 router.get('/:id/prices', requireRole('Gestor'), productController.listPrices);
 

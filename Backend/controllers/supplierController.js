@@ -28,35 +28,50 @@ async function listSuppliers(req, res) {
     }
 }
 
-// POST /api/suppliers: cria um fornecedor
-async function createSupplier(req, res) {
-    const supplier = {
-        supplierName: String(req.body.supplierName || '').trim(),
-        contact: String(req.body.contact || '').trim(),
-        email: toOptionalText(req.body.email),
-        nif: toOptionalText(req.body.nif),
-        address: toOptionalText(req.body.address),
-        acceptsReturns: req.body.acceptsReturns ? 1 : 0
+// Lê os dados do fornecedor que vieram no pedido
+function readSupplier(body) {
+    return {
+        supplierName: String(body.supplierName || '').trim(),
+        contact: String(body.contact || '').trim(),
+        email: toOptionalText(body.email),
+        nif: toOptionalText(body.nif),
+        address: toOptionalText(body.address),
+        acceptsReturns: body.acceptsReturns ? 1 : 0
     };
+}
 
+// Confirma os dados do fornecedor. Devolve a mensagem do primeiro erro, ou null se estiver tudo certo.
+function validateSupplier(supplier) {
     if (supplier.supplierName.length === 0 || supplier.supplierName.length > 100) {
-        return res.status(400).json({ error: 'Indica o nome do fornecedor (até 100 caracteres).' });
+        return 'Indica o nome do fornecedor (até 100 caracteres).';
     }
 
     if (!isValidPhone(supplier.contact)) {
-        return res.status(400).json({ error: 'O telefone tem de ter 9 algarismos (ex.: 912 345 678).' });
+        return 'O telefone tem de ter 9 algarismos (ex.: 912 345 678).';
     }
 
     if (supplier.email !== null && !isValidEmail(supplier.email)) {
-        return res.status(400).json({ error: 'O email do fornecedor não é válido.' });
+        return 'O email do fornecedor não é válido.';
     }
 
     if (supplier.nif !== null && !/^\d{9}$/.test(supplier.nif)) {
-        return res.status(400).json({ error: 'O NIF tem de ter 9 algarismos.' });
+        return 'O NIF tem de ter 9 algarismos.';
     }
 
     if (supplier.address !== null && supplier.address.length > 255) {
-        return res.status(400).json({ error: 'A morada pode ter até 255 caracteres.' });
+        return 'A morada pode ter até 255 caracteres.';
+    }
+
+    return null;
+}
+
+// POST /api/suppliers: cria um fornecedor
+async function createSupplier(req, res) {
+    const supplier = readSupplier(req.body);
+    const errorMessage = validateSupplier(supplier);
+
+    if (errorMessage) {
+        return res.status(400).json({ error: errorMessage });
     }
 
     try {
@@ -68,4 +83,27 @@ async function createSupplier(req, res) {
     }
 }
 
-module.exports = { listSuppliers, createSupplier };
+// PUT /api/suppliers/:id: altera os dados de um fornecedor
+async function updateSupplier(req, res) {
+    const supplier = readSupplier(req.body);
+    const errorMessage = validateSupplier(supplier);
+
+    if (errorMessage) {
+        return res.status(400).json({ error: errorMessage });
+    }
+
+    try {
+        const updated = await supplierModel.updateSupplier(req.session.user.brandId, Number(req.params.id), supplier);
+
+        if (!updated) {
+            return res.status(404).json({ error: 'Este fornecedor não existe.' });
+        }
+
+        res.json({ message: `Fornecedor "${supplier.supplierName}" alterado.` });
+    } catch (error) {
+        console.error('Erro ao alterar o fornecedor:', error.message);
+        res.status(500).json({ error: 'Não foi possível alterar o fornecedor. Tenta novamente.' });
+    }
+}
+
+module.exports = { listSuppliers, createSupplier, updateSupplier };

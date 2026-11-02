@@ -87,12 +87,20 @@ function apiCreateSupplier(supplierData) {
     return apiRequest('POST', '/api/suppliers', supplierData);
 }
 
+function apiUpdateSupplier(supplierId, supplierData) {
+    return apiRequest('PUT', `/api/suppliers/${supplierId}`, supplierData);
+}
+
 function apiListProducts() {
     return apiRequest('GET', '/api/products');
 }
 
 function apiCreateProduct(productData) {
     return apiRequest('POST', '/api/products', productData);
+}
+
+function apiUpdateProduct(productId, productData) {
+    return apiRequest('PUT', `/api/products/${productId}`, productData);
 }
 
 function apiListPrices(productId) {
