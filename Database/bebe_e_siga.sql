@@ -286,3 +286,24 @@ CREATE TABLE IF NOT EXISTS stock_movements (
     CONSTRAINT fk_stock_movements_user
         FOREIGN KEY (created_by) REFERENCES users (user_id)
 ) ENGINE=InnoDB;
+
+-- Notas do evento (RF24): diárias (com event_day_id) ou finais (event_day_id vazio).
+-- Ajudam a interpretar os resultados (ex.: choveu, faltou gelo). O impacto não é calculado.
+CREATE TABLE IF NOT EXISTS event_notes (
+    note_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    event_day_id INT NULL,
+    note_type ENUM('Meteorologia', 'Afluência', 'Produtos esgotados', 'Excesso de stock', 'Fornecedores',
+                   'Horário de maior movimento', 'Acontecimento externo', 'Outro') NOT NULL,
+    note_text VARCHAR(500) NOT NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_event_notes_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_event_notes_day
+        FOREIGN KEY (event_day_id) REFERENCES event_days (event_day_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_event_notes_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;

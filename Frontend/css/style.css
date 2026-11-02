@@ -2396,3 +2396,76 @@ th {
         white-space: normal;
     }
 }
+
+/* ---------- Fecho do dia e notas ---------- */
+
+.day-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 10px;
+}
+
+.day-status .day-note {
+    flex: 1 1 320px;
+    margin: 0;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--field-line);
+    border-radius: 12px;
+    font: inherit;
+    resize: vertical;
+}
+
+textarea:focus-visible {
+    border-color: var(--amber);
+    outline: none;
+}
+
+.note-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.note-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.note-text {
+    flex: 1 1 200px;
+}
+
+.note-form {
+    display: grid;
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.note-form select,
+.note-form input {
+    min-height: 42px;
+    padding: 8px 10px;
+}
+
+@media (max-width: 600px) {
+    .note-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

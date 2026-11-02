@@ -81,6 +81,29 @@ function apiListDays(eventId) {
     return apiRequest('GET', `/api/events/${eventId}/days`);
 }
 
+// Fechar e reabrir um dia (Gestor e Administrador)
+function apiCloseDay(eventId, dayId) {
+    return apiRequest('POST', `/api/events/${eventId}/days/${dayId}/close`);
+}
+
+function apiReopenDay(eventId, dayId) {
+    return apiRequest('POST', `/api/events/${eventId}/days/${dayId}/reopen`);
+}
+
+// ---------- Notas (ler: todos; escrever: Gestor e Administrador) ----------
+
+function apiListNotes(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/notes`);
+}
+
+function apiCreateNote(eventId, noteData) {
+    return apiRequest('POST', `/api/events/${eventId}/notes`, noteData);
+}
+
+function apiDeleteNote(eventId, noteId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/notes/${noteId}`);
+}
+
 // ---------- Vendas (todos os perfis) ----------
 
 function apiListSales(eventId, dayId) {

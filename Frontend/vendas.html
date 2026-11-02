@@ -55,7 +55,45 @@
         <section class="day-picker" id="dayPicker" aria-labelledby="dayPickerTitle" hidden>
             <h2 id="dayPickerTitle" class="day-picker-title">Dia das vendas</h2>
             <div class="day-buttons" id="dayButtons" role="radiogroup" aria-labelledby="dayPickerTitle"></div>
-            <p class="day-note" id="dayNote"></p>
+            <div class="day-status">
+                <p class="day-note" id="dayNote"></p>
+                <div class="day-actions" data-required-role="Gestor">
+                    <button class="button button-ghost button-small" type="button" id="closeDayButton">Fechar dia</button>
+                    <button class="button button-ghost button-small" type="button" id="reopenDayButton" hidden>Reabrir dia</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fecho do dia (RF19): resumo e nota opcional antes de confirmar -->
+        <section class="planner" id="closePlanner" aria-labelledby="closePlannerTitle" hidden>
+            <form id="closeForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="closePlannerTitle">Fechar o dia</h2>
+                    <button class="planner-close" type="button" id="cancelCloseButton">Cancelar</button>
+                </div>
+                <div class="planner-body">
+                    <div class="planner-col">
+                        <h3>Resumo do dia</h3>
+                        <div class="day-figures" id="closeFigures"></div>
+                        <p class="col-hint">Depois de fechado, o dia não aceita novas vendas nem saídas de stock. Podes reabri-lo para corrigir e voltar a fechar.</p>
+                    </div>
+                    <div class="planner-col">
+                        <h3>Nota do dia <span class="optional">(opcional)</span></h3>
+                        <div class="field">
+                            <label for="closeNoteType">Assunto</label>
+                            <select id="closeNoteType" class="note-type-select"></select>
+                        </div>
+                        <div class="field">
+                            <label for="closeNoteText">Nota</label>
+                            <textarea id="closeNoteText" rows="3" maxlength="500" placeholder="Ex.: choveu a partir das 22h e a afluência caiu"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="closeFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Confirmar fecho</button>
+                </div>
+            </form>
         </section>
 
         <p id="pageMessage" class="form-message" role="status" hidden></p>
@@ -103,6 +141,15 @@
                 </div>
             </div>
             <ul class="item-summary" id="itemSummary"></ul>
+
+            <h3 class="sales-log-title">Notas do dia</h3>
+            <ul class="note-list" id="noteList"></ul>
+            <p class="empty-state empty-small" id="notesEmpty" hidden>Sem notas neste dia.</p>
+            <form class="note-form" id="noteForm" data-required-role="Gestor" novalidate>
+                <select id="noteType" class="note-type-select" aria-label="Assunto da nota"></select>
+                <input type="text" id="noteText" maxlength="500" placeholder="Ex.: esgotou o gelo às 23h" aria-label="Nota">
+                <button class="button button-small" type="submit">Juntar nota</button>
+            </form>
 
             <h3 class="sales-log-title">Registos</h3>
             <ul class="sales-log" id="salesLog"></ul>

@@ -23,7 +23,7 @@ const APP_AREAS = [
             { name: 'Consultar faturação do dia', requiredRole: 'Colaborador', link: 'vendas.html' },
             { name: 'Registar compras e consultar stock', requiredRole: 'Gestor', link: 'compras.html' },
             { name: 'Corrigir stock e registar perdas', requiredRole: 'Gestor', link: 'stock.html' },
-            { name: 'Fechar e reabrir dias', requiredRole: 'Gestor' }
+            { name: 'Fechar e reabrir dias', requiredRole: 'Gestor', link: 'vendas.html' }
         ]
     },
     {

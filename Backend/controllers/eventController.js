@@ -173,4 +173,52 @@ async function listDays(req, res) {
     }
 }
 
-module.exports = { createEvent, listEvents, listDays };
+// Lê o evento e o dia do endereço e confirma que são da marca de quem tem a sessão
+async function findEventDay(req) {
+    const event = await eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
+    return event ? eventModel.findDayInEvent(event.event_id, Number(req.params.dayId)) : null;
+}
+
+// POST /api/events/:eventId/days/:dayId/close: fechar o dia (Gestor e Administrador, RF19)
+async function closeDay(req, res) {
+    try {
+        const day = await findEventDay(req);
+
+        if (!day) {
+            return res.status(404).json({ error: 'Este dia não existe neste evento.' });
+        }
+
+        if (day.is_closed) {
+            return res.status(400).json({ error: 'Este dia já está fechado.' });
+        }
+
+        await eventModel.closeDay(day.event_day_id, req.session.user.userId);
+        res.json({ message: 'Dia fechado. Já não aceita novas vendas nem saídas de stock.' });
+    } catch (error) {
+        console.error('Erro ao fechar o dia:', error.message);
+        res.status(500).json({ error: 'Não foi possível fechar o dia. Tenta novamente.' });
+    }
+}
+
+// POST /api/events/:eventId/days/:dayId/reopen: reabrir o dia para corrigir (Gestor e Administrador)
+async function reopenDay(req, res) {
+    try {
+        const day = await findEventDay(req);
+
+        if (!day) {
+            return res.status(404).json({ error: 'Este dia não existe neste evento.' });
+        }
+
+        if (!day.is_closed) {
+            return res.status(400).json({ error: 'Este dia já está aberto.' });
+        }
+
+        await eventModel.reopenDay(day.event_day_id);
+        res.json({ message: 'Dia reaberto. Depois de corrigir, volta a fechá-lo.' });
+    } catch (error) {
+        console.error('Erro ao reabrir o dia:', error.message);
+        res.status(500).json({ error: 'Não foi possível reabrir o dia. Tenta novamente.' });
+    }
+}
+
+module.exports = { createEvent, listEvents, listDays, closeDay, reopenDay };

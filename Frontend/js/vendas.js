@@ -9,6 +9,9 @@ const pageMessage = document.getElementById('pageMessage');
 const cartMessage = document.getElementById('cartMessage');
 
 let session = null;
+let canManage = false;
+let notes = [];
+let lastSummary = null;
 let events = [];
 let days = [];
 let menuItems = [];
@@ -28,6 +31,7 @@ async function startSalesPage() {
     }
 
     session = page.session;
+    canManage = hasRole(session.role, 'Gestor');
 
     try {
         events = (await apiListEvents()).events;
@@ -45,6 +49,7 @@ async function startSalesPage() {
 
     document.getElementById('clearCartButton').addEventListener('click', clearCart);
     document.getElementById('registerSalesButton').addEventListener('click', registerSales);
+    setupDayClosing();
 
     await loadEvent(currentEventId);
 }
@@ -55,10 +60,16 @@ async function loadEvent(eventId) {
     hideMessage(pageMessage);
     clearCart();
 
+    document.getElementById('closePlanner').hidden = true;
+
     try {
-        const [dayResult, menuResult] = await Promise.all([apiListDays(eventId), apiGetMenu(eventId)]);
+        const [dayResult, menuResult, noteResult] = await Promise.all([
+            apiListDays(eventId), apiGetMenu(eventId), apiListNotes(eventId)
+        ]);
         days = dayResult.days;
         menuItems = menuResult.items;
+        notes = noteResult.notes;
+        fillNoteTypes(noteResult.noteTypes);
     } catch (error) {
         showMessage(pageMessage, error.message, 'is-error');
         return;
@@ -131,6 +142,14 @@ async function selectDay(day) {
     if (day.is_closed) {
         note.textContent = 'Este dia está fechado: não aceita novas vendas. O Gestor pode reabri-lo.';
     }
+
+    document.getElementById('closeDayButton').hidden = Boolean(day.is_closed);
+    const reopenButton = document.getElementById('reopenDayButton');
+    reopenButton.hidden = !day.is_closed;
+    reopenButton.classList.remove('is-confirming');
+    reopenButton.textContent = 'Reabrir dia';
+    document.getElementById('closePlanner').hidden = true;
+    renderNotes();
 
     updateCart();
     await renderDaySales();
@@ -307,6 +326,7 @@ async function renderDaySales() {
         return;
     }
 
+    lastSummary = result.summary;
     document.getElementById('daySales').hidden = false;
     document.getElementById('daySalesTitle').textContent = `Vendas de ${formatDay(currentDay)}`;
     document.getElementById('dayRevenue').textContent = MONEY.format(result.summary.revenue);
@@ -379,6 +399,184 @@ async function cancelSale(sale, button) {
         const result = await apiCancelSale(currentEventId, sale.sale_id);
         showMessage(pageMessage, result.message, 'is-success');
         await renderDaySales();
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
+}
+
+// ---------- Fecho do dia (RF19) e notas (RF24) ----------
+
+function setupDayClosing() {
+    if (!canManage) {
+        return;
+    }
+
+    document.getElementById('closeDayButton').addEventListener('click', openClosePlanner);
+    document.getElementById('cancelCloseButton').addEventListener('click', () => {
+        document.getElementById('closePlanner').hidden = true;
+    });
+    document.getElementById('closeForm').addEventListener('submit', closeDay);
+    document.getElementById('reopenDayButton').addEventListener('click', reopenDay);
+    document.getElementById('noteForm').addEventListener('submit', addNote);
+}
+
+function fillNoteTypes(noteTypes) {
+    document.querySelectorAll('.note-type-select').forEach((select) => {
+        select.replaceChildren();
+        noteTypes.forEach((type) => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            select.appendChild(option);
+        });
+    });
+}
+
+// Antes de fechar, mostra a faturação, o artigo mais vendido e o objetivo do dia
+function openClosePlanner() {
+    hideMessage(pageMessage);
+    hideMessage(document.getElementById('closeFormMessage'));
+    document.getElementById('closeForm').reset();
+
+    const figures = document.getElementById('closeFigures');
+    figures.replaceChildren();
+    const top = lastSummary.items[0];
+
+    figures.append(createFigure('Faturação do dia', MONEY.format(lastSummary.revenue)));
+    figures.append(createFigure('Mais vendido', top ? `${top.itemName} (${top.quantity})` : '—', true));
+
+    if (currentDay.revenue_target !== null) {
+        const target = Number(currentDay.revenue_target);
+        const percent = target > 0 ? Math.round((lastSummary.revenue / target) * 100) : 0;
+        figures.append(createFigure('Objetivo do dia', `${MONEY.format(target)} (${percent}%)`, true));
+    }
+
+    const planner = document.getElementById('closePlanner');
+    planner.hidden = false;
+    planner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function createFigure(label, value, isText = false) {
+    const figure = document.createElement('div');
+    figure.className = 'figure';
+    figure.append(
+        createElementWithText('span', 'figure-label', label),
+        createElementWithText('strong', isText ? 'figure-value figure-text' : 'figure-value', value)
+    );
+    return figure;
+}
+
+async function closeDay(event) {
+    event.preventDefault();
+    const formMessage = document.getElementById('closeFormMessage');
+    hideMessage(formMessage);
+    const noteText = document.getElementById('closeNoteText').value.trim();
+
+    try {
+        if (noteText !== '') {
+            await apiCreateNote(currentEventId, {
+                eventDayId: currentDay.event_day_id,
+                noteType: document.getElementById('closeNoteType').value,
+                noteText
+            });
+        }
+
+        const result = await apiCloseDay(currentEventId, currentDay.event_day_id);
+        await reloadDays();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(formMessage, error.message, 'is-error');
+    }
+}
+
+// Reabrir pede uma segunda confirmação no próprio botão
+async function reopenDay() {
+    const button = document.getElementById('reopenDayButton');
+
+    if (!button.classList.contains('is-confirming')) {
+        button.classList.add('is-confirming');
+        button.textContent = 'Confirmar reabrir';
+        return;
+    }
+
+    try {
+        const result = await apiReopenDay(currentEventId, currentDay.event_day_id);
+        await reloadDays();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
+}
+
+// Volta a ler os dias e as notas e fica no mesmo dia
+async function reloadDays() {
+    const dayId = currentDay.event_day_id;
+    const [dayResult, noteResult] = await Promise.all([apiListDays(currentEventId), apiListNotes(currentEventId)]);
+    days = dayResult.days;
+    notes = noteResult.notes;
+    await selectDay(days.find((day) => day.event_day_id === dayId));
+}
+
+function renderNotes() {
+    const list = document.getElementById('noteList');
+    list.replaceChildren();
+    const dayNotes = notes.filter((note) => note.event_day_id === currentDay.event_day_id);
+    document.getElementById('notesEmpty').hidden = dayNotes.length > 0;
+
+    dayNotes.forEach((note) => {
+        const item = document.createElement('li');
+        item.append(
+            createElementWithText('span', 'tag', note.note_type),
+            createElementWithText('span', 'note-text', note.note_text)
+        );
+
+        if (canManage) {
+            const deleteButton = createElementWithText('button', 'link-button', 'Apagar');
+            deleteButton.type = 'button';
+            deleteButton.setAttribute('aria-label', `Apagar a nota: ${note.note_text}`);
+            deleteButton.addEventListener('click', () => deleteNote(note, deleteButton));
+            item.append(deleteButton);
+        }
+
+        list.append(item);
+    });
+}
+
+async function addNote(event) {
+    event.preventDefault();
+    const textInput = document.getElementById('noteText');
+
+    if (textInput.value.trim() === '') {
+        textInput.focus();
+        return;
+    }
+
+    try {
+        const result = await apiCreateNote(currentEventId, {
+            eventDayId: currentDay.event_day_id,
+            noteType: document.getElementById('noteType').value,
+            noteText: textInput.value
+        });
+        textInput.value = '';
+        notes = (await apiListNotes(currentEventId)).notes;
+        renderNotes();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
+}
+
+async function deleteNote(note, button) {
+    if (!button.classList.contains('is-confirming')) {
+        button.classList.add('is-confirming');
+        button.textContent = 'Confirmar';
+        return;
+    }
+
+    try {
+        await apiDeleteNote(currentEventId, note.note_id);
+        notes = (await apiListNotes(currentEventId)).notes;
+        renderNotes();
     } catch (error) {
         showMessage(pageMessage, error.message, 'is-error');
     }

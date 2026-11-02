@@ -15,4 +15,10 @@ router.post('/', requireRole('Gestor'), eventController.createEvent);
 // GET /api/events/:eventId/days: dias do evento (todos os perfis, ex.: para escolher o dia das vendas)
 router.get('/:eventId/days', requireLogin, eventController.listDays);
 
+// POST /api/events/:eventId/days/:dayId/close: fechar o dia (RF19)
+router.post('/:eventId/days/:dayId/close', requireRole('Gestor'), eventController.closeDay);
+
+// POST /api/events/:eventId/days/:dayId/reopen: reabrir o dia para corrigir
+router.post('/:eventId/days/:dayId/reopen', requireRole('Gestor'), eventController.reopenDay);
+
 module.exports = router;

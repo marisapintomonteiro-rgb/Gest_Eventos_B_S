@@ -93,4 +93,22 @@ async function findDayInEvent(eventId, dayId) {
     return days.find((day) => day.event_day_id === dayId) || null;
 }
 
-module.exports = { createEvent, findEventsByBrand, findEventById, findDaysByEvent, findDayInEvent };
+// Fecha um dia (RF19): a partir daqui não aceita novos registos
+async function closeDay(dayId, userId) {
+    await pool.execute('INSERT INTO day_closings (event_day_id, closed_by) VALUES (?, ?)', [dayId, userId]);
+}
+
+// Reabre um dia fechado, para corrigir (depois volta a fechar-se)
+async function reopenDay(dayId) {
+    await pool.execute('DELETE FROM day_closings WHERE event_day_id = ?', [dayId]);
+}
+
+module.exports = {
+    createEvent,
+    findEventsByBrand,
+    findEventById,
+    findDaysByEvent,
+    findDayInEvent,
+    closeDay,
+    reopenDay
+};
