@@ -13,6 +13,7 @@ const userRoutes = require('./routes/userRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const productRoutes = require('./routes/productRoutes');
+const menuRoutes = require('./routes/menuRoutes');
 
 // 2. Criar a aplicação (o nosso servidor)
 const app = express();
@@ -48,6 +49,9 @@ app.use('/api/users', userRoutes);
 
 // Endereços da API de eventos: /api/events/...
 app.use('/api/events', eventRoutes);
+
+// Endereços da API da ementa de cada evento: /api/events/:eventId/menu/...
+app.use('/api/events/:eventId/menu', menuRoutes);
 
 // Endereços da API de fornecedores e produtos: /api/suppliers/... e /api/products/...
 app.use('/api/suppliers', supplierRoutes);

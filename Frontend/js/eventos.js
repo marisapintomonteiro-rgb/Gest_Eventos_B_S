@@ -288,6 +288,12 @@ function createTicket(item) {
     });
 
     body.appendChild(days);
+
+    // Atalho para a ementa deste evento
+    const menuLink = createElementWithText('a', 'ticket-link', 'Ver ementa');
+    menuLink.href = `ementa.html?event=${item.event_id}`;
+    body.appendChild(menuLink);
+
     ticket.append(stub, body);
     return ticket;
 }

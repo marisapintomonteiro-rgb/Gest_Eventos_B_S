@@ -54,6 +54,20 @@ async function findProductById(brandId, productId) {
     return rows[0] || null;
 }
 
+// Devolve os produtos da lista que pertencem a esta marca, com a indicação de consumo residual
+async function findProductsOfBrand(brandId, productIds) {
+    if (productIds.length === 0) {
+        return [];
+    }
+
+    const placeholders = productIds.map(() => '?').join(', ');
+    const [rows] = await pool.execute(
+        `SELECT product_id, is_residual FROM products WHERE brand_id = ? AND product_id IN (${placeholders})`,
+        [brandId, ...productIds]
+    );
+    return rows;
+}
+
 // Confirma que o produto é desta marca e que o fornecedor está ligado a ele
 async function findProductSupplierLink(brandId, productId, supplierId) {
     const [rows] = await pool.execute(
@@ -187,6 +201,7 @@ module.exports = {
     findProductsByBrand,
     findProductByName,
     findProductById,
+    findProductsOfBrand,
     findProductSupplierLink,
     createProduct,
     updateProduct,

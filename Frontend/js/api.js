@@ -77,6 +77,28 @@ function apiCreateEvent(eventData) {
     return apiRequest('POST', '/api/events', eventData);
 }
 
+// ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
+
+function apiGetMenu(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/menu`);
+}
+
+function apiCreateMenuItem(eventId, itemData) {
+    return apiRequest('POST', `/api/events/${eventId}/menu`, itemData);
+}
+
+function apiUpdateMenuItem(eventId, itemId, itemData) {
+    return apiRequest('PUT', `/api/events/${eventId}/menu/${itemId}`, itemData);
+}
+
+function apiDeleteMenuItem(eventId, itemId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/menu/${itemId}`);
+}
+
+function apiCopyMenu(eventId, fromEventId) {
+    return apiRequest('POST', `/api/events/${eventId}/menu/copy`, { fromEventId });
+}
+
 // ---------- Fornecedores e produtos (só Gestor e Administrador) ----------
 
 function apiListSuppliers() {

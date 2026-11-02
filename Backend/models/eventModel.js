@@ -60,4 +60,13 @@ async function findEventsByBrand(brandId) {
     return rows;
 }
 
-module.exports = { createEvent, findEventsByBrand };
+// Procura um evento desta marca pelo número (para confirmar que o evento é mesmo da marca)
+async function findEventById(brandId, eventId) {
+    const [rows] = await pool.execute(
+        'SELECT event_id, event_name FROM events WHERE brand_id = ? AND event_id = ?',
+        [brandId, eventId]
+    );
+    return rows[0] || null;
+}
+
+module.exports = { createEvent, findEventsByBrand, findEventById };

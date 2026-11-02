@@ -8,7 +8,7 @@ const APP_AREAS = [
         features: [
             { name: 'Criar evento e configurar os dias', requiredRole: 'Gestor', link: 'eventos.html' },
             { name: 'Gerir produtos', requiredRole: 'Gestor', link: 'produtos.html' },
-            { name: 'Gerir ementa', requiredRole: 'Gestor' },
+            { name: 'Gerir ementa', requiredRole: 'Gestor', link: 'ementa.html' },
             { name: 'Gerir fornecedores', requiredRole: 'Gestor', link: 'produtos.html' },
             { name: 'Consultar previsão de compras', requiredRole: 'Gestor' }
         ]
@@ -16,7 +16,8 @@ const APP_AREAS = [
     {
         title: 'Operação diária',
         features: [
-            { name: 'Consultar calendário e ementa', requiredRole: 'Colaborador' },
+            { name: 'Consultar calendário', requiredRole: 'Colaborador' },
+            { name: 'Consultar ementa', requiredRole: 'Colaborador', link: 'ementa.html' },
             { name: 'Registar vendas', requiredRole: 'Colaborador' },
             { name: 'Registar consumo interno', requiredRole: 'Colaborador' },
             { name: 'Consultar faturação do dia', requiredRole: 'Colaborador' },

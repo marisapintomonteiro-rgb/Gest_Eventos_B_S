@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ementa | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="ementa.html" aria-current="page">Ementa</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading">
+            <div>
+                <h1>Ementa</h1>
+                <p class="lead">Cada evento tem a sua ementa. Mudar um preço aqui não mexe nos outros eventos.</p>
+            </div>
+            <div class="heading-actions" data-required-role="Gestor">
+                <button class="button button-ghost" type="button" id="copyMenuButton">Copiar de outro evento</button>
+                <button class="button" type="button" id="newItemButton">Novo artigo</button>
+            </div>
+        </div>
+
+        <div class="event-picker" id="eventPicker" hidden>
+            <label for="eventSelect">Evento</label>
+            <select id="eventSelect"></select>
+        </div>
+
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <p class="empty-state" id="noEventsNote" hidden>
+            Ainda não há eventos. A ementa pertence a um evento: <a href="eventos.html">cria primeiro o evento</a>.
+        </p>
+
+        <!-- Copiar a ementa de outro evento (RF10) -->
+        <section class="planner" id="copyPlanner" aria-labelledby="copyPlannerTitle" hidden>
+            <form id="copyForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="copyPlannerTitle">Copiar ementa de outro evento</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body planner-body-single">
+                    <div class="planner-col">
+                        <div class="field">
+                            <label for="copySourceSelect">Copiar de</label>
+                            <select id="copySourceSelect"></select>
+                        </div>
+                        <p class="col-hint">Os artigos são copiados com os preços e as receitas. Depois podes alterá-los aqui sem mudar o evento original. Os artigos com um nome que já existe nesta ementa ficam como estão.</p>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="copyFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Copiar ementa</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Novo artigo (RF08) e o que sai do stock (RF09) -->
+        <section class="planner" id="itemPlanner" aria-labelledby="itemPlannerTitle" hidden>
+            <form id="itemForm" novalidate>
+                <div class="planner-head">
+                    <h2 id="itemPlannerTitle">Novo artigo</h2>
+                    <button class="planner-close" type="button" data-close-planner>Cancelar</button>
+                </div>
+                <div class="planner-body">
+                    <div class="planner-col">
+                        <h3>Na ementa</h3>
+                        <div class="field">
+                            <label for="itemName">Nome</label>
+                            <input type="text" id="itemName" maxlength="100" placeholder="Ex.: Mojito" aria-describedby="itemNameError">
+                            <small class="error" id="itemNameError"></small>
+                        </div>
+
+                        <div class="field-pair">
+                            <div class="field">
+                                <label for="itemCategory">Categoria</label>
+                                <select id="itemCategory">
+                                    <option value="Bebidas">Bebidas</option>
+                                    <option value="Cocktails">Cocktails</option>
+                                    <option value="Shots">Shots</option>
+                                    <option value="Comida">Comida</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="itemPrice">Preço de venda</label>
+                                <div class="input-with-unit">
+                                    <input type="number" id="itemPrice" min="0" step="0.01" inputmode="decimal" aria-describedby="itemPriceError">
+                                    <span class="unit-suffix">€</span>
+                                </div>
+                                <small class="error" id="itemPriceError"></small>
+                            </div>
+                        </div>
+
+                        <fieldset class="field segmented-field">
+                            <legend>Tipo de artigo</legend>
+                            <div class="segmented">
+                                <label><input type="radio" name="itemType" value="Direta" checked><span>Venda direta</span></label>
+                                <label><input type="radio" name="itemType" value="Composta"><span>Composto</span></label>
+                            </div>
+                        </fieldset>
+                        <p class="hint" id="itemTypeHint"></p>
+                    </div>
+
+                    <div class="planner-col">
+                        <h3 id="stockTitle">Sai do stock em cada venda</h3>
+                        <p class="col-hint" id="stockHint"></p>
+                        <p class="empty-state empty-small" id="noProductsNote" hidden>
+                            Ainda não há produtos. <a href="produtos.html">Cria primeiro os produtos</a> (ex.: cerveja em barril, rum, lima).
+                        </p>
+                        <div id="itemProductList"></div>
+                        <button type="button" class="button button-ghost button-small add-row" id="addItemProductButton">Acrescentar produto</button>
+                    </div>
+                </div>
+                <div class="planner-foot">
+                    <p class="form-message is-error" id="itemFormMessage" role="alert" hidden></p>
+                    <button class="button" type="submit">Acrescentar à ementa</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- A ementa, como uma carta de bar -->
+        <section class="panel menu-board" id="menuBoard" aria-labelledby="menuTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="menuTitle">Ementa</h2>
+                <span class="counter" id="itemCount">0</span>
+            </div>
+            <div id="menuSections"></div>
+            <p class="empty-state" id="menuEmpty" hidden>Esta ementa ainda não tem artigos.</p>
+        </section>
+    </main>
+
+    <template id="itemProductTemplate">
+        <div class="ingredient-row">
+            <label class="ingredient-pick">Produto<select class="ip-product"></select></label>
+            <label>Quantidade
+                <span class="input-with-unit">
+                    <input type="number" class="ip-quantity" min="0" step="any" inputmode="decimal">
+                    <span class="unit-suffix ip-unit">un.</span>
+                </span>
+            </label>
+            <button type="button" class="remove-row" aria-label="Tirar este produto">×</button>
+        </div>
+    </template>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ementa.js"></script>
+</body>
+</html>

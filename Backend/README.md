@@ -25,6 +25,11 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | DELETE | `/api/users/:id` | Administrador |
 | GET | `/api/events` | quem tem sessão (eventos da sua marca) |
 | POST | `/api/events` | Gestor e Administrador (US01) |
+| GET | `/api/events/:eventId/menu` | quem tem sessão (RF29; o Colaborador não recebe a composição) |
+| POST | `/api/events/:eventId/menu` | Gestor e Administrador (RF08, RF09) |
+| PUT | `/api/events/:eventId/menu/:itemId` | Gestor e Administrador |
+| DELETE | `/api/events/:eventId/menu/:itemId` | Gestor e Administrador |
+| POST | `/api/events/:eventId/menu/copy` | Gestor e Administrador (RF10, copiar de outro evento) |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |

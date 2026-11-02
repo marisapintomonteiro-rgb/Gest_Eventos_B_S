@@ -146,3 +146,35 @@ CREATE TABLE IF NOT EXISTS product_prices (
     CONSTRAINT fk_product_prices_user
         FOREIGN KEY (created_by) REFERENCES users (user_id)
 ) ENGINE=InnoDB;
+
+-- Ementa de cada evento (RF08). Cada evento tem a sua: mudar um preço aqui não mexe nos outros eventos.
+-- item_type: 'Direta' (ex.: cerveja de garrafa, fino) ou 'Composta' (ex.: Mojito, com receita).
+CREATE TABLE IF NOT EXISTS menu_items (
+    menu_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    item_name VARCHAR(100) NOT NULL,
+    category ENUM('Bebidas', 'Cocktails', 'Comida', 'Shots', 'Outros') NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    item_type ENUM('Direta', 'Composta') NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_menu_items_name UNIQUE (event_id, item_name),
+    CONSTRAINT fk_menu_items_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- O que sai do stock em cada venda de um artigo (RF09).
+-- Venda direta: um só produto (ex.: fino = 220 ml do barril). Composto: a receita (ex.: Mojito).
+-- A quantidade está na unidade base do produto (unidade, grama ou mililitro).
+-- Num produto de consumo residual (sal, hortelã...) a quantidade pode ficar vazia.
+CREATE TABLE IF NOT EXISTS menu_item_products (
+    menu_item_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity DECIMAL(10,2) NULL,
+    PRIMARY KEY (menu_item_id, product_id),
+    CONSTRAINT fk_menu_item_products_item
+        FOREIGN KEY (menu_item_id) REFERENCES menu_items (menu_item_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_menu_item_products_product
+        FOREIGN KEY (product_id) REFERENCES products (product_id)
+) ENGINE=InnoDB;

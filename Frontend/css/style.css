@@ -1602,3 +1602,159 @@ th {
         animation: none;
     }
 }
+
+/* ---------- Página Ementa ---------- */
+
+.event-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin-bottom: 24px;
+}
+
+.event-picker label {
+    margin: 0;
+    font-weight: 500;
+}
+
+.event-picker select {
+    width: auto;
+    min-width: 260px;
+    max-width: 100%;
+}
+
+.planner-body-single {
+    grid-template-columns: minmax(0, 640px);
+}
+
+.ingredient-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 40px;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 10px;
+}
+
+.ingredient-row label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.ingredient-row select,
+.ingredient-row input {
+    min-width: 0;
+    min-height: 42px;
+    margin-top: 2px;
+    padding: 8px 10px;
+    color: var(--ink);
+    font-size: 0.95rem;
+}
+
+.ingredient-row .input-with-unit {
+    display: block;
+}
+
+/* A carta: categorias com o nome, uma linha de pontos e o preço */
+.menu-category + .menu-category {
+    margin-top: 22px;
+}
+
+.menu-category-title {
+    margin: 0 0 6px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--ink);
+    color: var(--red);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.menu-items {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.menu-line {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.menu-line-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.menu-item-name {
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+.menu-leader {
+    flex: 1;
+    min-width: 20px;
+    border-bottom: 2px dotted var(--field-line);
+    transform: translateY(-4px);
+}
+
+.menu-price {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.menu-line-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin-top: 4px;
+}
+
+.menu-line-details .tag {
+    font-size: 0.75rem;
+}
+
+.menu-recipe {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.menu-actions {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.link-button.is-confirming {
+    background: var(--red);
+    color: var(--paper);
+    text-decoration: none;
+}
+
+.ticket-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--red);
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .event-picker select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .ingredient-row {
+        grid-template-columns: minmax(0, 1fr) 40px;
+    }
+
+    .ingredient-row .ingredient-pick {
+        grid-column: 1 / -1;
+    }
+
+    .menu-actions {
+        margin-left: 0;
+    }
+}
