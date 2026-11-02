@@ -8,6 +8,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
+const { connectionOptions } = require('./config/database');
 
 async function setupDatabase() {
     const sqlPath = path.join(__dirname, '..', 'Database', 'bebe_e_siga.sql');
@@ -17,14 +18,8 @@ async function setupDatabase() {
         .replace(/CREATE DATABASE[^;]*;/i, '')
         .replace(/USE\s+\w+\s*;/i, '');
 
-    const connection = await mysql.createConnection({
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT),
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-        multipleStatements: true
-    });
+    // Os mesmos dados de ligação do servidor, mas a aceitar vários comandos SQL de uma vez
+    const connection = await mysql.createConnection({ ...connectionOptions, multipleStatements: true });
 
     try {
         await connection.query(sql);
