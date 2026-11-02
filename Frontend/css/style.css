@@ -1929,3 +1929,344 @@ th {
         width: 100%;
     }
 }
+
+/* ---------- Página Vendas ---------- */
+
+.day-picker {
+    margin-bottom: 22px;
+}
+
+.day-picker-title {
+    margin: 0 0 8px;
+    font-size: 1rem;
+}
+
+.day-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.day-button {
+    display: grid;
+    min-width: 88px;
+    padding: 8px 14px;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.day-button small {
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.day-button[aria-checked="true"] {
+    background: var(--ink);
+    color: var(--paper);
+}
+
+.day-button[aria-checked="true"] small {
+    color: var(--amber);
+}
+
+.day-button.is-closed:not([aria-checked="true"]) {
+    border-style: dashed;
+    color: var(--muted);
+}
+
+.day-note {
+    margin: 10px 0 0;
+    padding: 8px 12px;
+    border-left: 3px solid var(--amber);
+    background: var(--amber-soft);
+    font-size: 0.92rem;
+}
+
+.day-note.is-closed {
+    border-left-color: var(--red);
+    background: var(--red-soft);
+}
+
+/* A caixa: ementa em botões e o talão ao lado */
+.till {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+.till-category + .till-category {
+    margin-top: 16px;
+}
+
+.till-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+}
+
+.till-item {
+    position: relative;
+    display: grid;
+    gap: 2px;
+    min-height: 64px;
+    padding: 10px 12px;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.till-item:hover {
+    border-color: var(--ink);
+}
+
+.till-item:active {
+    transform: scale(0.98);
+}
+
+.till-item.is-in-cart {
+    border-color: var(--ink);
+    background: var(--amber-soft);
+}
+
+.till-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.till-item-name {
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.till-item-price {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.till-item-count {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    color: var(--red);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.till-receipt {
+    position: sticky;
+    top: 16px;
+    border-top: 6px solid var(--ink);
+}
+
+.cart-lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cart-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--field-line);
+}
+
+.cart-name {
+    grid-column: 1 / -1;
+    font-weight: 500;
+}
+
+.cart-amount {
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.qty-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.qty-button {
+    width: 34px;
+    height: 34px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.qty-input {
+    width: 72px;
+    min-height: 34px;
+    padding: 4px 6px;
+    border: 2px solid var(--field-line);
+    border-radius: 8px;
+    font: inherit;
+    text-align: center;
+}
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    margin: 12px 0;
+    font-size: 1.2rem;
+}
+
+.till-receipt .form-message {
+    margin-bottom: 10px;
+}
+
+/* Faturação do dia */
+.day-sales {
+    margin-bottom: 20px;
+}
+
+.day-figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.figure {
+    display: grid;
+    gap: 2px;
+    padding: 12px 14px;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+}
+
+.figure-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.figure-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.figure-text {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.item-summary,
+.sales-log {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item-summary li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.sales-log-title {
+    margin: 18px 0 6px;
+    font-size: 1rem;
+}
+
+.sales-log-line {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto auto;
+    gap: 2px 12px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.sale-time {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.sale-what {
+    font-weight: 500;
+}
+
+.sale-who {
+    grid-column: 2;
+    grid-row: 2;
+    color: var(--muted);
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+}
+
+.sales-log-line .link-button,
+.sales-log-line .tag {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+}
+
+.sales-log-line .receipt-amount {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+}
+
+.sales-log-line.is-cancelled .sale-what,
+.sales-log-line.is-cancelled .receipt-amount {
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+@media (max-width: 900px) {
+    .till {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .till-receipt {
+        position: static;
+    }
+}
+
+@media (max-width: 600px) {
+    .till-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sales-log-line {
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+    }
+
+    .sales-log-line .receipt-amount {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .sales-log-line .link-button,
+    .sales-log-line .tag {
+        grid-column: 3;
+        grid-row: 2;
+        justify-self: end;
+    }
+}
+
+.qty-box .qty-input {
+    width: 84px;
+    min-height: 38px;
+    flex: none;
+    padding: 4px 6px;
+}

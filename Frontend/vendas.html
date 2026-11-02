@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800&display=swap">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <a class="app-brand" href="marca.html">
+            <span class="header-logo" id="headerLogo"></span>
+            <span id="headerBrandName"></span>
+        </a>
+
+        <nav class="app-nav" aria-label="Navegação principal">
+            <a href="marca.html">Início</a>
+            <a href="eventos.html">Eventos</a>
+            <a href="vendas.html" aria-current="page">Vendas</a>
+            <a href="ementa.html">Ementa</a>
+            <a href="compras.html" data-required-role="Gestor">Compras</a>
+            <a href="produtos.html" data-required-role="Gestor">Produtos</a>
+            <a href="utilizadores.html" data-required-role="Administrador">Utilizadores</a>
+        </nav>
+
+        <div class="user-area">
+            <span class="role-chip" id="headerRole"></span>
+            <span class="user-email" id="headerEmail"></span>
+            <button class="button button-ghost button-small" type="button" id="logoutButton">Sair</button>
+        </div>
+    </header>
+
+    <main class="page">
+        <div class="events-heading">
+            <div>
+                <h1>Vendas</h1>
+                <p class="lead">Toca nos artigos para os juntar ao talão, ou escreve a quantidade total (ex.: 1000 cervejas).</p>
+            </div>
+        </div>
+
+        <div class="event-picker" id="eventPicker" hidden>
+            <label for="eventSelect">Evento</label>
+            <select id="eventSelect"></select>
+        </div>
+
+        <p class="empty-state" id="noEventsNote" hidden>
+            Ainda não há eventos. <a href="eventos.html">Cria primeiro o evento</a> e a sua ementa.
+        </p>
+
+        <!-- Dia operacional (regra da secção 8): escolhido por quem regista, não pela hora do sistema -->
+        <section class="day-picker" id="dayPicker" aria-labelledby="dayPickerTitle" hidden>
+            <h2 id="dayPickerTitle" class="day-picker-title">Dia das vendas</h2>
+            <div class="day-buttons" id="dayButtons" role="radiogroup" aria-labelledby="dayPickerTitle"></div>
+            <p class="day-note" id="dayNote"></p>
+        </section>
+
+        <p id="pageMessage" class="form-message" role="status" hidden></p>
+
+        <div class="till" id="till" hidden>
+            <section class="panel till-menu" aria-labelledby="tillMenuTitle">
+                <div class="panel-heading">
+                    <h2 id="tillMenuTitle">Ementa</h2>
+                </div>
+                <div id="tillCategories"></div>
+                <p class="empty-state empty-small" id="tillMenuEmpty" hidden>
+                    Este evento ainda não tem ementa. <a href="ementa.html">Ver a ementa</a>
+                </p>
+            </section>
+
+            <section class="panel till-receipt" aria-labelledby="cartTitle">
+                <div class="panel-heading">
+                    <h2 id="cartTitle">Talão</h2>
+                    <button class="link-button" type="button" id="clearCartButton">Limpar</button>
+                </div>
+                <ul class="cart-lines" id="cartLines"></ul>
+                <p class="empty-state empty-small" id="cartEmpty">Toca num artigo da ementa.</p>
+                <div class="cart-total">
+                    <span>Total</span>
+                    <strong id="cartTotal">0,00 €</strong>
+                </div>
+                <p class="form-message is-error" id="cartMessage" role="alert" hidden></p>
+                <button class="button button-block" type="button" id="registerSalesButton" disabled>Registar vendas</button>
+            </section>
+        </div>
+
+        <!-- Faturação do dia (RF30) e vendas registadas -->
+        <section class="panel day-sales" id="daySales" aria-labelledby="daySalesTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="daySalesTitle">Vendas do dia</h2>
+            </div>
+            <div class="day-figures">
+                <div class="figure">
+                    <span class="figure-label">Faturação do dia</span>
+                    <strong class="figure-value" id="dayRevenue">0,00 €</strong>
+                </div>
+                <div class="figure">
+                    <span class="figure-label">Mais vendido</span>
+                    <strong class="figure-value figure-text" id="dayTopItem">—</strong>
+                </div>
+            </div>
+            <ul class="item-summary" id="itemSummary"></ul>
+
+            <h3 class="sales-log-title">Registos</h3>
+            <ul class="sales-log" id="salesLog"></ul>
+            <p class="empty-state empty-small" id="salesEmpty" hidden>Ainda não há vendas neste dia.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        Bebe e Siga · Gestão de Eventos. Os dados ficam guardados no servidor, numa base de dados MySQL.
+    </footer>
+
+    <script src="js/comum.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/vendas.js"></script>
+</body>
+</html>

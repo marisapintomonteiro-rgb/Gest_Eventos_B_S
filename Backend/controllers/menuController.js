@@ -4,6 +4,7 @@
 const menuModel = require('../models/menuModel');
 const eventModel = require('../models/eventModel');
 const productModel = require('../models/productModel');
+const saleModel = require('../models/saleModel');
 
 const CATEGORIES = ['Bebidas', 'Cocktails', 'Comida', 'Shots', 'Outros'];
 const ITEM_TYPES = ['Direta', 'Composta'];
@@ -200,6 +201,11 @@ async function deleteItem(req, res) {
 
         if (!event || !await menuModel.findItemInEvent(event.event_id, itemId)) {
             return res.status(404).json({ error: 'Este artigo não existe.' });
+        }
+
+        // Um artigo já vendido fica na ementa: as vendas apontam para ele (histórico)
+        if (await saleModel.itemHasSales(itemId)) {
+            return res.status(400).json({ error: 'Este artigo já tem vendas e não pode ser retirado. Podes mudar o preço ou o nome.' });
         }
 
         await menuModel.deleteItem(itemId);

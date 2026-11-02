@@ -77,6 +77,24 @@ function apiCreateEvent(eventData) {
     return apiRequest('POST', '/api/events', eventData);
 }
 
+function apiListDays(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/days`);
+}
+
+// ---------- Vendas (todos os perfis) ----------
+
+function apiListSales(eventId, dayId) {
+    return apiRequest('GET', `/api/events/${eventId}/sales?day=${dayId}`);
+}
+
+function apiCreateSales(eventId, eventDayId, lines) {
+    return apiRequest('POST', `/api/events/${eventId}/sales`, { eventDayId, lines });
+}
+
+function apiCancelSale(eventId, saleId) {
+    return apiRequest('POST', `/api/events/${eventId}/sales/${saleId}/cancel`);
+}
+
 // ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
 
 function apiGetMenu(eventId) {
