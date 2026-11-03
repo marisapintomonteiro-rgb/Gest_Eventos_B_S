@@ -9,6 +9,7 @@ const expenseModel = require('../models/expenseModel');
 const stockModel = require('../models/stockModel');
 const returnModel = require('../models/returnModel');
 const noteModel = require('../models/noteModel');
+const invoiceModel = require('../models/invoiceModel');
 const { getEditDeadline, isEventEditable } = require('../middleware/eventMiddleware');
 
 function roundMoney(value) {
@@ -46,13 +47,16 @@ function calculateStockValue(stock, costs) {
 // Resultados financeiros do evento (RF21). As compras não entram nas despesas (não se contam duas vezes);
 // as devoluções baixam o custo das compras; o stock que sobra fica separado do que foi consumido.
 async function calculateFinance(event, revenue, stock) {
-    const [costs, expenses, returnTotal] = await Promise.all([
+    const [costs, expenses, returnTotal, invoiceTotal] = await Promise.all([
         purchaseModel.findPurchaseCostByProduct(event.event_id),
         expenseModel.findExpensesByEvent(event.event_id),
-        returnModel.sumReturnsByEvent(event.event_id)
+        returnModel.sumReturnsByEvent(event.event_id),
+        invoiceModel.sumInvoicesByEvent(event.event_id)
     ]);
 
-    const purchases = roundMoney(costs.reduce((sum, cost) => sum + Number(cost.cost), 0));
+    // Compras = compras com produtos + faturas registadas pelo valor total
+    const productPurchases = costs.reduce((sum, cost) => sum + Number(cost.cost), 0);
+    const purchases = roundMoney(productPurchases + invoiceTotal);
     const expenseTotal = roundMoney(expenses.reduce((sum, expense) => sum + Number(expense.amount), 0));
     const returns = roundMoney(returnTotal);
     const spent = roundMoney(purchases - returns + expenseTotal);
@@ -68,6 +72,7 @@ async function calculateFinance(event, revenue, stock) {
             spent,
             result: roundMoney(revenue - spent),
             stockValue,
+            // Sem controlo de stock não se sabe o que sobrou: o consumido é o total das compras
             consumedValue: roundMoney(purchases - returns - stockValue)
         }
     };
@@ -92,7 +97,13 @@ async function getDashboard(req, res) {
 
         const revenue = roundMoney(days.reduce((sum, day) => sum + Number(day.revenue), 0));
         const dashboard = {
-            event: { event_id: event.event_id, event_name: event.event_name, first_day: event.first_day, last_day: event.last_day },
+            event: {
+                event_id: event.event_id,
+                event_name: event.event_name,
+                first_day: event.first_day,
+                last_day: event.last_day,
+                track_stock: Boolean(event.track_stock)
+            },
             revenue,
             days: days.map((day) => ({
                 eventDayId: day.event_day_id,
@@ -126,13 +137,14 @@ async function getReport(req, res) {
             return res.status(404).json({ error: 'Este evento não existe.' });
         }
 
-        const [revenueDays, closedDays, items, stock, returns, notes] = await Promise.all([
+        const [revenueDays, closedDays, items, stock, returns, notes, invoices] = await Promise.all([
             saleModel.findRevenueByDay(event.event_id),
             eventModel.findDaysByEvent(event.event_id),
             saleModel.findTopItems(event.event_id, 1000),
             stockModel.findStockByEvent(event.event_id),
             returnModel.findReturnsByEvent(event.event_id),
-            noteModel.findNotesByEvent(event.event_id)
+            noteModel.findNotesByEvent(event.event_id),
+            invoiceModel.findInvoicesByEvent(event.event_id)
         ]);
 
         const revenue = roundMoney(revenueDays.reduce((sum, day) => sum + Number(day.revenue), 0));
@@ -155,6 +167,7 @@ async function getReport(req, res) {
             finance: finance.totals,
             expenses: finance.expenses,
             returns,
+            invoices,
             stock,
             notes
         });

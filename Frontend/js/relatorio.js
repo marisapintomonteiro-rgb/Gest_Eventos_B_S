@@ -187,6 +187,14 @@ function renderReport() {
         MONEY.format(Number(item.packages) * Number(item.package_price))
     ], 'Sem devoluções.');
 
+    fillTable('reportInvoices', report.invoices || [], (invoice) => [
+        `${invoice.supplier_name}${invoice.description ? ` (${invoice.description})` : ''}`,
+        formatDate(invoice.invoice_date),
+        MONEY.format(Number(invoice.amount))
+    ], 'Sem faturas.');
+    document.getElementById('reportInvoicesSection').hidden = (report.invoices || []).length === 0;
+    document.getElementById('reportStockSection').hidden = !trackStock();
+
     fillTable('reportStock', report.stock, (row) => [
         row.product_name,
         formatQuantity(row.purchased, row.unit),
@@ -206,13 +214,17 @@ function renderFinance() {
 
     const rows = [
         ['Faturação', report.revenue, ''],
-        ['Compras de produtos', -finance.purchases, ''],
+        ['Compras e faturas', -finance.purchases, ''],
         ['Devoluções a fornecedores', finance.returns, ''],
         ['Despesas', -finance.expenses, ''],
-        ['Resultado', finance.result, 'is-total'],
-        ['Stock que sobrou (ao custo)', finance.stockValue, 'is-separate'],
-        ['Produtos consumidos (ao custo)', finance.consumedValue, '']
+        ['Resultado', finance.result, 'is-total']
     ];
+
+    // O valor do stock só existe nos eventos que controlam o stock
+    if (trackStock()) {
+        rows.push(['Stock que sobrou (ao custo)', finance.stockValue, 'is-separate']);
+        rows.push(['Produtos consumidos (ao custo)', finance.consumedValue, '']);
+    }
 
     if (finance.budget !== null) {
         rows.push([`Orçamento (gasto ${MONEY.format(finance.spent)})`, finance.budget, 'is-separate']);
@@ -274,4 +286,9 @@ function renderNotes() {
         );
         list.append(item);
     });
+}
+
+// O evento do relatório controla o stock?
+function trackStock() {
+    return eventTracksStock(report.event);
 }

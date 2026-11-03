@@ -48,6 +48,7 @@ async function startSalesPage() {
     currentEventId = setupEventPicker(events, 'vendas.html', loadEvent);
 
     document.getElementById('clearCartButton').addEventListener('click', clearCart);
+    document.getElementById('dayTotalForm').addEventListener('submit', addDayTotal);
     document.getElementById('registerSalesButton').addEventListener('click', registerSales);
     setupDayClosing();
 
@@ -78,7 +79,16 @@ async function loadEvent(eventId) {
     renderTillMenu();
     selectDay(chooseStartDay());
     document.getElementById('dayPicker').hidden = false;
-    document.getElementById('till').hidden = false;
+
+    // Sem controlo de stock: aparece o registo da faturação em euros; a caixa só se houver ementa
+    const tracking = isTrackingStock();
+    document.getElementById('dayTotalPanel').hidden = tracking;
+    document.getElementById('till').hidden = !tracking && menuItems.length === 0;
+}
+
+// O evento escolhido controla o stock?
+function isTrackingStock() {
+    return eventTracksStock(events.find((item) => item.event_id === currentEventId));
 }
 
 // ---------- Dia operacional ----------
@@ -347,6 +357,7 @@ async function renderDaySales() {
     });
 
     renderSalesLog(result.sales);
+    renderDayTotals(result.dayTotals || []);
 }
 
 // Lista dos registos, com o botão Anular (o Colaborador só vê nas suas; o servidor confirma)
@@ -577,6 +588,77 @@ async function deleteNote(note, button) {
         await apiDeleteNote(currentEventId, note.note_id);
         notes = (await apiListNotes(currentEventId)).notes;
         renderNotes();
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
+}
+
+// ---------- Faturação do dia em euros (eventos sem controlo de stock) ----------
+
+async function addDayTotal(event) {
+    event.preventDefault();
+    const message = document.getElementById('dayTotalMessage');
+    hideMessage(message);
+    const amountInput = document.getElementById('dayTotalAmount');
+
+    if (!(Number(amountInput.value) > 0)) {
+        showMessage(message, 'Indica o valor faturado.', 'is-error');
+        amountInput.focus();
+        return;
+    }
+
+    try {
+        const result = await apiCreateDayTotal(currentEventId, currentDay.event_day_id, amountInput.value, document.getElementById('dayTotalNote').value);
+        document.getElementById('dayTotalForm').reset();
+        await renderDaySales();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(message, error.message, 'is-error');
+    }
+}
+
+// Os totais em euros aparecem no topo dos registos do dia
+function renderDayTotals(dayTotals) {
+    const log = document.getElementById('salesLog');
+    const canDeleteAll = hasRole(session.role, 'Gestor');
+
+    if (dayTotals.length > 0) {
+        document.getElementById('salesEmpty').hidden = true;
+    }
+
+    [...dayTotals].reverse().forEach((total) => {
+        const line = document.createElement('li');
+        line.className = 'sales-log-line';
+        line.append(
+            createElementWithText('span', 'sale-time', total.created_at.slice(11, 16)),
+            createElementWithText('span', 'sale-what', total.note ? `Total em euros · ${total.note}` : 'Total em euros'),
+            createElementWithText('span', 'sale-who', total.created_by_email),
+            createElementWithText('span', 'receipt-amount', MONEY.format(Number(total.amount)))
+        );
+
+        if (!currentDay.is_closed && (canDeleteAll || total.created_by === session.userId)) {
+            const deleteButton = createElementWithText('button', 'link-button', 'Apagar');
+            deleteButton.type = 'button';
+            deleteButton.setAttribute('aria-label', `Apagar o total de ${MONEY.format(Number(total.amount))}`);
+            deleteButton.addEventListener('click', () => deleteDayTotal(total, deleteButton));
+            line.append(deleteButton);
+        }
+
+        log.prepend(line);
+    });
+}
+
+async function deleteDayTotal(total, button) {
+    if (!button.classList.contains('is-confirming')) {
+        button.classList.add('is-confirming');
+        button.textContent = 'Confirmar';
+        return;
+    }
+
+    try {
+        const result = await apiDeleteDayTotal(currentEventId, total.revenue_id);
+        await renderDaySales();
+        showMessage(pageMessage, result.message, 'is-success');
     } catch (error) {
         showMessage(pageMessage, error.message, 'is-error');
     }

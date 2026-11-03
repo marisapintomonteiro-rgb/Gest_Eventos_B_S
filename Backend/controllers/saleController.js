@@ -13,8 +13,9 @@ async function findEvent(req) {
     return eventModel.findEventById(req.session.user.brandId, Number(req.params.eventId));
 }
 
-// Resumo do dia: faturação e quantidade vendida de cada artigo (sem as vendas anuladas)
-function summarizeDay(sales) {
+// Resumo do dia: faturação e quantidade vendida de cada artigo (sem as vendas anuladas).
+// Os totais registados em euros (eventos só com valores) somam à faturação.
+function summarizeDay(sales, dayTotals = []) {
     const validSales = sales.filter((sale) => !sale.cancelled_at);
     const byItem = {};
 
@@ -28,7 +29,8 @@ function summarizeDay(sales) {
     });
 
     const items = Object.values(byItem).sort((first, second) => second.quantity - first.quantity);
-    const revenue = items.reduce((sum, item) => sum + item.revenue, 0);
+    const totalsAmount = dayTotals.reduce((sum, total) => sum + Number(total.amount), 0);
+    const revenue = items.reduce((sum, item) => sum + item.revenue, 0) + totalsAmount;
 
     return { revenue, items };
 }
@@ -43,8 +45,11 @@ async function listSales(req, res) {
             return res.status(404).json({ error: 'Este dia não existe neste evento.' });
         }
 
-        const sales = await saleModel.findSalesByDay(day.event_day_id);
-        res.json({ day, sales, summary: summarizeDay(sales) });
+        const [sales, dayTotals] = await Promise.all([
+            saleModel.findSalesByDay(day.event_day_id),
+            saleModel.findDayTotals(day.event_day_id)
+        ]);
+        res.json({ day, sales, dayTotals, summary: summarizeDay(sales, dayTotals) });
     } catch (error) {
         console.error('Erro ao listar as vendas:', error.message);
         res.status(500).json({ error: 'Não foi possível carregar as vendas. Tenta novamente.' });
@@ -98,7 +103,14 @@ async function createSales(req, res) {
             fullLines.push({ item, quantity: line.quantity });
         }
 
-        await saleModel.createSales(event.event_id, day.event_day_id, userId, fullLines);
+        const trackStock = Boolean(event.track_stock);
+        await saleModel.createSales(event.event_id, day.event_day_id, userId, fullLines, trackStock);
+        const total = fullLines.reduce((sum, line) => sum + line.quantity, 0);
+
+        // Sem controlo de stock não há avisos de stock
+        if (!trackStock) {
+            return res.status(201).json({ message: `Registadas ${total} vendas.`, warnings: [] });
+        }
 
         // A venda fica sempre registada; se algum produto ficar com stock negativo, avisa
         const productIds = fullLines.flatMap((line) => line.item.products.map((product) => product.product_id));
@@ -107,7 +119,6 @@ async function createSales(req, res) {
             .filter((row) => !row.is_residual && Number(row.quantity) < 0)
             .map((row) => ({ productName: row.product_name, quantity: Number(row.quantity), unit: row.unit }));
 
-        const total = fullLines.reduce((sum, line) => sum + line.quantity, 0);
         res.status(201).json({ message: `Registadas ${total} vendas.`, warnings });
     } catch (error) {
         console.error('Erro ao registar as vendas:', error.message);
@@ -150,4 +161,73 @@ async function cancelSale(req, res) {
     }
 }
 
-module.exports = { listSales, createSales, cancelSale };
+// POST /api/events/:eventId/sales/totals: faturação do dia pelo total em euros (sem artigos).
+// Só nos eventos que não controlam o stock.
+async function createDayTotal(req, res) {
+    const amount = Number(req.body.amount);
+    const note = String(req.body.note || '').trim();
+
+    if (Number.isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ error: 'Indica o valor faturado (maior do que zero).' });
+    }
+
+    if (note.length > 150) {
+        return res.status(400).json({ error: 'A nota pode ter até 150 caracteres.' });
+    }
+
+    try {
+        const event = await findEvent(req);
+        const day = event ? await eventModel.findDayInEvent(event.event_id, Number(req.body.eventDayId)) : null;
+
+        if (!day) {
+            return res.status(400).json({ error: 'Escolhe um dia deste evento.' });
+        }
+
+        if (event.track_stock) {
+            return res.status(400).json({ error: 'Este evento controla o stock: regista as vendas pelos artigos da ementa.' });
+        }
+
+        if (day.is_closed) {
+            return res.status(400).json({ error: 'Este dia está fechado. Pede ao Gestor para o reabrir.' });
+        }
+
+        await saleModel.createDayTotal(event.event_id, day.event_day_id, req.session.user.userId, amount, note === '' ? null : note);
+        res.status(201).json({ message: 'Faturação registada.' });
+    } catch (error) {
+        console.error('Erro ao registar a faturação:', error.message);
+        res.status(500).json({ error: 'Não foi possível registar a faturação. Tenta novamente.' });
+    }
+}
+
+// DELETE /api/events/:eventId/sales/totals/:revenueId: apagar um total registado por engano
+// (o Colaborador só apaga os seus; o Gestor e o Administrador apagam qualquer um)
+async function deleteDayTotal(req, res) {
+    const { userId, role } = req.session.user;
+
+    try {
+        const event = await findEvent(req);
+        const total = event ? await saleModel.findDayTotalInEvent(event.event_id, Number(req.params.revenueId)) : null;
+
+        if (!total) {
+            return res.status(404).json({ error: 'Este registo não existe.' });
+        }
+
+        if (role === 'Colaborador' && total.created_by !== userId) {
+            return res.status(403).json({ error: 'Só podes apagar o que registaste.' });
+        }
+
+        const day = await eventModel.findDayInEvent(event.event_id, total.event_day_id);
+
+        if (day.is_closed) {
+            return res.status(400).json({ error: 'Este dia está fechado. Pede ao Gestor para o reabrir.' });
+        }
+
+        await saleModel.deleteDayTotal(total.revenue_id);
+        res.json({ message: 'Registo apagado.' });
+    } catch (error) {
+        console.error('Erro ao apagar a faturação:', error.message);
+        res.status(500).json({ error: 'Não foi possível apagar o registo. Tenta novamente.' });
+    }
+}
+
+module.exports = { listSales, createSales, cancelSale, createDayTotal, deleteDayTotal };

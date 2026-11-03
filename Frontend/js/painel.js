@@ -60,7 +60,7 @@ async function renderDashboard() {
     renderLowStock(data.lowStock);
 
     if (data.finance) {
-        renderFinance(data.finance, data.revenue);
+        renderFinance(data.finance, data.revenue, eventTracksStock(data.event));
         await renderExpenses();
     }
 }
@@ -68,6 +68,9 @@ async function renderDashboard() {
 // ---------- Números em destaque ----------
 
 function renderHeroFigures(data) {
+    // Evento só com valores: sem número de stock baixo
+    document.getElementById('lowStockFigure').hidden = !eventTracksStock(data.event);
+
     document.getElementById('revenueValue').textContent = MONEY.format(data.revenue);
 
     const daysWithSales = data.days.filter((day) => day.revenue > 0).length;
@@ -214,13 +217,13 @@ function renderLowStock(lowStock) {
 
 // ---------- Resultados (RF21) ----------
 
-function renderFinance(finance, revenue) {
+function renderFinance(finance, revenue, trackStock = true) {
     const table = document.getElementById('financeTable');
     table.replaceChildren();
 
     const rows = [
         ['Faturação', revenue, ''],
-        ['Compras de produtos', -finance.purchases, ''],
+        ['Compras e faturas', -finance.purchases, ''],
         ['Devoluções a fornecedores', finance.returns, ''],
         ['Despesas', -finance.expenses, ''],
         ['Resultado estimado', finance.result, 'is-total']
@@ -228,8 +231,11 @@ function renderFinance(finance, revenue) {
 
     rows.forEach(([label, value, className]) => appendMoneyRow(table, label, value, className));
 
-    appendMoneyRow(table, 'Stock que sobra (ao custo)', finance.stockValue, 'is-separate');
-    appendMoneyRow(table, 'Produtos consumidos (ao custo)', finance.consumedValue, '');
+    // O valor do stock só existe nos eventos que controlam o stock
+    if (trackStock) {
+        appendMoneyRow(table, 'Stock que sobra (ao custo)', finance.stockValue, 'is-separate');
+        appendMoneyRow(table, 'Produtos consumidos (ao custo)', finance.consumedValue, '');
+    }
 
     if (finance.budget !== null) {
         const left = finance.budget - finance.spent;

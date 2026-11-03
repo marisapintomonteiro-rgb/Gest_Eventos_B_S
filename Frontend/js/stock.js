@@ -63,6 +63,17 @@ async function startStockPage() {
 }
 
 async function loadEvent() {
+    // Evento só com valores: não há stock para mostrar
+    const tracking = eventTracksStock(events.find((item) => item.event_id === currentEventId));
+    document.getElementById('noStockNote').hidden = tracking;
+    document.querySelector('.heading-actions').hidden = !tracking;
+
+    if (!tracking) {
+        document.getElementById('stockLayout').hidden = true;
+        closePlanners();
+        return;
+    }
+
     try {
         days = (await apiListDays(currentEventId)).days;
     } catch (error) {

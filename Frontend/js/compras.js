@@ -48,7 +48,14 @@ async function startPurchasesPage() {
     });
 
     setupForm();
+    document.getElementById('invoiceForm').addEventListener('submit', addInvoice);
+    suppliers.forEach((supplier) => document.getElementById('supplierNames').append(new Option(supplier.supplier_name)));
     await renderPurchases();
+}
+
+// O evento escolhido controla o stock? Se não, a página mostra só as faturas pelo valor total.
+function isTrackingStock() {
+    return eventTracksStock(events.find((item) => item.event_id === currentEventId));
 }
 
 // ---------- Formulário da compra ----------
@@ -242,6 +249,22 @@ async function savePurchase(event) {
 
 async function renderPurchases() {
     let result;
+    const tracking = isTrackingStock();
+
+    // Sem stock: só faturas (sem compras por produto, previsão nem devoluções)
+    document.getElementById('invoicePanel').hidden = tracking;
+    document.querySelector('.heading-actions').hidden = !tracking;
+    document.querySelector('.events-heading .lead').textContent = tracking
+        ? 'O que se comprou para cada evento, antes ou durante. Cada compra entra no stock do evento.'
+        : 'As faturas de compra deste evento, pelo valor total.';
+
+    if (!tracking) {
+        document.getElementById('purchaseLayout').hidden = true;
+        document.getElementById('returnsPanel').hidden = true;
+        document.getElementById('forecastPanel').hidden = true;
+        await renderInvoices();
+        return;
+    }
 
     try {
         result = await apiListPurchases(currentEventId);
@@ -626,4 +649,86 @@ function updateForecastTotals() {
         button.addEventListener('click', () => openPurchaseForm(group));
         actions.append(button);
     });
+}
+
+// ---------- Faturas pelo valor total (eventos sem controlo de stock) ----------
+
+async function renderInvoices() {
+    let invoices;
+
+    try {
+        invoices = (await apiListInvoices(currentEventId)).invoices;
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+        return;
+    }
+
+    const dateInput = document.getElementById('invoiceDate');
+
+    if (!dateInput.value) {
+        dateInput.value = new Date().toLocaleDateString('sv-SE');
+    }
+
+    const list = document.getElementById('invoiceList');
+    list.replaceChildren();
+    document.getElementById('invoiceCount').textContent = invoices.length;
+    document.getElementById('invoicesEmpty').hidden = invoices.length > 0;
+
+    const total = invoices.reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+    document.getElementById('invoiceSum').textContent = `Total das faturas: ${MONEY.format(total)}`;
+
+    invoices.forEach((invoice) => {
+        const line = document.createElement('li');
+        const text = document.createElement('div');
+        const date = new Date(`${invoice.invoice_date}T12:00:00`).toLocaleDateString('pt-PT');
+        text.append(
+            createElementWithText('strong', '', invoice.supplier_name),
+            createElementWithText('span', 'expense-meta', invoice.description ? `${date} · ${invoice.description}` : date)
+        );
+
+        const deleteButton = createElementWithText('button', 'link-button', 'Apagar');
+        deleteButton.type = 'button';
+        deleteButton.setAttribute('aria-label', `Apagar a fatura de ${invoice.supplier_name}`);
+        deleteButton.addEventListener('click', () => deleteInvoice(invoice, deleteButton));
+
+        line.append(text, createElementWithText('span', 'receipt-amount', MONEY.format(Number(invoice.amount))), deleteButton);
+        list.append(line);
+    });
+}
+
+async function addInvoice(event) {
+    event.preventDefault();
+    const formMessage = document.getElementById('invoiceFormMessage');
+    hideMessage(formMessage);
+
+    try {
+        const result = await apiCreateInvoice(currentEventId, {
+            supplierName: document.getElementById('invoiceSupplier').value,
+            invoiceDate: document.getElementById('invoiceDate').value,
+            description: document.getElementById('invoiceDescription').value,
+            amount: document.getElementById('invoiceAmount').value
+        });
+        document.getElementById('invoiceDescription').value = '';
+        document.getElementById('invoiceAmount').value = '';
+        await renderInvoices();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(formMessage, error.message, 'is-error');
+    }
+}
+
+async function deleteInvoice(invoice, button) {
+    if (!button.classList.contains('is-confirming')) {
+        button.classList.add('is-confirming');
+        button.textContent = 'Confirmar';
+        return;
+    }
+
+    try {
+        const result = await apiDeleteInvoice(currentEventId, invoice.invoice_id);
+        await renderInvoices();
+        showMessage(pageMessage, result.message, 'is-success');
+    } catch (error) {
+        showMessage(pageMessage, error.message, 'is-error');
+    }
 }

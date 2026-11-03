@@ -2,6 +2,14 @@
 
 const pool = require('../config/database');
 
+// Guarda se o evento controla o stock ou se é só com valores (faturas, vendas e despesas)
+async function saveTrackStock(connection, eventId, trackStock) {
+    await connection.execute(
+        'REPLACE INTO event_settings (event_id, track_stock) VALUES (?, ?)',
+        [eventId, trackStock ? 1 : 0]
+    );
+}
+
 // Grava o evento, os dias e as despesas iniciais de uma só vez (transação).
 // Devolve o número (event_id) do evento novo.
 async function createEvent(brandId, userId, eventData, days, expenses) {
@@ -17,6 +25,7 @@ async function createEvent(brandId, userId, eventData, days, expenses) {
                 eventData.expectedAudience, eventData.budget, userId]
         );
         const eventId = eventResult.insertId;
+        await saveTrackStock(connection, eventId, eventData.trackStock);
 
         for (const day of days) {
             await connection.execute(
@@ -50,7 +59,8 @@ async function findEventsByBrand(brandId) {
                 MIN(d.event_date) AS first_day, MAX(d.event_date) AS last_day,
                 COUNT(d.event_day_id) AS day_count,
                 GROUP_CONCAT(d.event_date ORDER BY d.event_date SEPARATOR ',') AS dates,
-                MAX(ec.event_id IS NOT NULL) AS is_closed
+                MAX(ec.event_id IS NOT NULL) AS is_closed,
+                (SELECT COALESCE(MAX(es.track_stock), 1) FROM event_settings es WHERE es.event_id = e.event_id) AS track_stock
          FROM events e
          LEFT JOIN event_days d ON d.event_id = e.event_id
          LEFT JOIN event_closings ec ON ec.event_id = e.event_id
@@ -66,7 +76,8 @@ async function findEventsByBrand(brandId) {
 async function findEventById(brandId, eventId) {
     const [rows] = await pool.execute(
         `SELECT e.event_id, e.event_name, e.location, e.budget, MIN(d.event_date) AS first_day,
-                MAX(d.event_date) AS last_day, MAX(ec.event_id IS NOT NULL) AS is_closed, MAX(ec.closed_at) AS closed_at
+                MAX(d.event_date) AS last_day, MAX(ec.event_id IS NOT NULL) AS is_closed, MAX(ec.closed_at) AS closed_at,
+                (SELECT COALESCE(MAX(es.track_stock), 1) FROM event_settings es WHERE es.event_id = e.event_id) AS track_stock
          FROM events e
          LEFT JOIN event_days d ON d.event_id = e.event_id
          LEFT JOIN event_closings ec ON ec.event_id = e.event_id
@@ -138,8 +149,9 @@ async function findCalendarDays(brandId) {
     const [rows] = await pool.execute(
         `SELECT d.event_day_id, d.event_date, d.start_time, d.end_time, d.revenue_target,
                 e.event_id, e.event_name, e.location,
-                COALESCE(SUM(CASE WHEN s.cancelled_at IS NULL THEN s.quantity * s.unit_price END), 0) AS revenue,
-                COUNT(s.sale_id) AS sale_count
+                COALESCE(SUM(CASE WHEN s.cancelled_at IS NULL THEN s.quantity * s.unit_price END), 0)
+                + (SELECT COALESCE(SUM(r.amount), 0) FROM day_revenues r WHERE r.event_day_id = d.event_day_id) AS revenue,
+                COUNT(s.sale_id) + (SELECT COUNT(*) FROM day_revenues r WHERE r.event_day_id = d.event_day_id) AS sale_count
          FROM event_days d
          JOIN events e ON e.event_id = d.event_id
          LEFT JOIN sales s ON s.event_day_id = d.event_day_id
@@ -158,7 +170,8 @@ async function findPaidByEvent(brandId) {
                 (SELECT COALESCE(SUM(x.amount), 0) FROM expenses x WHERE x.event_id = e.event_id)
                 + (SELECT COALESCE(SUM(pl.packages * pl.package_price), 0)
                    FROM purchase_lines pl JOIN purchases pu ON pu.purchase_id = pl.purchase_id
-                   WHERE pu.event_id = e.event_id) AS paid
+                   WHERE pu.event_id = e.event_id)
+                + (SELECT COALESCE(SUM(i.amount), 0) FROM purchase_invoices i WHERE i.event_id = e.event_id) AS paid
          FROM events e
          WHERE e.brand_id = ?`,
         [brandId]
@@ -169,9 +182,10 @@ async function findPaidByEvent(brandId) {
 // Dados do evento para o formulário de edição: o evento e os seus dias
 async function findEventDetails(brandId, eventId) {
     const [rows] = await pool.execute(
-        `SELECT event_id, event_name, location, space_type, expected_audience, budget
-         FROM events
-         WHERE brand_id = ? AND event_id = ?`,
+        `SELECT e.event_id, e.event_name, e.location, e.space_type, e.expected_audience, e.budget,
+                (SELECT COALESCE(MAX(es.track_stock), 1) FROM event_settings es WHERE es.event_id = e.event_id) AS track_stock
+         FROM events e
+         WHERE e.brand_id = ? AND e.event_id = ?`,
         [brandId, eventId]
     );
 
@@ -212,6 +226,7 @@ async function updateEvent(eventId, eventData, days) {
             [eventData.eventName, eventData.location, eventData.spaceType, eventData.expectedAudience,
                 eventData.budget, eventId]
         );
+        await saveTrackStock(connection, eventId, eventData.trackStock);
 
         const [existing] = await connection.execute('SELECT event_day_id, event_date FROM event_days WHERE event_id = ?', [eventId]);
         const newDates = days.map((day) => day.date);

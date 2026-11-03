@@ -100,6 +100,7 @@ async function openEditor(eventId) {
     eventForm.querySelectorAll('input[name="spaceType"]').forEach((input) => {
         input.checked = input.value === event.space_type;
     });
+    document.getElementById('trackStock').checked = eventTracksStock(event);
 
     dayList.replaceChildren();
     event.days.forEach((day) => addDayRow(day));
@@ -268,6 +269,7 @@ async function saveEvent(event) {
         spaceType: spaceTypeInput ? spaceTypeInput.value : null,
         expectedAudience: document.getElementById('expectedAudience').value || null,
         budget: budgetInput.value || null,
+        trackStock: document.getElementById('trackStock').checked,
         days: readDays(),
         expenses: readExpenses()
     };
@@ -367,6 +369,11 @@ function createTicket(item) {
     }
 
     body.insertBefore(createElementWithText('span', item.is_closed ? 'ticket-status is-closed' : 'ticket-status', status), body.firstChild);
+
+    // Evento só com valores (sem controlo de stock)
+    if (!eventTracksStock(item)) {
+        body.firstChild.after(createElementWithText('span', 'ticket-status simple-tag', 'Só valores'));
+    }
 
     const links = document.createElement('div');
     links.className = 'ticket-links';

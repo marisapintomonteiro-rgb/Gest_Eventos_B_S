@@ -204,6 +204,28 @@ function apiGetCalendar() {
     return apiRequest('GET', '/api/events/calendar');
 }
 
+// ---------- Faturas e faturação do dia em euros (eventos sem controlo de stock) ----------
+
+function apiListInvoices(eventId) {
+    return apiRequest('GET', `/api/events/${eventId}/invoices`);
+}
+
+function apiCreateInvoice(eventId, invoiceData) {
+    return apiRequest('POST', `/api/events/${eventId}/invoices`, invoiceData);
+}
+
+function apiDeleteInvoice(eventId, invoiceId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/invoices/${invoiceId}`);
+}
+
+function apiCreateDayTotal(eventId, eventDayId, amount, note) {
+    return apiRequest('POST', `/api/events/${eventId}/sales/totals`, { eventDayId, amount, note });
+}
+
+function apiDeleteDayTotal(eventId, revenueId) {
+    return apiRequest('DELETE', `/api/events/${eventId}/sales/totals/${revenueId}`);
+}
+
 // ---------- Ementa de um evento (consultar: todos; alterar: Gestor e Administrador) ----------
 
 function apiGetMenu(eventId) {

@@ -90,6 +90,10 @@ async function createOutMovement(req, res) {
             return res.status(400).json({ error: 'Escolhe um dia deste evento.' });
         }
 
+        if (!event.track_stock) {
+            return res.status(400).json({ error: 'Este evento não controla o stock.' });
+        }
+
         if (day.is_closed) {
             return res.status(400).json({ error: 'Este dia está fechado. Pede ao Gestor para o reabrir.' });
         }
@@ -136,6 +140,10 @@ async function createCorrection(req, res) {
 
         if (!event) {
             return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        if (!event.track_stock) {
+            return res.status(400).json({ error: 'Este evento não controla o stock.' });
         }
 
         if (!await productExists(brandId, productId)) {

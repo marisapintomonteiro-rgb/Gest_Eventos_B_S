@@ -60,6 +60,34 @@
             Ainda não há eventos. As compras pertencem a um evento: <a href="eventos.html">cria primeiro o evento</a>.
         </p>
 
+        <!-- Eventos sem controlo de stock: faturas pelo valor total -->
+        <section class="panel invoice-panel" id="invoicePanel" aria-labelledby="invoicesTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="invoicesTitle">Faturas de compra</h2>
+                <span class="counter" id="invoiceCount">0</span>
+            </div>
+            <p class="col-hint">Este evento não controla o stock: regista cada fatura pelo valor total. Entra nas compras do balanço, no Painel e no Relatório.</p>
+            <p class="money-summary" id="invoiceSum"></p>
+
+            <form class="invoice-form" id="invoiceForm" novalidate>
+                <label>Fornecedor<input type="text" id="invoiceSupplier" maxlength="100" list="supplierNames" placeholder="Ex.: Distribuidora do Norte"></label>
+                <label>Data<input type="date" id="invoiceDate"></label>
+                <label>Descrição <span class="optional">(opcional)</span><input type="text" id="invoiceDescription" maxlength="150" placeholder="Ex.: bebidas, fatura n.º 123"></label>
+                <label>Valor
+                    <span class="input-with-unit">
+                        <input type="number" id="invoiceAmount" min="0" step="0.01" inputmode="decimal">
+                        <span class="unit-suffix">€</span>
+                    </span>
+                </label>
+                <button class="button" type="submit">Registar fatura</button>
+            </form>
+            <datalist id="supplierNames"></datalist>
+            <p class="form-message is-error" id="invoiceFormMessage" role="alert" hidden></p>
+
+            <ul class="expense-list" id="invoiceList"></ul>
+            <p class="empty-state empty-small" id="invoicesEmpty" hidden>Ainda não há faturas neste evento.</p>
+        </section>
+
         <!-- Previsão de compras (RF13) -->
         <section class="panel forecast-panel" id="forecastPanel" aria-labelledby="forecastTitle" hidden>
             <div class="panel-heading">

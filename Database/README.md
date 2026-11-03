@@ -13,7 +13,8 @@ O ficheiro `bebe_e_siga.sql` cria a base de dados e as tabelas:
 - notas: `event_notes` (notas diárias e finais);
 - fim do evento: `purchase_returns` (devoluções a fornecedores) e `event_closings` (eventos encerrados);
 - previsão: `event_editions` (liga cada evento à sua edição anterior);
-- acesso: `password_resets` (contas com palavra-passe temporária, que têm de a mudar ao entrar).
+- acesso: `password_resets` (contas com palavra-passe temporária, que têm de a mudar ao entrar);
+- modo só com valores: `event_settings` (o evento controla ou não o stock), `purchase_invoices` (faturas pelo valor total) e `day_revenues` (faturação do dia pelo total).
 
 O stock de um produto num evento é: soma das compras + soma dos movimentos (as saídas são negativas).
 

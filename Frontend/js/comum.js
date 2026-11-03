@@ -275,3 +275,12 @@ function showReadOnlyNote(events, eventId) {
         note.textContent = `Só consulta: o prazo de edição deste evento terminou a ${deadline} (um mês depois do último dia).`;
     }
 }
+
+// O evento controla o stock? (por defeito sim; os eventos "só com valores" têm track_stock = 0)
+function eventTracksStock(event) {
+    if (!event || event.track_stock === undefined || event.track_stock === null) {
+        return true;
+    }
+
+    return Boolean(Number(event.track_stock));
+}

@@ -117,10 +117,18 @@ function applyItemType(keepRows) {
     document.getElementById('stockHint').textContent = texts.stockHint;
 
     const hasProducts = products.length > 0;
-    document.getElementById('noProductsNote').hidden = hasProducts;
-    document.getElementById('addItemProductButton').hidden = !hasProducts || itemType === 'Direta';
+    const tracking = isTrackingStock();
+
+    // Evento sem controlo de stock: os produtos são opcionais (o artigo pode ter só nome e preço)
+    if (!tracking) {
+        document.getElementById('stockHint').textContent = 'Este evento não controla o stock: os produtos são opcionais. O artigo pode ter só o nome e o preço.';
+    }
+
+    document.getElementById('noProductsNote').hidden = hasProducts || !tracking;
+    document.getElementById('addItemProductButton').hidden = !hasProducts || (tracking && itemType === 'Direta');
 
     if (!keepRows) {
+        updateRemoveButtons();
         return;
     }
 
@@ -129,18 +137,24 @@ function applyItemType(keepRows) {
         Array.from(itemProductList.children).slice(1).forEach((row) => row.remove());
     }
 
-    if (hasProducts && itemProductList.children.length === 0) {
+    if (tracking && hasProducts && itemProductList.children.length === 0) {
         addProductRow();
     }
 
     updateRemoveButtons();
 }
 
+// O evento escolhido controla o stock?
+function isTrackingStock() {
+    return eventTracksStock(events.find((item) => item.event_id === currentEventId));
+}
+
 // Na venda direta não se tira a única linha; no composto pode tirar-se qualquer uma, menos a última
 function updateRemoveButtons() {
     const rows = Array.from(itemProductList.children);
+    const tracking = isTrackingStock();
     rows.forEach((row) => {
-        row.querySelector('.remove-row').hidden = rows.length === 1;
+        row.querySelector('.remove-row').hidden = tracking && rows.length === 1;
     });
 }
 
@@ -264,7 +278,7 @@ async function saveItem(event) {
         return;
     }
 
-    if (itemProductList.children.length === 0) {
+    if (isTrackingStock() && itemProductList.children.length === 0) {
         showMessage(formMessage, 'Escolhe pelo menos um produto.', 'is-error');
         return;
     }

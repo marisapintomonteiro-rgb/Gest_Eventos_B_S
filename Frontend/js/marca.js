@@ -233,14 +233,19 @@ function renderActions(event, state, todayDay) {
         actions.push({ text: 'Registar vendas', hint: 'Abrir a caixa de hoje', href: `vendas.html${query}`, main: true });
     }
 
-    actions.push({ text: 'Stock', hint: 'Ver o stock e registar consumo interno', href: `stock.html${query}` });
+    const tracking = eventTracksStock(event);
+
+    if (tracking) {
+        actions.push({ text: 'Stock', hint: 'Ver o stock e registar consumo interno', href: `stock.html${query}` });
+    }
+
     actions.push({ text: 'Ementa', hint: 'Artigos e preços', href: `ementa.html${query}` });
 
     if (isManager) {
         if (state === 'upcoming') {
             actions.unshift({ text: 'Preparar compras', hint: 'Previsão e compras do evento', href: `compras.html${query}`, main: true });
         } else {
-            actions.push({ text: 'Compras', hint: 'Compras e devoluções', href: `compras.html${query}` });
+            actions.push({ text: tracking ? 'Compras' : 'Faturas', hint: tracking ? 'Compras e devoluções' : 'Faturas de compra pelo valor', href: `compras.html${query}` });
         }
 
         actions.push({ text: 'Painel', hint: 'Resultados, despesas e gráficos', href: `painel.html${query}` });

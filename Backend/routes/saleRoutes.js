@@ -18,4 +18,10 @@ router.post('/', requireLogin, requireEditableEvent, saleController.createSales)
 // POST /api/events/:eventId/sales/:saleId/cancel: anular uma venda (o controller confirma quem pode)
 router.post('/:saleId/cancel', requireLogin, requireEditableEvent, saleController.cancelSale);
 
+// POST /api/events/:eventId/sales/totals: faturação do dia pelo total (eventos só com valores)
+router.post('/totals', requireLogin, requireEditableEvent, saleController.createDayTotal);
+
+// DELETE /api/events/:eventId/sales/totals/:revenueId: apagar um total registado por engano
+router.delete('/totals/:revenueId', requireLogin, requireEditableEvent, saleController.deleteDayTotal);
+
 module.exports = router;

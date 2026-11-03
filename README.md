@@ -15,6 +15,8 @@ A aplicação corre num servidor Node.js e guarda os dados em MySQL.
 
 Não abrir as páginas com duplo clique: têm de ser abertas através do servidor, para a sessão funcionar.
 
+Cada evento pode controlar o stock (compras por produto, receitas, stock) ou ser **só com valores**: faturas pelo total, faturação do dia em euros e despesas, com o balanço no Painel e no Relatório. Escolhe-se ao criar ou editar o evento.
+
 Sempre que o ficheiro `Database/bebe_e_siga.sql` mudar, basta importá-lo outra vez: só são criadas as tabelas que faltam e os dados não se perdem.
 
 ## O que a aplicação faz

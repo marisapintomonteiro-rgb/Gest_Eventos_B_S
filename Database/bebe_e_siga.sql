@@ -375,3 +375,50 @@ CREATE TABLE IF NOT EXISTS password_resets (
         FOREIGN KEY (reset_by) REFERENCES users (user_id)
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Modo de cada evento: com controlo de stock (por defeito) ou só com valores.
+-- Sem linha aqui, o evento controla o stock.
+CREATE TABLE IF NOT EXISTS event_settings (
+    event_id INT PRIMARY KEY,
+    track_stock BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT fk_event_settings_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Faturas de compra pelo valor total (eventos sem controlo de stock): fornecedor, data e valor.
+-- Contam como compras no balanço (não como despesas, para não contarem duas vezes).
+CREATE TABLE IF NOT EXISTS purchase_invoices (
+    invoice_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    supplier_name VARCHAR(100) NOT NULL,
+    invoice_date DATE NOT NULL,
+    description VARCHAR(150) NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_purchase_invoices_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_purchase_invoices_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;
+
+-- Faturação de um dia registada pelo total em euros, sem artigos (eventos sem controlo de stock).
+CREATE TABLE IF NOT EXISTS day_revenues (
+    revenue_id INT AUTO_INCREMENT PRIMARY KEY,
+    event_id INT NOT NULL,
+    event_day_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    note VARCHAR(150) NULL,
+    created_by INT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_day_revenues_event
+        FOREIGN KEY (event_id) REFERENCES events (event_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_day_revenues_day
+        FOREIGN KEY (event_day_id) REFERENCES event_days (event_day_id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_day_revenues_user
+        FOREIGN KEY (created_by) REFERENCES users (user_id)
+) ENGINE=InnoDB;

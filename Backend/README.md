@@ -63,6 +63,11 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 | GET | `/api/events/calendar` | quem tem sessão (RF06, RF32; o aviso de lucro só para Gestor e Administrador) |
 | GET | `/api/events/:eventId/forecast?margin=10` | Gestor e Administrador (RF13) |
 | PUT | `/api/events/:eventId/previous` | Gestor e Administrador (edição anterior do evento) |
+| GET | `/api/events/:eventId/invoices` | Gestor e Administrador (faturas pelo valor total) |
+| POST | `/api/events/:eventId/invoices` | Gestor e Administrador (fornecedor, data e valor) |
+| DELETE | `/api/events/:eventId/invoices/:invoiceId` | Gestor e Administrador |
+| POST | `/api/events/:eventId/sales/totals` | quem tem sessão (faturação do dia em euros, só em eventos sem stock) |
+| DELETE | `/api/events/:eventId/sales/totals/:revenueId` | Colaborador (os seus), Gestor e Administrador |
 | GET | `/api/suppliers` | Gestor e Administrador (RF11) |
 | POST | `/api/suppliers` | Gestor e Administrador (RF11) |
 | PUT | `/api/suppliers/:id` | Gestor e Administrador (editar fornecedor) |

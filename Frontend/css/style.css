@@ -3563,3 +3563,62 @@ textarea:focus-visible {
 .app-header .button {
     white-space: nowrap;
 }
+
+/* ---------- Faturas e totais do dia (eventos só com valores) ---------- */
+
+.invoice-panel {
+    margin-bottom: 20px;
+}
+
+.invoice-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr) minmax(0, 1.4fr) minmax(0, 0.9fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 16px;
+}
+
+.invoice-form label,
+.day-total-form label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.invoice-form input,
+.day-total-form input {
+    min-height: 44px;
+    margin-top: 2px;
+    color: var(--ink);
+}
+
+.day-total-form {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.day-total-panel {
+    margin-bottom: 20px;
+}
+
+.simple-tag {
+    margin-left: 4px;
+}
+
+@media (max-width: 900px) {
+    .invoice-form {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .invoice-form .button {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .day-total-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

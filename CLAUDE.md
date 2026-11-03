@@ -726,6 +726,8 @@ Regras transversais:
 - vendas, compras e movimentos guardam os valores do momento (nome, preço, tamanho da embalagem, receita), para o histórico não mudar (secção 16);
 - os controllers `dashboardController`, `calendarController` e `forecastController` não têm model próprio: juntam dados de outros models.
 
+Eventos "só com valores" (decisão da equipa, 3 de novembro): ao criar ou editar um evento pode desligar-se "Controlar o stock". Nesse caso registam-se só faturas pelo valor total (`purchase_invoices`), a faturação do dia em euros (`day_revenues`) ou vendas pela ementa sem receitas, e despesas; o balanço continua no Painel e no Relatório. As faturas contam como compras, não como despesas.
+
 Trabalho futuro: guardar o logótipo da marca e as fotografias dos artigos no servidor; registar compras por fotografia da fatura.
 
 ---

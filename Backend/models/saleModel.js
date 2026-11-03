@@ -46,7 +46,8 @@ async function itemHasSales(menuItemId) {
 // Cada linha traz o artigo (nome, preço e produtos da receita) e a quantidade vendida.
 // Por cada produto da receita sai do stock: quantidade da receita x quantidade vendida.
 // Os produtos de consumo residual (ou sem quantidade) não descontam.
-async function createSales(eventId, dayId, userId, lines) {
+// trackStock false: o evento não controla o stock, por isso a venda não cria movimentos
+async function createSales(eventId, dayId, userId, lines, trackStock = true) {
     const connection = await pool.getConnection();
 
     try {
@@ -59,7 +60,7 @@ async function createSales(eventId, dayId, userId, lines) {
                 [eventId, dayId, line.item.menu_item_id, line.item.item_name, line.quantity, line.item.price, userId]
             );
 
-            for (const product of line.item.products) {
+            for (const product of trackStock ? line.item.products : []) {
                 if (product.is_residual || product.quantity === null) {
                     continue;
                 }
@@ -105,7 +106,8 @@ async function cancelSale(saleId, userId) {
 async function findRevenueByDay(eventId) {
     const [rows] = await pool.execute(
         `SELECT d.event_day_id, d.event_date, d.revenue_target,
-                COALESCE(SUM(CASE WHEN s.cancelled_at IS NULL THEN s.quantity * s.unit_price END), 0) AS revenue
+                COALESCE(SUM(CASE WHEN s.cancelled_at IS NULL THEN s.quantity * s.unit_price END), 0)
+                + (SELECT COALESCE(SUM(r.amount), 0) FROM day_revenues r WHERE r.event_day_id = d.event_day_id) AS revenue
          FROM event_days d
          LEFT JOIN sales s ON s.event_day_id = d.event_day_id
          WHERE d.event_id = ?
@@ -130,7 +132,44 @@ async function findTopItems(eventId, limit) {
     return rows;
 }
 
+// ---------- Faturação do dia pelo total em euros (eventos só com valores) ----------
+
+async function findDayTotals(dayId) {
+    const [rows] = await pool.execute(
+        `SELECT r.revenue_id, r.amount, r.note, r.created_at, r.created_by, u.email AS created_by_email
+         FROM day_revenues r
+         JOIN users u ON u.user_id = r.created_by
+         WHERE r.event_day_id = ?
+         ORDER BY r.created_at DESC, r.revenue_id DESC`,
+        [dayId]
+    );
+    return rows;
+}
+
+async function findDayTotalInEvent(eventId, revenueId) {
+    const [rows] = await pool.execute(
+        'SELECT revenue_id, event_day_id, created_by FROM day_revenues WHERE event_id = ? AND revenue_id = ?',
+        [eventId, revenueId]
+    );
+    return rows[0] || null;
+}
+
+async function createDayTotal(eventId, dayId, userId, amount, note) {
+    await pool.execute(
+        'INSERT INTO day_revenues (event_id, event_day_id, amount, note, created_by) VALUES (?, ?, ?, ?, ?)',
+        [eventId, dayId, amount, note, userId]
+    );
+}
+
+async function deleteDayTotal(revenueId) {
+    await pool.execute('DELETE FROM day_revenues WHERE revenue_id = ?', [revenueId]);
+}
+
 module.exports = {
+    findDayTotals,
+    findDayTotalInEvent,
+    createDayTotal,
+    deleteDayTotal,
     findRevenueByDay,
     findTopItems,
     findSalesByDay,

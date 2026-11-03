@@ -101,6 +101,25 @@
 
         <p id="pageMessage" class="form-message" role="status" hidden></p>
 
+        <!-- Eventos sem controlo de stock: faturação do dia pelo total em euros -->
+        <section class="panel day-total-panel" id="dayTotalPanel" aria-labelledby="dayTotalTitle" hidden>
+            <div class="panel-heading">
+                <h2 id="dayTotalTitle">Faturação do dia em euros</h2>
+            </div>
+            <p class="col-hint">Este evento não controla o stock: podes registar só quanto se faturou (ex.: o total da caixa), sem artigos. Também podes usar a ementa, em baixo.</p>
+            <form class="day-total-form" id="dayTotalForm" novalidate>
+                <label>Valor faturado
+                    <span class="input-with-unit">
+                        <input type="number" id="dayTotalAmount" min="0" step="0.01" inputmode="decimal">
+                        <span class="unit-suffix">€</span>
+                    </span>
+                </label>
+                <label>Nota <span class="optional">(opcional)</span><input type="text" id="dayTotalNote" maxlength="150" placeholder="Ex.: caixa do bar 1"></label>
+                <button class="button" type="submit">Registar faturação</button>
+            </form>
+            <p class="form-message is-error" id="dayTotalMessage" role="alert" hidden></p>
+        </section>
+
         <div class="till" id="till" hidden>
             <section class="panel till-menu" aria-labelledby="tillMenuTitle">
                 <div class="panel-heading">

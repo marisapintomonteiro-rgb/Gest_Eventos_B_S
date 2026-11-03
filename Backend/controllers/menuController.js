@@ -36,7 +36,8 @@ function readItem(body) {
 }
 
 // Confirma os dados do artigo. Devolve a mensagem do primeiro erro, ou null se estiver tudo certo.
-function validateItem(item, products) {
+// Num evento sem controlo de stock (trackStock false), o artigo pode não ter produtos.
+function validateItem(item, products, trackStock = true) {
     if (item.itemName.length === 0 || item.itemName.length > 100) {
         return 'Indica o nome do artigo (até 100 caracteres).';
     }
@@ -53,11 +54,11 @@ function validateItem(item, products) {
         return 'O tipo tem de ser venda direta ou artigo composto.';
     }
 
-    if (item.itemType === 'Direta' && products.length !== 1) {
+    if (trackStock && item.itemType === 'Direta' && products.length !== 1) {
         return 'Um artigo de venda direta usa um só produto.';
     }
 
-    if (item.itemType === 'Composta' && products.length === 0) {
+    if (trackStock && item.itemType === 'Composta' && products.length === 0) {
         return 'Indica os produtos da receita.';
     }
 
@@ -126,17 +127,18 @@ async function getMenu(req, res) {
 // POST /api/events/:eventId/menu: acrescentar um artigo à ementa
 async function createItem(req, res) {
     const { item, products } = readItem(req.body);
-    const errorMessage = validateItem(item, products);
-
-    if (errorMessage) {
-        return res.status(400).json({ error: errorMessage });
-    }
 
     try {
         const event = await findEvent(req);
 
         if (!event) {
             return res.status(404).json({ error: 'Este evento não existe.' });
+        }
+
+        const errorMessage = validateItem(item, products, Boolean(event.track_stock));
+
+        if (errorMessage) {
+            return res.status(400).json({ error: errorMessage });
         }
 
         if (await menuModel.findItemByName(event.event_id, item.itemName)) {
@@ -161,17 +163,18 @@ async function createItem(req, res) {
 async function updateItem(req, res) {
     const itemId = Number(req.params.itemId);
     const { item, products } = readItem(req.body);
-    const errorMessage = validateItem(item, products);
-
-    if (errorMessage) {
-        return res.status(400).json({ error: errorMessage });
-    }
 
     try {
         const event = await findEvent(req);
 
         if (!event || !await menuModel.findItemInEvent(event.event_id, itemId)) {
             return res.status(404).json({ error: 'Este artigo não existe.' });
+        }
+
+        const errorMessage = validateItem(item, products, Boolean(event.track_stock));
+
+        if (errorMessage) {
+            return res.status(400).json({ error: errorMessage });
         }
 
         if (await menuModel.findItemByName(event.event_id, item.itemName, itemId)) {

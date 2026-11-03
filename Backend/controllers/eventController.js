@@ -112,7 +112,9 @@ function readEventBody(body) {
         location: String(body.location || '').trim(),
         spaceType: body.spaceType ? String(body.spaceType) : null,
         expectedAudience: toOptionalNumber(body.expectedAudience),
-        budget: toOptionalNumber(body.budget)
+        budget: toOptionalNumber(body.budget),
+        // Por defeito o evento controla o stock; false = só faturas, vendas e despesas
+        trackStock: body.trackStock !== false
     };
 
     const days = (Array.isArray(body.days) ? body.days : []).map((day) => ({
