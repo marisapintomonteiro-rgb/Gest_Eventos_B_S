@@ -82,6 +82,17 @@ As credenciais e o segredo das sessões ficam num ficheiro `.env`, que não vai 
 
 Todas as rotas que alteram um evento passam pelo `middleware/eventMiddleware.js` (`requireEditableEvent`): um mês depois do último dia, o evento fica só para consulta e o servidor responde com erro 403.
 
+## Dados de demonstração
+
+O `demoData.js` cria uma marca com dados simulados para apresentar a aplicação, usando a própria API (as regras são todas aplicadas). Pede a palavra-passe das três contas no terminal e não a guarda.
+
+```bash
+node demoData.js http://localhost:3000 --dia 2026-11-05
+node demoData.js https://gest-eventos.onrender.com --dia 2026-11-05 --marca "Marca de Demonstração"
+```
+
+Cria: 3 contas (Administrador, Gestor e Colaborador, com emails `@<nome-da-marca>.test`), 3 fornecedores, 11 produtos, uma edição anterior encerrada, um evento a decorrer que inclui o dia indicado em `--dia` (com stock baixo e um dia ainda por fechar), o próximo evento ligado à edição anterior (para a previsão) e um evento só com valores.
+
 ## Limitações conhecidas
 
 - As sessões ficam na memória do servidor: ao reiniciar o servidor, todos têm de entrar outra vez.
