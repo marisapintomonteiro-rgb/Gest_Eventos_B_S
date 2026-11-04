@@ -1,6 +1,6 @@
 -- bebe_e_siga.sql: script inicial da base de dados MySQL.
--- Cria as tabelas do módulo de acesso (Sprint 1): marcas e utilizadores.
--- As tabelas dos outros módulos entram nas próximas sprints.
+-- Cria as 24 tabelas da aplicação: acesso, eventos, produtos e fornecedores, ementa,
+-- compras, vendas, stock, despesas, notas, devoluções, encerramento e eventos só com valores.
 
 CREATE DATABASE IF NOT EXISTS bebe_e_siga
     CHARACTER SET utf8mb4
