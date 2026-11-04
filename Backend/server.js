@@ -35,6 +35,11 @@ app.use(express.json());
 // Mostrar as páginas da pasta Frontend (ex.: http://localhost:3000/login.html)
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
 
+// O endereço principal (ex.: https://gest-eventos.onrender.com/) abre a página de entrada
+app.get('/', (req, res) => {
+    res.redirect('/login.html');
+});
+
 // Sessões: a "pulseira" (cookie) que lembra quem fez login.
 // Termina ao fim de 30 minutos sem atividade (RNF08).
 app.use(session({
