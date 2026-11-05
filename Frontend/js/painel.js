@@ -55,7 +55,12 @@ async function renderDashboard() {
 
     document.getElementById('dashboard').hidden = false;
     renderHeroFigures(data);
-    renderDayChart(data.days);
+
+    // A faturação só chega ao Gestor e ao Administrador (RF30)
+    if (data.days) {
+        renderDayChart(data.days);
+    }
+
     renderTopChart(data.topItems);
     renderLowStock(data.lowStock);
 
@@ -71,10 +76,12 @@ function renderHeroFigures(data) {
     // Evento só com valores: sem número de stock baixo
     document.getElementById('lowStockFigure').hidden = !eventTracksStock(data.event);
 
-    document.getElementById('revenueValue').textContent = MONEY.format(data.revenue);
+    if (data.days) {
+        document.getElementById('revenueValue').textContent = MONEY.format(data.revenue);
 
-    const daysWithSales = data.days.filter((day) => day.revenue > 0).length;
-    document.getElementById('revenueHint').textContent = `${daysWithSales} de ${data.days.length} dias com vendas`;
+        const daysWithSales = data.days.filter((day) => day.revenue > 0).length;
+        document.getElementById('revenueHint').textContent = `${daysWithSales} de ${data.days.length} dias com vendas`;
+    }
 
     const lowCount = data.lowStock.length;
     document.getElementById('lowStockValue').textContent = lowCount;
@@ -171,7 +178,9 @@ function renderTopChart(items) {
 
     items.forEach((item) => {
         const line = document.createElement('li');
-        line.title = `${item.itemName}: ${item.quantity} vendidos, ${MONEY.format(item.revenue)}`;
+        line.title = item.revenue === undefined
+            ? `${item.itemName}: ${item.quantity} vendidos`
+            : `${item.itemName}: ${item.quantity} vendidos, ${MONEY.format(item.revenue)}`;
 
         const label = document.createElement('div');
         label.className = 'rank-label';

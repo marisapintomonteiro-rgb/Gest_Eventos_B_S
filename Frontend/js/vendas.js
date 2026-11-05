@@ -80,9 +80,10 @@ async function loadEvent(eventId) {
     selectDay(chooseStartDay());
     document.getElementById('dayPicker').hidden = false;
 
-    // Sem controlo de stock: aparece o registo da faturação em euros; a caixa só se houver ementa
+    // Sem controlo de stock: aparece o registo da faturação em euros (só para o Gestor, RF30);
+    // a caixa só aparece se houver ementa
     const tracking = isTrackingStock();
-    document.getElementById('dayTotalPanel').hidden = tracking;
+    document.getElementById('dayTotalPanel').hidden = tracking || !canManage;
     document.getElementById('till').hidden = !tracking && menuItems.length === 0;
 }
 
@@ -339,7 +340,10 @@ async function renderDaySales() {
     lastSummary = result.summary;
     document.getElementById('daySales').hidden = false;
     document.getElementById('daySalesTitle').textContent = `Vendas de ${formatDay(currentDay)}`;
-    document.getElementById('dayRevenue').textContent = MONEY.format(result.summary.revenue);
+    // O servidor só envia a faturação ao Gestor e ao Administrador (RF30)
+    if (canManage) {
+        document.getElementById('dayRevenue').textContent = MONEY.format(result.summary.revenue);
+    }
 
     const top = result.summary.items[0];
     document.getElementById('dayTopItem').textContent = top ? `${top.itemName} (${top.quantity})` : '—';
@@ -349,10 +353,12 @@ async function renderDaySales() {
 
     result.summary.items.forEach((item) => {
         const line = document.createElement('li');
-        line.append(
-            createElementWithText('span', '', `${item.quantity} × ${item.itemName}`),
-            createElementWithText('span', 'receipt-amount', MONEY.format(item.revenue))
-        );
+        line.append(createElementWithText('span', '', `${item.quantity} × ${item.itemName}`));
+
+        if (canManage) {
+            line.append(createElementWithText('span', 'receipt-amount', MONEY.format(item.revenue)));
+        }
+
         summary.append(line);
     });
 
@@ -380,9 +386,13 @@ function renderSalesLog(sales) {
         line.append(
             createElementWithText('span', 'sale-time', time),
             createElementWithText('span', 'sale-what', `${sale.quantity} × ${sale.item_name}`),
-            createElementWithText('span', 'sale-who', sale.created_by_email),
-            createElementWithText('span', 'receipt-amount', MONEY.format(sale.quantity * Number(sale.unit_price)))
+            createElementWithText('span', 'sale-who', sale.created_by_email)
         );
+
+        // O valor de cada venda só aparece a quem gere (o Colaborador não recebe o preço)
+        if (canManage) {
+            line.append(createElementWithText('span', 'receipt-amount', MONEY.format(sale.quantity * Number(sale.unit_price))));
+        }
 
         if (sale.cancelled_at) {
             line.append(createElementWithText('span', 'tag', 'Anulada'));

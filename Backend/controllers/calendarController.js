@@ -73,8 +73,9 @@ async function getCalendar(req, res) {
                     eventId: day.event_id,
                     eventName: day.event_name,
                     location: day.location,
-                    revenue,
-                    target,
+                    // O Colaborador vê a cor do desempenho, mas não os valores em euros (RF30)
+                    revenue: isManager ? revenue : null,
+                    target: isManager ? target : null,
                     performance: getPerformance(revenue, target, Number(day.sale_count)),
                     isProfitDay: profitDays[day.event_id] === day.event_day_id
                 };
