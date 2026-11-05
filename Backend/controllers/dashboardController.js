@@ -104,19 +104,24 @@ async function getDashboard(req, res) {
                 last_day: event.last_day,
                 track_stock: Boolean(event.track_stock)
             },
-            revenue,
-            days: days.map((day) => ({
+            topItems: topItems.map((item) => ({ itemName: item.item_name, quantity: Number(item.quantity) })),
+            lowStock: findLowStock(stock)
+        };
+
+        // Faturação e valores financeiros: só para quem gere (RF21, RF30).
+        // O Colaborador vê os artigos mais vendidos (em quantidade) e o stock baixo.
+        if (isManager) {
+            dashboard.revenue = revenue;
+            dashboard.days = days.map((day) => ({
                 eventDayId: day.event_day_id,
                 date: day.event_date,
                 revenue: Number(day.revenue),
                 target: day.revenue_target === null ? null : Number(day.revenue_target)
-            })),
-            topItems: topItems.map((item) => ({ itemName: item.item_name, quantity: Number(item.quantity), revenue: Number(item.revenue) })),
-            lowStock: findLowStock(stock)
-        };
+            }));
+            dashboard.topItems.forEach((item, index) => {
+                item.revenue = Number(topItems[index].revenue);
+            });
 
-        // Valores financeiros: só para quem gere (RF21)
-        if (isManager) {
             const finance = await calculateFinance(event, revenue, stock);
             dashboard.finance = finance.totals;
         }

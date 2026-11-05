@@ -1,5 +1,6 @@
 // controllers/saleController.js: vendas de cada dia do evento (RF14, RF15 e RF30).
-// Todos os perfis registam vendas e veem a faturação do dia; o Colaborador só anula as suas.
+// Todos os perfis registam vendas; o Colaborador só anula as suas.
+// A faturação do dia (valores em euros) é só para o Gestor e o Administrador (RF30).
 
 const saleModel = require('../models/saleModel');
 const menuModel = require('../models/menuModel');
@@ -35,6 +36,19 @@ function summarizeDay(sales, dayTotals = []) {
     return { revenue, items };
 }
 
+// O Colaborador vê as quantidades vendidas, mas nenhum valor em euros (RF30):
+// sem preço nas vendas, sem totais em euros, sem faturação e sem objetivo do dia
+function hideMoney(result) {
+    const { revenue_target: revenueTarget, ...day } = result.day;
+
+    return {
+        day,
+        sales: result.sales.map(({ unit_price: unitPrice, ...sale }) => sale),
+        dayTotals: [],
+        summary: { items: result.summary.items.map(({ revenue, ...item }) => item) }
+    };
+}
+
 // GET /api/events/:eventId/sales?day=ID: vendas e faturação de um dia
 async function listSales(req, res) {
     try {
@@ -49,7 +63,8 @@ async function listSales(req, res) {
             saleModel.findSalesByDay(day.event_day_id),
             saleModel.findDayTotals(day.event_day_id)
         ]);
-        res.json({ day, sales, dayTotals, summary: summarizeDay(sales, dayTotals) });
+        const result = { day, sales, dayTotals, summary: summarizeDay(sales, dayTotals) };
+        res.json(req.session.user.role === 'Colaborador' ? hideMoney(result) : result);
     } catch (error) {
         console.error('Erro ao listar as vendas:', error.message);
         res.status(500).json({ error: 'Não foi possível carregar as vendas. Tenta novamente.' });

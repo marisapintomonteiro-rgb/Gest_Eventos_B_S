@@ -186,10 +186,16 @@ function renderEventCard(event, state, days, todayDay) {
     });
 }
 
-// Faturação de hoje (com o objetivo), faturação do evento e, para quem gere, o resultado
+// Faturação de hoje (com o objetivo), faturação do evento e, para quem gere, o resultado.
+// O Colaborador não recebe a faturação (RF30): nesse caso não há números em destaque.
 function renderFigures(dashboard, todayDay) {
     const figures = document.getElementById('todayFigures');
     figures.replaceChildren();
+
+    if (!dashboard.days) {
+        figures.hidden = true;
+        return;
+    }
 
     if (todayDay) {
         const day = dashboard.days.find((item) => item.eventDayId === todayDay.event_day_id);

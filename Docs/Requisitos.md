@@ -17,7 +17,7 @@ A partir daí foram escritos os requisitos funcionais e não funcionais. Depois 
 | Ator | Descrição |
 | --- | --- |
 | Visitante | Pessoa que ainda não entrou na aplicação. Pode registar a marca e iniciar sessão. |
-| Colaborador | Trabalha durante o evento. Regista vendas e consumos e consulta a ementa e a faturação do dia. Não vê custos nem lucro. |
+| Colaborador | Trabalha durante o evento. Regista vendas e consumos e consulta a ementa e as quantidades vendidas no dia. Não vê valores faturados, custos nem lucro. |
 | Gestor | Planeia e gere os eventos: ementa, produtos, fornecedores, compras, stock, despesas, fecho dos dias e resultados. Tem também as permissões do Colaborador. |
 | Administrador | Tem acesso total, incluindo a gestão dos utilizadores da marca. Tem também as permissões do Gestor. |
 
@@ -335,9 +335,11 @@ Corresponde ao caso de uso UC29.
 
 ## RF30 — Consultar faturação diária
 
-Permitir ao Colaborador consultar a faturação do dia.
+Permitir ao Gestor e ao Administrador consultar a faturação do dia, em euros.
 
-O Colaborador não consulta custos nem lucro.
+O Colaborador consulta só as vendas do dia em quantidades (artigos e número vendido). Não vê valores em euros: a faturação do dia, a faturação acumulada do evento, o valor de cada venda, o objetivo de faturação, os custos e o lucro. Também não regista nem apaga a faturação do dia pelo total em euros (eventos sem controlo de stock).
+
+Alteração decidida pela equipa a 5 de novembro de 2026: antes, o Colaborador via a faturação do dia.
 
 Corresponde ao caso de uso UC30.
 

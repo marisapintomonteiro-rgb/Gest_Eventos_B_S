@@ -124,7 +124,8 @@ function createDayChip(day) {
 }
 
 function describeDay(day) {
-    const parts = [`${day.eventName}: ${MONEY.format(day.revenue)}`];
+    // O Colaborador não recebe a faturação (vem a null): mostra só o nome e o desempenho (RF30)
+    const parts = [day.revenue === null ? day.eventName : `${day.eventName}: ${MONEY.format(day.revenue)}`];
 
     if (day.target !== null) {
         parts.push(`objetivo ${MONEY.format(day.target)} (${Math.round((day.revenue / day.target) * 100)}%)`);
