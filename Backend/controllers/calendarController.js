@@ -14,7 +14,7 @@ function getPerformance(revenue, target, saleCount) {
 
     const percent = (revenue / target) * 100;
 
-    if (percent > 110) {
+    if (percent > 105) {
         return 'acima';
     }
 
