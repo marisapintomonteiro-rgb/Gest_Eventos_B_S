@@ -1,6 +1,6 @@
 // controllers/calendarController.js: calendário dos eventos (RF06) com desempenho e aviso de lucro (RF32).
 // Cor de cada dia, comparando a faturação com o objetivo do dia (RF05):
-//   acima do expectável: mais de 110%; cumpriu: entre 90% e 110%; abaixo: menos de 90%.
+//   acima do expectável: mais de 120%; cumpriu: entre 90% e 120%; abaixo: menos de 90%.
 //   Sem objetivo, ou ainda sem vendas: sem cor.
 // Aviso de lucro (só Gestor e Administrador): o primeiro dia em que a faturação acumulada do evento
 // iguala ou ultrapassa tudo o que foi pago (despesas + todas as compras).
@@ -14,7 +14,7 @@ function getPerformance(revenue, target, saleCount) {
 
     const percent = (revenue / target) * 100;
 
-    if (percent > 105) {
+    if (percent > 120) {
         return 'acima';
     }
 

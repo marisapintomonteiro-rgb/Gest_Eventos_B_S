@@ -361,8 +361,8 @@ Corresponde ao caso de uso UC03 (Criar conta).
 
 Mostrar os dias de cada evento num calendário, com uma cor por dia, conforme a faturação do dia em relação ao objetivo de faturação definido no planeamento (RF05):
 
-- Acima do expectável: mais de 110% do objetivo
-- Cumpriu as expectativas: entre 90% e 110% do objetivo
+- Acima do expectável: mais de 120% do objetivo
+- Cumpriu as expectativas: entre 90% e 120% do objetivo, inclusive
 - Abaixo do expectável: menos de 90% do objetivo
 
 Os dias sem objetivo definido, ou ainda sem vendas, aparecem sem cor.
